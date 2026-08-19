@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет | ЭкоПиксель{% endblock %}
+
+{% block content %}
+<section style="margin-bottom:20px;">
+    <h1 class="section-title">Личный кабинет</h1>
+    <p class="section-subtitle">Привет, {{ request.user.username }}. Email: {{ request.user.email }}</p>
+    <a class="btn-secondary" href="{% url 'logout' %}">Выйти</a>
+</section>
+
+<section class="gallery-grid">
+    {% for work in drawings %}
+        <article class="work-card card animate-on-scroll">
+            <div class="work-image-wrap">
+                {% if work.image %}<img src="{{ work.image.url }}" alt="{{ work.title }}" loading="lazy">{% endif %}
+                <span class="category-chip">{{ work.category.name }}</span>
+            </div>
+            <div class="work-card__body">
+                <h3 class="work-card__title"><a href="{% url 'work_detail' work.id %}">{{ work.title }}</a></h3>
+                <p class="work-card__meta">Голосов: {{ work.votes }}</p>
+                <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
+                {% if work.id in winner_ids %}
+                    <a class="btn-secondary" href="{% url 'certificate' work.id %}">Сертификат</a>
+                {% endif %}
+            </div>
+        </article>
+    {% empty %}
+        <p>Пока нет отправленных работ. <a href="{% url 'draw' %}">Создать первую работу</a>.</p>
+    {% endfor %}
+</section>
+{% endblock %}

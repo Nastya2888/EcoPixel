@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}{{ work.title }} — ЭкоПиксель{% endblock %}
+{% block og_title %}{{ work.title }} — ЭкоПиксель{% endblock %}
+{% block og_description %}Пиксельный рисунок автора {{ work.author_name }}, {{ work.age }} лет{% endblock %}
+{% block og_image %}{{ og_image_url }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'gallery' %}" class="back-link animate-on-scroll">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    <span>Назад в галерею</span>
+</a>
+<section class="work-layout card">
+    {% csrf_token %}
+    <div class="work-image-card animate-on-scroll">
+        {% if work.image %}<img src="{{ work.image.url }}" alt="{{ work.title }}" loading="lazy">{% endif %}
+    </div>
+    <div class="work-info animate-on-scroll">
+        <span class="work-badge">{{ work.category.name }}</span>
+        <h1>{{ work.title }}</h1>
+        <div class="author-row">
+            <span class="author-avatar">{{ work.author|first|upper }}</span>
+            <div>
+                <strong>{{ work.author }}</strong><br>
+                <span class="work-card__meta">{{ work.age }} лет, {{ work.city }}</span>
+            </div>
+        </div>
+        <div class="separator"></div>
+        <div class="work-meta">
+            <span>Категория: {{ work.category.name }}</span>
+            <span>Дата: {{ work.created_at|date:"d.m.Y" }}</span>
+        </div>
+        <div class="votes-big"><span id="votes-count">{{ work.votes }}</span> голосов</div>
+        <div class="vote-btn-wrap">
+            <button
+                id="vote-btn"
+                class="btn-ripple {% if has_voted %}voted{% endif %}"
+                data-id="{{ work.id }}"
+                {% if not user.is_authenticated or has_voted %}disabled{% endif %}
+            >
+                {% if not user.is_authenticated %}
+                    ❤️ Войти, чтобы голосовать
+                {% elif has_voted %}
+                    Вы проголосовали ❤️
+                {% else %}
+                    ❤️ Проголосовать
+                {% endif %}
+            </button>
+        </div>
+        <div class="share-row">
+            <a target="_blank" rel="noopener" href="https://vk.com/share.php?url={{ request.build_absolute_uri|urlencode }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.408 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.864-.525-2.05-1.727-1.033-1-1.49-1.135-1.744-1.135-.356 0-.458.102-.458.593v1.575c0 .424-.135.678-1.253.678-1.846 0-3.896-1.118-5.335-3.202C4.624 10.857 4 8.673 4 8.231c0-.254.102-.491.593-.491h1.744c.44 0 .61.203.78.678.863 2.49 2.303 4.675 2.896 4.675.22 0 .322-.102.322-.66V9.721c-.068-1.186-.695-1.287-.695-1.71 0-.203.17-.407.44-.407h2.744c.373 0 .508.203.508.643v3.473c0 .372.17.508.271.508.22 0 .407-.136.813-.542 1.254-1.406 2.151-3.574 2.151-3.574.119-.254.322-.491.763-.491h1.744c.525 0 .644.27.525.643-.22 1.017-2.354 4.031-2.354 4.031-.186.305-.254.44 0 .78.186.254.796.779 1.203 1.253.745.847 1.32 1.558 1.473 2.05.17.49-.085.744-.576.744z"/></svg>
+                <span>ВК</span>
+            </a>
+            <a target="_blank" rel="noopener" href="https://t.me/share/url?url={{ request.build_absolute_uri|urlencode }}&text={{ work.title|urlencode }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                <span>Telegram</span>
+            </a>
+            <button id="copy-work-link" type="button">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span>Скопировать</span>
+            </button>
+        </div>
+        <p id="vote-message" class="vote-message"></p>
+    </div>
+</section>
+
+<script>
+(() => {
+    const voteButton = document.getElementById("vote-btn");
+    const votesCount = document.getElementById("votes-count");
+    const voteMessage = document.getElementById("vote-message");
+    const csrfInput = document.querySelector("input[name='csrfmiddlewaretoken']");
+    const copyBtn = document.getElementById("copy-work-link");
+
+    if (copyBtn) {
+        copyBtn.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                copyBtn.textContent = "Скопировано";
+                setTimeout(() => {
+                    copyBtn.textContent = "Скопировать ссылку";
+                }, 1400);
+            } catch (error) {
+                copyBtn.textContent = "Ошибка";
+            }
+        });
+    }
+
+    if (!voteButton) return;
+
+    if (voteButton.disabled && voteButton.textContent.includes("Войти")) {
+        voteButton.disabled = false;
+        voteButton.addEventListener("click", () => {
+            window.location.href = `/login/?next=${encodeURIComponent(window.location.pathname)}`;
+        });
+        return;
+    }
+
+    if (voteButton.disabled) return;
+
+    voteButton.addEventListener("click", async () => {
+        voteButton.disabled = true;
+        voteMessage.textContent = "Отправляем голос...";
+        const id = voteButton.dataset.id;
+
+        try {
+            const response = await fetch(`/vote/${id}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfInput ? csrfInput.value : "",
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                credentials: "same-origin",
+            });
+            const data = await response.json();
+
+            if (typeof data.votes === "number") {
+                votesCount.textContent = String(data.votes);
+            }
+
+            if (response.ok && data.success) {
+                voteMessage.textContent = "Спасибо! Голос учтен.";
+                voteButton.textContent = "Вы проголосовали ❤️";
+                voteButton.classList.add("voted");
+                voteButton.animate(
+                    [{ transform: "scale(1)" }, { transform: "scale(1.3)" }, { transform: "scale(1)" }],
+                    { duration: 230 }
+                );
+                return;
+            }
+
+            if (response.status === 403) {
+                alert("Вы уже голосовали");
+                voteButton.textContent = "Вы уже голосовали ❤️";
+                voteButton.classList.add("voted");
+                voteMessage.textContent = data.error || "Вы уже голосовали за эту работу.";
+                return;
+            }
+
+            if (response.status === 401) {
+                window.location.href = `/login/?next=${encodeURIComponent(window.location.pathname)}`;
+                return;
+            }
+
+            voteButton.disabled = false;
+            alert("Ошибка, попробуйте позже");
+            voteMessage.textContent = data.error || "Не удалось проголосовать.";
+        } catch (error) {
+            voteButton.disabled = false;
+            alert("Ошибка, попробуйте позже");
+            voteMessage.textContent = "Ошибка сети.";
+        }
+    });
+})();
+</script>
+{% endblock %}

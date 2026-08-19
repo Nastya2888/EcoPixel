@@ -1,0 +1,36 @@
+from django.conf import settings
+from django.core.mail import send_mail
+from django.urls import reverse
+
+
+def send_notification(drawing, event_type, request=None):
+    if not drawing.email:
+        return
+
+    if request is not None:
+        work_url = request.build_absolute_uri(reverse("work_detail", kwargs={"pk": drawing.pk}))
+    else:
+        work_url = f"http://127.0.0.1:8000{reverse('work_detail', kwargs={'pk': drawing.pk})}"
+
+    if event_type == "submitted":
+        subject = "ЭкоПиксель: работа принята"
+        message = (
+            f"Ваша работа принята! Номер работы: #{drawing.pk}.\n"
+            f"Ссылка: {work_url}"
+        )
+    elif event_type == "approved":
+        subject = "ЭкоПиксель: работа опубликована"
+        message = (
+            "Ваша работа опубликована в галерее! "
+            f"Голосуйте за неё: {work_url}"
+        )
+    else:
+        return
+
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[drawing.email],
+        fail_silently=True,
+    )

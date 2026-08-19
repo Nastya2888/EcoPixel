@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Результаты | ЭкоПиксель{% endblock %}
+
+{% block content %}
+<section>
+    <h1 class="section-title animate-on-scroll">Результаты конкурса</h1>
+    <div class="results-grid">
+        {% for item in winners %}
+            <article class="winner-card card animate-on-scroll">
+                <h2>{{ item.category.name }}</h2>
+                {% if item.winner %}
+                    <p class="winner-place">🥇 ПОБЕДИТЕЛЬ</p>
+                    {% if item.winner.image %}<img src="{{ item.winner.image.url }}" alt="{{ item.winner.title }}" loading="lazy">{% endif %}
+                    <p class="winner-name">{{ item.winner.title }}</p>
+                    <p>{{ item.winner.author }}, {{ item.winner.age }} лет</p>
+                    <p class="winner-votes">{{ item.winner.votes }}</p>
+                    <p class="work-card__meta">голосов</p>
+                    <p><a class="btn" href="{% url 'certificate' item.winner.id %}">Скачать сертификат</a></p>
+                {% else %}
+                    <p>Пока нет участников</p>
+                {% endif %}
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

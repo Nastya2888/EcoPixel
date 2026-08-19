@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Главная | ЭкоПиксель{% endblock %}
+
+{% block content %}
+<style>
+    .categories-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 24px !important;
+        align-items: stretch !important;
+        max-width: none !important;
+        width: 100% !important;
+    }
+
+    .categories-grid .category-card {
+        width: 100% !important;
+        min-height: 255px !important;
+        height: 255px !important;
+        padding: 28px 24px 36px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    .categories-grid .category-icon {
+        width: 64px !important;
+        height: 64px !important;
+        min-width: 64px !important;
+        min-height: 64px !important;
+        margin-bottom: 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .categories-grid .category-icon svg,
+    .categories-grid .category-svg {
+        width: 56px !important;
+        height: 56px !important;
+        display: block !important;
+        flex-shrink: 0 !important;
+    }
+
+    .categories-grid .category-name {
+        margin: 0 0 10px !important;
+    }
+
+    .categories-grid .category-theme {
+        margin: 0 0 12px !important;
+    }
+
+    .categories-grid .category-desc {
+        margin: 0 !important;
+        line-height: 1.55 !important;
+        padding-bottom: 6px !important;
+    }
+
+    @media (max-width: 768px) {
+        .categories-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+<section class="hero card animate-on-scroll">
+    <div>
+        <h1>Создай пиксельное <span class="gradient-word">будущее</span> планеты</h1>
+        <p>ЭкоПиксель — пространство, где детские идеи про природу и устойчивый мир превращаются в яркое цифровое искусство.</p>
+        <div class="hero-actions">
+            <a class="btn" href="{% url 'draw' %}">Начать рисовать</a>
+            <a class="btn-secondary" href="{% url 'gallery' %}">Смотреть работы</a>
+        </div>
+        <div class="countdown">
+            <div class="timer-card"><strong id="cd-days">00</strong><span>дней</span></div>
+            <div class="timer-card"><strong id="cd-hours">00</strong><span>часов</span></div>
+            <div class="timer-card"><strong id="cd-minutes">00</strong><span>минут</span></div>
+            <div class="timer-card"><strong id="cd-seconds">00</strong><span>секунд</span></div>
+        </div>
+    </div>
+    <div class="hero-preview floating-card">
+        <svg class="hero-tree" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="image-rendering: pixelated; width: 100%; height: auto; max-width: 200px; display: block; margin: 0 auto;">
+          <ellipse cx="60" cy="108" rx="32" ry="6" fill="#1B4332" opacity="0.08"/>
+          <rect x="24" y="96" width="72" height="8" rx="4" fill="#D4A373"/>
+          <rect x="28" y="100" width="64" height="4" rx="2" fill="#E9C46A"/>
+          <rect x="40" y="80" width="40" height="18" rx="3" fill="#E07A5F"/>
+          <rect x="36" y="76" width="48" height="6" rx="2" fill="#D4A373"/>
+          <rect x="44" y="84" width="32" height="2" fill="#F5F5DC" opacity="0.4" rx="1"/>
+          <rect x="52" y="56" width="16" height="22" fill="#D4A373"/>
+          <rect x="54" y="58" width="4" height="18" fill="#E9C46A" opacity="0.5"/>
+          <rect x="32" y="48" width="56" height="10" rx="2" fill="#2ECC71"/>
+          <rect x="36" y="36" width="48" height="14" rx="2" fill="#27AE60"/>
+          <rect x="44" y="24" width="32" height="14" rx="2" fill="#52B788"/>
+          <rect x="52" y="16" width="16" height="10" rx="2" fill="#8CB369"/>
+          <rect x="72" y="42" width="6" height="6" rx="2" fill="#E07A5F"/>
+          <rect x="73" y="41" width="2" height="2" fill="#27AE60"/>
+          <rect x="36" y="40" width="6" height="6" rx="1" fill="#52B788"/>
+        </svg>
+    </div>
+</section>
+
+<section>
+    <h2 class="section-title animate-on-scroll">Выбери свою тему</h2>
+    <p class="section-subtitle animate-on-scroll">Три направления, чтобы каждый участник нашёл историю, которую хочется рассказать пикселями.</p>
+    <div class="categories-grid">
+        {% for category in categories %}
+            <a class="category-card card animate-on-scroll" href="{% url 'gallery' %}?category={{ category.slug }}&sort=popular">
+                <div class="category-icon">
+                    {% if category.slug == 'moy-chistyy-dom' %}
+                        <svg class="category-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M6 24L32 6L58 24" stroke="#1B4332" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M10 22L32 9L54 22" fill="#E07A5F"/>
+                          <rect x="8" y="24" width="48" height="30" fill="#F5F5DC" rx="2"/>
+                          <rect x="26" y="36" width="12" height="18" fill="#D4A373" rx="1"/>
+                          <rect x="14" y="30" width="10" height="10" fill="#81C3D7" rx="1"/>
+                          <rect x="40" y="30" width="10" height="10" fill="#81C3D7" rx="1"/>
+                          <rect x="50" y="46" width="6" height="8" fill="#2ECC71" rx="1"/>
+                          <rect x="6" y="54" width="52" height="4" fill="#27AE60" rx="2"/>
+                        </svg>
+                    {% elif category.slug == 'sohranim-lesa' %}
+                        <svg class="category-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="27" y="30" width="10" height="24" fill="#D4A373" rx="2"/>
+                          <circle cx="32" cy="20" r="12" fill="#2ECC71"/>
+                          <circle cx="20" cy="30" r="11" fill="#27AE60"/>
+                          <circle cx="44" cy="30" r="11" fill="#52B788"/>
+                          <path d="M8 54C18 49 26 54 32 54C38 54 46 49 56 54" stroke="#81C3D7" stroke-width="3" stroke-linecap="round"/>
+                          <rect x="8" y="56" width="48" height="3" fill="#27AE60" rx="1.5" opacity="0.35"/>
+                        </svg>
+                    {% elif category.slug == 'eko-gorod' %}
+                        <svg class="category-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="6" y="24" width="22" height="30" fill="#E9C46A" rx="2"/>
+                          <rect x="11" y="32" width="5" height="5" fill="#81C3D7" rx="1"/>
+                          <rect x="19" y="32" width="5" height="5" fill="#81C3D7" rx="1"/>
+                          <rect x="34" y="12" width="24" height="42" fill="#F4A261" rx="2"/>
+                          <rect x="39" y="20" width="5" height="5" fill="#81C3D7" rx="1"/>
+                          <rect x="47" y="20" width="5" height="5" fill="#81C3D7" rx="1"/>
+                          <rect x="39" y="30" width="5" height="5" fill="#81C3D7" rx="1"/>
+                          <rect x="47" y="30" width="5" height="5" fill="#81C3D7" rx="1"/>
+                          <rect x="12" y="8" width="16" height="8" fill="#2ECC71" rx="1"/>
+                          <line x1="16" y1="8" x2="16" y2="4" stroke="#1B4332" stroke-width="2"/>
+                          <line x1="24" y1="8" x2="24" y2="4" stroke="#1B4332" stroke-width="2"/>
+                          <rect x="8" y="56" width="48" height="4" fill="#27AE60" rx="2"/>
+                        </svg>
+                    {% endif %}
+                </div>
+                <h3 class="category-name">{{ category.name }}</h3>
+                <p class="category-theme">{{ category.theme|default:"Тема будет добавлена" }}</p>
+                <p class="category-desc">
+                    {% if category.slug == 'moy-chistyy-dom' %}
+                        Сортировка мусора, кормление птиц, экономия воды и света
+                    {% elif category.slug == 'sohranim-lesa' %}
+                        Защита природы, посадка деревьев, субботники, помощь животным
+                    {% elif category.slug == 'eko-gorod' %}
+                        Эко-технологии, солнечные батареи, электротранспорт, переработка
+                    {% endif %}
+                </p>
+                {% if category.drawing_count > 0 %}
+                    <span class="category-badge">{{ category.drawing_count }}</span>
+                {% endif %}
+            </a>
+        {% empty %}
+            <article class="category-card card">
+                <h3 class="category-name">Категории скоро появятся</h3>
+                <p class="category-theme">Добавьте категории в админке</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <h2 class="section-title animate-on-scroll">Как участвовать</h2>
+    <div class="steps-grid">
+        <article class="step-card card animate-on-scroll">
+            <span class="step-number">01</span>
+            <h3>Создай рисунок</h3>
+            <p>Открой редактор и собери пиксельный сюжет про экологичное будущее.</p>
+        </article>
+        <article class="step-card card animate-on-scroll">
+            <span class="step-number">02</span>
+            <h3>Отправь на конкурс</h3>
+            <p>Заполни короткую форму и отправь работу за пару кликов.</p>
+        </article>
+        <article class="step-card card animate-on-scroll">
+            <span class="step-number">03</span>
+            <h3>Собирай голоса</h3>
+            <p>Поделись ссылкой с друзьями и следи за ростом поддержки.</p>
+        </article>
+    </div>
+
+    <h2 class="section-title animate-on-scroll">Счётчики конкурса</h2>
+    <div class="stats-grid">
+        <div class="stat-card card animate-on-scroll">
+            <strong data-count="{{ stats.participants_total }}">0</strong>
+            <span>Всего участников</span>
+        </div>
+        <div class="stat-card card animate-on-scroll">
+            <strong data-count="{{ stats.approved_total }}">0</strong>
+            <span>Одобренных работ</span>
+        </div>
+        <div class="stat-card card animate-on-scroll">
+            <strong data-count="{{ stats.votes_total }}">0</strong>
+            <span>Всего голосов</span>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2 class="section-title animate-on-scroll">Последние работы</h2>
+    <div class="works-grid">
+        {% for work in latest_drawings %}
+            <article class="work-card card animate-on-scroll">
+                <div class="work-image-wrap">
+                    {% if work.image %}
+                        <img src="{{ work.image.url }}" alt="{{ work.title }}" loading="lazy">
+                    {% endif %}
+                    <span class="category-chip">{{ work.category.name }}</span>
+                </div>
+                <div class="work-card__body">
+                    <h3 class="work-card__title"><a href="{% url 'work_detail' work.id %}">{{ work.title }}</a></h3>
+                    <p class="work-card__meta">{{ work.author }}</p>
+                    <div class="likes">
+                        <span class="likes-heart">❤️</span>
+                        <span>{{ work.votes }}</span>
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <p>Пока нет одобренных работ.</p>
+        {% endfor %}
+    </div>
+</section>
+<script>
+(() => {
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 14);
+    const daysEl = document.getElementById("cd-days");
+    const hoursEl = document.getElementById("cd-hours");
+    const minutesEl = document.getElementById("cd-minutes");
+    const secondsEl = document.getElementById("cd-seconds");
+    if (!daysEl || !hoursEl || !minutesEl || !secondsEl) return;
+
+    function tick() {
+        const now = new Date().getTime();
+        const diff = Math.max(endDate.getTime() - now, 0);
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        daysEl.textContent = String(days).padStart(2, "0");
+        hoursEl.textContent = String(hours).padStart(2, "0");
+        minutesEl.textContent = String(minutes).padStart(2, "0");
+        secondsEl.textContent = String(seconds).padStart(2, "0");
+    }
+    tick();
+    setInterval(tick, 1000);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Рисовать | ЭкоПиксель{% endblock %}
+
+{% block content %}
+<section class="draw-page draw-v4 card animate-on-scroll" data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
+    <div class="editor-workspace">
+        <aside class="editor-sidebar left">
+            <div class="panel tools-panel" id="tools">
+                <div class="panel-title">Инструменты</div>
+                <div class="tools-list">
+                    <button class="tool tool-btn active" data-tool="pencil" title="Карандаш (B)" type="button">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        <span>Карандаш</span>
+                        <kbd>B</kbd>
+                    </button>
+                    <button class="tool tool-btn" data-tool="eraser" title="Ластик (E)" type="button">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16C2 15 2 13 3 12L13 2L22 11L20 20Z"></path><path d="M17 17L7 7"></path></svg>
+                        <span>Ластик</span>
+                        <kbd>E</kbd>
+                    </button>
+                    <button class="tool tool-btn" data-tool="fill" title="Заливка (F)" type="button">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11l-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11z"></path><path d="M5 21h14"></path></svg>
+                        <span>Заливка</span>
+                        <kbd>F</kbd>
+                    </button>
+                    <div class="tool-divider"></div>
+                    <button class="tool tool-btn" id="undo-button" data-action="undo" type="button" title="Отмена (Ctrl+Z)">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+                        <span>Отмена</span>
+                        <kbd>Ctrl+Z</kbd>
+                    </button>
+                    <button class="tool tool-btn" id="clear-button" data-action="clear" type="button" title="Очистить холст">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Очистить</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel palette-panel">
+                <div class="panel-title">Палитра</div>
+                <div class="palette" id="palette"></div>
+                <button class="add-color-btn" id="addCustomColor" title="Свой цвет" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+                <input type="color" id="customColorPicker" class="hidden-color-picker">
+            </div>
+        </aside>
+
+        <main class="editor-canvas-area">
+            <div class="canvas-frame">
+                <div class="canvas-wrapper canvas-container">
+                    <canvas id="main-canvas" width="32" height="32"></canvas>
+                    <canvas id="grid-canvas" width="32" height="32" class="grid-overlay"></canvas>
+                    <canvas id="cursor-canvas" width="32" height="32"></canvas>
+                </div>
+                <div class="canvas-meta canvas-info">
+                    <span class="meta-badge" id="canvas-size-badge">32×32</span>
+                    <span class="meta-dot divider"></span>
+                    <span class="meta-color" id="meta-color">Коралл</span>
+                    <span class="color-dot" id="current-color-dot"></span>
+                </div>
+            </div>
+        </main>
+
+        <aside class="editor-sidebar right">
+            <div class="panel settings-panel">
+                <div class="panel-title">Размер</div>
+                <label class="size-card">
+                    <input type="radio" name="grid-size" value="32" checked>
+                    <div class="size-visual">
+                        <div class="size-grid grid-32"></div>
+                    </div>
+                    <div class="size-text">
+                        <strong>32×32</strong>
+                        <span>Для начинающих</span>
+                    </div>
+                </label>
+                <label class="size-card">
+                    <input type="radio" name="grid-size" value="64">
+                    <div class="size-visual">
+                        <div class="size-grid grid-64"></div>
+                    </div>
+                    <div class="size-text">
+                        <strong>64×64</strong>
+                        <span>Для опытных</span>
+                    </div>
+                </label>
+            </div>
+
+            <div class="panel preview-panel">
+                <div class="panel-title">Предпросмотр</div>
+                <canvas id="preview-canvas" width="128" height="128"></canvas>
+                <p class="preview-caption">Так работа будет в галерее</p>
+            </div>
+
+            {% if user.is_authenticated %}
+                <button class="submit-btn" id="submit-btn" type="button">
+                    <span>Готово</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+            {% else %}
+                <div class="panel auth-submit-box">
+                    <p>Войдите, чтобы отправить работу</p>
+                    <div class="auth-submit-actions">
+                        <a class="btn-secondary" href="{% url 'login' %}?next=/draw/">Войти</a>
+                        <a class="btn" href="{% url 'register' %}">Регистрация</a>
+                    </div>
+                </div>
+            {% endif %}
+
+            <p id="auth-required-message" class="form-errors"></p>
+            <p id="submit-result"></p>
+        </aside>
+    </div>
+</section>
+
+<div id="submit-modal" class="modal modal-overlay hidden" aria-hidden="true">
+    <div class="modal-content">
+        <h2>Отправить работу</h2>
+        <form id="submission-form" data-submit-url="{% url 'submit_drawing' %}">
+            {% csrf_token %}
+            <input type="hidden" name="category_slug" id="category-slug-input" value="">
+            <div class="form-group">
+                <label>Название работы</label>
+                <input type="text" name="title" required maxlength="120" placeholder=" ">
+            </div>
+            <div class="form-group">
+                <label>Имя автора</label>
+                <input
+                    type="text"
+                    name="author_name"
+                    required
+                    maxlength="80"
+                    {% if user.is_authenticated %}value="{{ user.username }}"{% endif %}
+                    placeholder=" "
+                >
+            </div>
+            <div class="form-group">
+                <label>Возраст</label>
+                <input type="number" name="age" required min="6" max="17" id="age-input" placeholder=" ">
+            </div>
+            <div class="form-group">
+                <label>Город</label>
+                <input type="text" name="city" required maxlength="80" placeholder=" ">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input
+                    type="email"
+                    name="email"
+                    {% if user.is_authenticated %}
+                        value="{{ user.email }}"
+                        readonly
+                    {% else %}
+                        required
+                    {% endif %}
+                    placeholder=" "
+                >
+            </div>
+            <div class="form-group">
+                <label>Категория</label>
+                <select id="category-auto">
+                    <option value="">Определится автоматически</option>
+                    {% for category in categories %}
+                        <option value="{{ category.name }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <label class="consent-row">
+                <input type="checkbox" name="consent" value="on" required>
+                Согласие на обработку персональных данных
+            </label>
+            <div id="form-errors" class="form-errors"></div>
+            <div class="form-actions">
+                <button type="button" id="cancel-submit" class="btn-secondary">← Вернуться к редактированию</button>
+                <button type="submit" class="btn-primary">Отправить на конкурс</button>
+            </div>
+        </form>
+        <div id="submit-progress" class="submit-progress hidden">
+            <p id="submit-progress-text">Отправка...</p>
+            <div class="progress-track">
+                <div id="submit-progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+        <div id="submit-success" class="submit-success hidden">
+            <p id="submit-success-text"></p>
+            <div class="share-actions">
+                <button type="button" id="copy-link-btn" class="btn-secondary">Скопировать ссылку</button>
+                <a id="vk-share-link" class="btn-secondary" href="#" target="_blank" rel="noopener">Поделиться в ВК</a>
+                <a id="tg-share-link" class="btn-secondary" href="#" target="_blank" rel="noopener">Telegram</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'drawings/js/draw.js' %}?v=20260820-03"></script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Работа #{{ drawing.id }} | ЭкоПиксель{% endblock %}
+
+{% block content %}
+<section class="work-page">
+    <h1>Работа #{{ drawing.id }}</h1>
+    <div class="work-meta">
+        <div class="work-meta-item"><strong>Автор:</strong> {{ drawing.name }} ({{ drawing.city }})</div>
+        <div class="work-meta-item"><strong>Категория:</strong> {{ drawing.category.name }}</div>
+        <div class="work-meta-item"><strong>Дата:</strong> {{ drawing.created_at }}</div>
+    </div>
+
+    <div class="work-image">
+        <img src="{{ drawing.image.url }}" alt="Работа {{ drawing.id }}" width="420" height="420" style="image-rendering: pixelated;">
+    </div>
+
+    <div class="vote-block">
+        <button
+            id="vote-button"
+            type="button"
+            data-vote-url="{% url 'vote' drawing.id %}"
+            {% if has_voted %}disabled{% endif %}
+        >
+            ❤ <span id="votes-count">{{ drawing.votes }}</span>
+        </button>
+        <p id="vote-message">
+            {% if has_voted %}
+                Вы уже голосовали за эту работу.
+            {% else %}
+                Нажмите на сердце, чтобы проголосовать.
+            {% endif %}
+        </p>
+    </div>
+</section>
+
+<script>
+(() => {
+    const voteButton = document.getElementById("vote-button");
+    const votesCount = document.getElementById("votes-count");
+    const voteMessage = document.getElementById("vote-message");
+
+    if (!voteButton) return;
+    if (voteButton.disabled) return;
+
+    function getCsrfToken() {
+        const name = "csrftoken=";
+        const parts = document.cookie.split(";");
+        for (const part of parts) {
+            const value = part.trim();
+            if (value.startsWith(name)) return value.substring(name.length);
+        }
+        return "";
+    }
+
+    voteButton.addEventListener("click", async () => {
+        voteButton.disabled = true;
+        voteMessage.textContent = "Голос отправляется...";
+
+        try {
+            const response = await fetch(voteButton.dataset.voteUrl, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCsrfToken(),
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                credentials: "same-origin",
+            });
+            const data = await response.json();
+
+            if (typeof data.votes === "number") {
+                votesCount.textContent = String(data.votes);
+            }
+
+            if (data.ok) {
+                voteMessage.textContent = "Спасибо! Ваш голос учтен.";
+                return;
+            }
+
+            if (data.already_voted) {
+                voteMessage.textContent = "Вы уже голосовали за эту работу.";
+                return;
+            }
+
+            voteMessage.textContent = data.message || "Не удалось проголосовать.";
+            voteButton.disabled = false;
+        } catch (error) {
+            voteMessage.textContent = "Сетевая ошибка. Попробуйте снова.";
+            voteButton.disabled = false;
+        }
+    });
+})();
+</script>
+{% endblock %}
