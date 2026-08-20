@@ -8,6 +8,7 @@ Copy `.env.example` to `.env` and set real values:
 - `DJANGO_SECRET_KEY` (long random string)
 - `DJANGO_ALLOWED_HOSTS` (domain names)
 - `DJANGO_CSRF_TRUSTED_ORIGINS` (https URLs for domains)
+- `DATABASE_URL` (PostgreSQL connection string)
 
 ## 2) Install dependencies
 

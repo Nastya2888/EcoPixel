@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,6 +16,25 @@ def _env_bool(name: str, default: bool = False) -> bool:
 def _env_list(name: str, default: str = "") -> list[str]:
     value = os.getenv(name, default)
     return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _parse_postgres_database_url(db_url: str) -> dict:
+    parsed = urlparse(db_url)
+    if parsed.scheme not in {"postgres", "postgresql"}:
+        raise ValueError("Unsupported DATABASE_URL scheme")
+
+    return {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": parsed.path.lstrip("/"),
+        "USER": unquote(parsed.username or ""),
+        "PASSWORD": unquote(parsed.password or ""),
+        "HOST": parsed.hostname or "",
+        "PORT": str(parsed.port or 5432),
+        "CONN_MAX_AGE": int(os.getenv("DJANGO_DB_CONN_MAX_AGE", "600")),
+        "OPTIONS": {
+            "sslmode": os.getenv("DJANGO_DB_SSLMODE", "require"),
+        },
+    }
 
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "ecopixel-dev-key-change-in-production-7f4d6a9b2c1e")
@@ -77,6 +97,10 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+database_url = os.getenv("DATABASE_URL", "").strip()
+if database_url:
+    DATABASES["default"] = _parse_postgres_database_url(database_url)
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
