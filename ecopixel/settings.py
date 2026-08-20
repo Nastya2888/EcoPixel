@@ -18,6 +18,21 @@ def _env_list(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def _is_placeholder_database_url(db_url: str) -> bool:
+    parsed = urlparse(db_url)
+    username = (parsed.username or "").strip().lower()
+    password = (parsed.password or "").strip().lower()
+    host = (parsed.hostname or "").strip().lower()
+    db_name = parsed.path.lstrip("/").strip().lower()
+
+    return (
+        username in {"user", "username"}
+        and password in {"password", "pass"}
+        and host in {"host", "hostname"}
+        and db_name in {"dbname", "database", "db"}
+    )
+
+
 def _parse_postgres_database_url(db_url: str) -> dict:
     parsed = urlparse(db_url)
     if parsed.scheme not in {"postgres", "postgresql"}:
@@ -100,7 +115,12 @@ DATABASES = {
 
 database_url = os.getenv("DATABASE_URL", "").strip()
 if database_url:
-    DATABASES["default"] = _parse_postgres_database_url(database_url)
+    try:
+        if not _is_placeholder_database_url(database_url):
+            DATABASES["default"] = _parse_postgres_database_url(database_url)
+    except ValueError:
+        # Keep default sqlite DB when DATABASE_URL is invalid.
+        pass
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
