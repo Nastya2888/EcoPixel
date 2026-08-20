@@ -89,6 +89,7 @@ def _database_config_from_env() -> dict | None:
     # Railway users often provide either DATABASE_URL or DATABASE_PRIVATE_URL.
     for env_name in (
         "DATABASE_URL",
+        "DATABASE_URI",
         "DATABASE_PRIVATE_URL",
         "POSTGRES_URL",
         "POSTGRESQL_URL",
