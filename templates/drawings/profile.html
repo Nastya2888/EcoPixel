@@ -9,17 +9,42 @@
     <a class="btn-secondary" href="{% url 'logout' %}">Выйти</a>
 </section>
 
+{% if restore_status == "ok" %}
+    <p class="restore-image-notice success">Изображение восстановлено и снова видно в галерее.</p>
+{% elif restore_status == "missing_file" %}
+    <p class="restore-image-notice">Выберите PNG-файл для восстановления изображения.</p>
+{% elif restore_status == "invalid_type" %}
+    <p class="restore-image-notice">Можно загрузить только PNG-файл.</p>
+{% elif restore_status == "empty_file" %}
+    <p class="restore-image-notice">Файл пустой. Выберите корректный PNG.</p>
+{% endif %}
+
 <section class="gallery-grid">
     {% for work in drawings %}
         <article class="work-card card animate-on-scroll">
             <div class="work-image-wrap">
-                {% if work.image or work.image_blob %}<img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">{% endif %}
+                <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
                 <span class="category-chip">{{ work.category.name }}</span>
             </div>
             <div class="work-card__body">
                 <h3 class="work-card__title"><a href="{% url 'work_detail' work.id %}">{{ work.title }}</a></h3>
                 <p class="work-card__meta">Голосов: {{ work.votes }}</p>
                 <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
+                {% if work.id in missing_image_ids %}
+                    <form
+                        class="restore-image-form"
+                        method="post"
+                        action="{% url 'restore_drawing_image' work.id %}"
+                        enctype="multipart/form-data"
+                    >
+                        {% csrf_token %}
+                        <label class="restore-image-input">
+                            <span>Загрузите PNG, чтобы вернуть оригинальный рисунок:</span>
+                            <input type="file" name="image" accept="image/png" required>
+                        </label>
+                        <button class="btn-secondary" type="submit">Восстановить изображение</button>
+                    </form>
+                {% endif %}
                 {% if work.id in winner_ids %}
                     <a class="btn-secondary" href="{% url 'certificate' work.id %}">Сертификат</a>
                 {% endif %}

@@ -21,6 +21,12 @@ from .models import Category, Drawing, Vote
 from .utils import send_notification
 
 
+def _build_stored_image_name(original_name: str) -> str:
+    safe_name = Path(original_name or "drawing.png").name
+    ext = Path(safe_name).suffix.lower() or ".png"
+    return f"drawing-{uuid4().hex}{ext}"
+
+
 def _missing_image_svg(title: str) -> str:
     safe_title = escape(title or "Работа")
     return f"""
@@ -150,8 +156,7 @@ def work_detail(request, pk):
     has_voted = False
     if request.user.is_authenticated:
         has_voted = Vote.objects.filter(drawing=work, user=request.user).exists()
-    has_image = bool((work.image and work.image.name) or work.image_blob)
-    og_image_url = request.build_absolute_uri(reverse("drawing_image", args=[work.pk])) if has_image else ""
+    og_image_url = request.build_absolute_uri(reverse("drawing_image", args=[work.pk]))
     return render(
         request,
         "drawings/work_detail.html",
@@ -287,9 +292,7 @@ def submit_drawing(request):
         category.name = category_name
         category.save(update_fields=["name"])
 
-    original_name = Path(image.name or "drawing.png").name
-    ext = Path(original_name).suffix.lower() or ".png"
-    stored_name = f"drawing-{uuid4().hex}{ext}"
+    stored_name = _build_stored_image_name(image.name)
 
     drawing = Drawing.objects.create(
         user=request.user,
@@ -308,6 +311,36 @@ def submit_drawing(request):
     send_notification(drawing, "submitted", request=request)
 
     return JsonResponse({"success": True, "id": drawing.id})
+
+
+@login_required
+@require_POST
+def restore_drawing_image(request, pk):
+    drawing = get_object_or_404(Drawing, pk=pk, user=request.user)
+    image = request.FILES.get("image")
+    if image is None:
+        return redirect(f"{reverse('profile')}?restore=missing_file")
+    if image.content_type != "image/png":
+        return redirect(f"{reverse('profile')}?restore=invalid_type")
+
+    image_bytes = image.read()
+    if not image_bytes:
+        return redirect(f"{reverse('profile')}?restore=empty_file")
+
+    previous_name = drawing.image.name if drawing.image else ""
+    drawing.image.save(_build_stored_image_name(image.name), ContentFile(image_bytes), save=False)
+    drawing.image_blob = image_bytes
+    drawing.image_blob_content_type = image.content_type or "image/png"
+    drawing.save(update_fields=["image", "image_blob", "image_blob_content_type"])
+
+    if (
+        previous_name
+        and previous_name != drawing.image.name
+        and default_storage.exists(previous_name)
+    ):
+        default_storage.delete(previous_name)
+
+    return redirect(f"{reverse('profile')}?restore=ok")
 
 
 @require_POST
@@ -394,7 +427,16 @@ def user_logout(request):
 
 @login_required
 def profile(request):
-    drawings = Drawing.objects.filter(user=request.user).order_by("-created_at")
+    drawings = list(Drawing.objects.filter(user=request.user).order_by("-created_at"))
+    missing_image_ids = set()
+    for drawing in drawings:
+        has_file = bool(
+            drawing.image and drawing.image.name and default_storage.exists(drawing.image.name)
+        )
+        has_blob = bool(drawing.image_blob)
+        if not has_file and not has_blob:
+            missing_image_ids.add(drawing.id)
+
     winner_ids = set()
     for category in Category.objects.all():
         winner = (
@@ -408,7 +450,12 @@ def profile(request):
     return render(
         request,
         "drawings/profile.html",
-        {"drawings": drawings, "winner_ids": winner_ids},
+        {
+            "drawings": drawings,
+            "winner_ids": winner_ids,
+            "missing_image_ids": missing_image_ids,
+            "restore_status": request.GET.get("restore", ""),
+        },
     )
 
 

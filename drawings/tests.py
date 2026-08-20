@@ -15,6 +15,12 @@ class AuthFlowTests(TestCase):
             password=self.password,
         )
         self.category = Category.objects.create(name="6–9 лет", slug="age-6-9", theme="6–9 лет")
+        self.png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+            b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
+            b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
+            b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
 
     def test_profile_requires_authentication(self):
         response = self.client.get(reverse("profile"))
@@ -40,12 +46,7 @@ class AuthFlowTests(TestCase):
         self.client.login(username=self.user.email, password=self.password)
         png = SimpleUploadedFile(
             "test.png",
-            (
-                b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
-                b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
-                b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
-                b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
-            ),
+            self.png,
             content_type="image/png",
         )
 
@@ -65,6 +66,64 @@ class AuthFlowTests(TestCase):
         self.assertEqual(Drawing.objects.filter(user=self.user).count(), 1)
         drawing = Drawing.objects.get(user=self.user)
         self.assertTrue(bool(drawing.image_blob))
+
+    def test_owner_can_restore_missing_image_from_profile(self):
+        self.client.login(username=self.user.email, password=self.password)
+        drawing = Drawing.objects.create(
+            user=self.user,
+            title="Нужно восстановить",
+            author="Аня",
+            age=9,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("old.png", self.png, content_type="image/png"),
+            image_blob=None,
+            image_blob_content_type="image/png",
+            is_approved=True,
+            votes=1,
+        )
+        if drawing.image and drawing.image.name:
+            drawing.image.storage.delete(drawing.image.name)
+        drawing.image_blob = None
+        drawing.save(update_fields=["image_blob"])
+
+        response = self.client.post(
+            reverse("restore_drawing_image", args=[drawing.id]),
+            {"image": SimpleUploadedFile("new.png", self.png, content_type="image/png")},
+        )
+        self.assertRedirects(response, f"{reverse('profile')}?restore=ok")
+
+        drawing.refresh_from_db()
+        self.assertTrue(bool(drawing.image_blob))
+        image_response = self.client.get(reverse("drawing_image", args=[drawing.id]))
+        self.assertEqual(image_response.status_code, 200)
+        self.assertEqual(image_response["Content-Type"], "image/png")
+
+    def test_user_cannot_restore_someone_elses_image(self):
+        owner = User.objects.create_user(
+            username="owner@example.com",
+            email="owner@example.com",
+            password=self.password,
+        )
+        drawing = Drawing.objects.create(
+            user=owner,
+            title="Чужая работа",
+            author="Другой",
+            age=9,
+            city="Алматы",
+            email=owner.email,
+            category=self.category,
+            image=SimpleUploadedFile("other.png", self.png, content_type="image/png"),
+            is_approved=True,
+            votes=0,
+        )
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.post(
+            reverse("restore_drawing_image", args=[drawing.id]),
+            {"image": SimpleUploadedFile("new.png", self.png, content_type="image/png")},
+        )
+        self.assertEqual(response.status_code, 404)
 
 
 class HomePageTests(TestCase):

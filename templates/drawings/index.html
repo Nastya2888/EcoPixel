@@ -198,9 +198,7 @@
         {% for work in latest_drawings %}
             <article class="work-card card animate-on-scroll">
                 <div class="work-image-wrap">
-                    {% if work.image or work.image_blob %}
-                        <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
-                    {% endif %}
+                    <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
                     <span class="category-chip">{{ work.category.name }}</span>
                 </div>
                 <div class="work-card__body">
