@@ -248,3 +248,28 @@ class DrawingImageFallbackTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "image/png")
         self.assertEqual(response.content, self.png)
+
+    def test_drawing_image_returns_svg_placeholder_when_everything_missing(self):
+        drawing = Drawing.objects.create(
+            user=self.user,
+            title="Потерянная работа",
+            author="Автор",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("missing.png", self.png, content_type="image/png"),
+            image_blob=None,
+            image_blob_content_type="image/png",
+            is_approved=True,
+            votes=0,
+        )
+        if drawing.image and drawing.image.name:
+            drawing.image.storage.delete(drawing.image.name)
+        drawing.image_blob = None
+        drawing.save(update_fields=["image_blob"])
+
+        response = self.client.get(reverse("drawing_image", args=[drawing.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "image/svg+xml")
+        self.assertIn("Изображение недоступно", response.content.decode("utf-8"))

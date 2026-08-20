@@ -1,5 +1,6 @@
 from pathlib import Path
 from uuid import uuid4
+from html import escape
 
 from django.http import Http404, HttpResponse, JsonResponse
 from django.db.models import Sum
@@ -18,6 +19,33 @@ from django.views.decorators.http import require_GET, require_POST
 
 from .models import Category, Drawing, Vote
 from .utils import send_notification
+
+
+def _missing_image_svg(title: str) -> str:
+    safe_title = escape(title or "Работа")
+    return f"""
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F0FDF4"/>
+      <stop offset="100%" stop-color="#E4EFE8"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="640" fill="url(#g)"/>
+  <rect x="48" y="48" width="544" height="544" rx="28" fill="#FFFFFF" stroke="#DCE8E0" stroke-width="6"/>
+  <g transform="translate(320 250)">
+    <rect x="-64" y="-64" width="128" height="128" rx="18" fill="#EFF8F2" stroke="#2ECC71" stroke-width="8"/>
+    <path d="M-34 30l24-26 20 18 20-22 24 30" fill="none" stroke="#1B4332" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="-18" cy="-18" r="10" fill="#2ECC71"/>
+  </g>
+  <text x="320" y="410" text-anchor="middle" fill="#1B4332" font-size="30" font-family="Arial, sans-serif" font-weight="700">
+    Изображение недоступно
+  </text>
+  <text x="320" y="450" text-anchor="middle" fill="#5C7166" font-size="22" font-family="Arial, sans-serif">
+    {safe_title}
+  </text>
+</svg>
+""".strip()
 
 
 AGE_CATEGORY_FILTERS = (
@@ -148,7 +176,10 @@ def drawing_image(request, pk):
             content_type=drawing.image_blob_content_type or "image/png",
         )
 
-    raise Http404("Изображение не найдено.")
+    return HttpResponse(
+        _missing_image_svg(drawing.title),
+        content_type="image/svg+xml",
+    )
 
 
 @require_GET
