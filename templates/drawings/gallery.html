@@ -10,10 +10,10 @@
     {% csrf_token %}
 
     <div class="filter-row animate-on-scroll">
-        <a class="filter-btn {% if not selected_category %}active{% endif %}" href="?sort={{ sort_mode }}">Все</a>
-        {% for category in categories %}
+        <a class="filter-btn {% if not selected_age_category %}active{% endif %}" href="?sort={{ sort_mode }}">Все</a>
+        {% for category in age_categories %}
             <a
-                class="filter-btn {% if selected_category and selected_category.id == category.id %}active{% endif %}"
+                class="filter-btn {% if selected_age_category and selected_age_category.slug == category.slug %}active{% endif %}"
                 href="?category={{ category.slug }}&sort={{ sort_mode }}"
             >
                 {{ category.name }}
@@ -24,20 +24,20 @@
     <div class="filter-row animate-on-scroll">
         <a
             class="filter-btn {% if sort_mode == 'popular' %}active{% endif %}"
-            href="?{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort=popular"
+            href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort=popular"
         >
             По популярности
         </a>
         <a
             class="filter-btn {% if sort_mode == 'new' %}active{% endif %}"
-            href="?{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort=new"
+            href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort=new"
         >
             Сначала новые
         </a>
     </div>
 
-    {% if selected_category %}
-        <p>Текущая категория: {{ selected_category.name }}</p>
+    {% if selected_age_category %}
+        <p>Текущая категория: {{ selected_age_category.name }}</p>
     {% endif %}
 
     <div class="gallery-grid">
@@ -85,11 +85,11 @@
 
     <div class="pagination">
         {% if page_obj.has_previous %}
-            <a href="?{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.previous_page_number }}">Назад</a>
+            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.previous_page_number }}">Назад</a>
         {% endif %}
         <span class="active-page">{{ page_obj.number }}</span>
         {% if page_obj.has_next %}
-            <a href="?{% if selected_category %}category={{ selected_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.next_page_number }}">Вперёд</a>
+            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.next_page_number }}">Вперёд</a>
         {% endif %}
     </div>
 </section>

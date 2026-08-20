@@ -118,58 +118,75 @@ class GalleryTests(TestCase):
             email="gallery@example.com",
             password=self.password,
         )
-        self.category = Category.objects.create(name="14–17 лет", slug="age-14-17", theme="14–17 лет")
-        image = SimpleUploadedFile(
-            "gallery.png",
-            (
-                b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
-                b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
-                b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
-                b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
-            ),
-            content_type="image/png",
+        self.category_6_9 = Category.objects.create(name="6–9 лет", slug="age-6-9", theme="6–9 лет")
+        self.category_10_13 = Category.objects.create(name="10–13 лет", slug="age-10-13", theme="10–13 лет")
+        self.category_14_17 = Category.objects.create(name="14–17 лет", slug="age-14-17", theme="14–17 лет")
+
+        png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+            b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
+            b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
+            b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
         )
-        self.approved = Drawing.objects.create(
+
+        self.young_work = Drawing.objects.create(
             user=self.user,
-            title="Опубликованная работа",
+            title="Младшая категория",
             author="Автор",
-            age=14,
+            age=8,
             city="Алматы",
             email=self.user.email,
-            category=self.category,
-            image=image,
+            category=self.category_6_9,
+            image=SimpleUploadedFile("gallery-young.png", png, content_type="image/png"),
             is_approved=True,
-            votes=1,
+            votes=2,
         )
-        self.pending = Drawing.objects.create(
+        self.middle_pending_work = Drawing.objects.create(
             user=self.user,
-            title="Работа на модерации",
+            title="Средняя категория",
             author="Автор",
-            age=14,
+            age=11,
             city="Алматы",
             email=self.user.email,
-            category=self.category,
-            image=SimpleUploadedFile(
-                "gallery2.png",
-                (
-                    b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
-                    b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
-                    b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
-                    b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
-                ),
-                content_type="image/png",
-            ),
+            category=self.category_10_13,
+            image=SimpleUploadedFile("gallery-middle.png", png, content_type="image/png"),
             is_approved=False,
             votes=0,
+        )
+        self.teen_work = Drawing.objects.create(
+            user=self.user,
+            title="Старшая категория",
+            author="Автор",
+            age=15,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category_14_17,
+            image=SimpleUploadedFile("gallery-teen.png", png, content_type="image/png"),
+            is_approved=True,
+            votes=1,
         )
 
     def test_gallery_shows_approved_and_pending_drawings(self):
         response = self.client.get(reverse("gallery"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.approved.title)
-        self.assertContains(response, self.pending.title)
+        self.assertContains(response, self.young_work.title)
+        self.assertContains(response, self.middle_pending_work.title)
+        self.assertContains(response, self.teen_work.title)
+
+    def test_gallery_has_all_age_filters(self):
+        response = self.client.get(reverse("gallery"))
+        self.assertContains(response, "6–9 лет")
+        self.assertContains(response, "10–13 лет")
+        self.assertContains(response, "14–17 лет")
+
+    def test_gallery_filters_by_middle_age_group(self):
+        response = self.client.get(reverse("gallery"), {"category": "age-10-13"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.middle_pending_work.title)
+        self.assertNotContains(response, self.young_work.title)
+        self.assertNotContains(response, self.teen_work.title)
 
     def test_unapproved_drawing_vote_is_forbidden(self):
         self.client.login(username=self.user.email, password=self.password)
-        response = self.client.post(reverse("vote", args=[self.pending.id]))
+        response = self.client.post(reverse("vote", args=[self.middle_pending_work.id]))
         self.assertEqual(response.status_code, 404)

@@ -14,6 +14,13 @@ from .models import Category, Drawing, Vote
 from .utils import send_notification
 
 
+AGE_CATEGORY_FILTERS = (
+    {"slug": "age-6-9", "name": "6–9 лет", "min_age": 6, "max_age": 9},
+    {"slug": "age-10-13", "name": "10–13 лет", "min_age": 10, "max_age": 13},
+    {"slug": "age-14-17", "name": "14–17 лет", "min_age": 14, "max_age": 17},
+)
+
+
 @require_GET
 def index(request):
     categories = Category.objects.annotate(drawing_count=Count("submissions")).order_by("name")[:3]
@@ -36,14 +43,17 @@ def index(request):
 
 @require_GET
 def gallery(request):
-    categories = Category.objects.all()
+    age_categories = list(AGE_CATEGORY_FILTERS)
+    category_by_slug = {item["slug"]: item for item in age_categories}
     current_slug = request.GET.get("category", "").strip()
     sort_mode = request.GET.get("sort", "popular").strip()
     drawings = Drawing.objects.select_related("category").all()
-    selected_category = None
-    if current_slug:
-        selected_category = get_object_or_404(Category, slug=current_slug)
-        drawings = drawings.filter(category=selected_category)
+    selected_age_category = category_by_slug.get(current_slug)
+    if selected_age_category:
+        drawings = drawings.filter(
+            age__gte=selected_age_category["min_age"],
+            age__lte=selected_age_category["max_age"],
+        )
 
     if sort_mode == "new":
         drawings = drawings.order_by("-created_at")
@@ -63,8 +73,8 @@ def gallery(request):
         request,
         "drawings/gallery.html",
         {
-            "categories": categories,
-            "selected_category": selected_category,
+            "age_categories": age_categories,
+            "selected_age_category": selected_age_category,
             "sort_mode": sort_mode,
             "page_obj": page_obj,
             "voted_ids": voted_ids,
@@ -307,8 +317,9 @@ def profile(request):
 
 
 def _get_category_for_age(age):
-    if 6 <= age <= 9:
-        return "6–9 лет", "age-6-9"
-    if 10 <= age <= 13:
-        return "10–13 лет", "age-10-13"
+    for category in AGE_CATEGORY_FILTERS:
+        if category["min_age"] <= age <= category["max_age"]:
+            return category["name"], category["slug"]
+
+    # Safety fallback, though age is validated earlier.
     return "14–17 лет", "age-14-17"
