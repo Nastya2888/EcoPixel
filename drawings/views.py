@@ -1,5 +1,5 @@
 from django.http import Http404, JsonResponse
-from django.db.models import Count, Sum
+from django.db.models import Sum
 from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -15,15 +15,43 @@ from .utils import send_notification
 
 
 AGE_CATEGORY_FILTERS = (
-    {"slug": "age-6-9", "name": "6–9 лет", "min_age": 6, "max_age": 9},
-    {"slug": "age-10-13", "name": "10–13 лет", "min_age": 10, "max_age": 13},
-    {"slug": "age-14-17", "name": "14–17 лет", "min_age": 14, "max_age": 17},
+    {
+        "slug": "age-6-9",
+        "name": "6–9 лет",
+        "min_age": 6,
+        "max_age": 9,
+        "theme": "Мой чистый дом",
+        "description": "Сортировка мусора, кормление птиц, экономия воды и света.",
+    },
+    {
+        "slug": "age-10-13",
+        "name": "10–13 лет",
+        "min_age": 10,
+        "max_age": 13,
+        "theme": "Сохраним леса",
+        "description": "Посадка деревьев, защита природы, субботники и помощь животным.",
+    },
+    {
+        "slug": "age-14-17",
+        "name": "14–17 лет",
+        "min_age": 14,
+        "max_age": 17,
+        "theme": "Эко-город будущего",
+        "description": "Эко-технологии, солнечные батареи, электротранспорт и переработка.",
+    },
 )
 
 
 @require_GET
 def index(request):
-    categories = Category.objects.annotate(drawing_count=Count("submissions")).order_by("name")[:3]
+    home_categories = []
+    for category in AGE_CATEGORY_FILTERS:
+        drawing_count = Drawing.objects.filter(
+            age__gte=category["min_age"],
+            age__lte=category["max_age"],
+        ).count()
+        home_categories.append({**category, "drawing_count": drawing_count})
+
     latest_drawings = Drawing.objects.filter(is_approved=True).order_by("-created_at")[:6]
     stats = {
         "participants_total": Drawing.objects.count(),
@@ -34,7 +62,7 @@ def index(request):
         request,
         "drawings/index.html",
         {
-            "categories": categories,
+            "home_categories": home_categories,
             "latest_drawings": latest_drawings,
             "stats": stats,
         },

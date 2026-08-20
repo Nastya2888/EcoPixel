@@ -103,10 +103,10 @@
     <h2 class="section-title animate-on-scroll">Выбери свою тему</h2>
     <p class="section-subtitle animate-on-scroll">Три направления, чтобы каждый участник нашёл историю, которую хочется рассказать пикселями.</p>
     <div class="categories-grid">
-        {% for category in categories %}
-            <a class="category-card card animate-on-scroll" href="{% url 'gallery' %}?category={{ category.slug }}&sort=popular">
+        {% for category in home_categories %}
+            <article class="category-card card animate-on-scroll">
                 <div class="category-icon">
-                    {% if category.slug == 'moy-chistyy-dom' %}
+                    {% if category.slug == 'age-6-9' %}
                         <svg class="category-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M6 24L32 6L58 24" stroke="#1B4332" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                           <path d="M10 22L32 9L54 22" fill="#E07A5F"/>
@@ -117,7 +117,7 @@
                           <rect x="50" y="46" width="6" height="8" fill="#2ECC71" rx="1"/>
                           <rect x="6" y="54" width="52" height="4" fill="#27AE60" rx="2"/>
                         </svg>
-                    {% elif category.slug == 'sohranim-lesa' %}
+                    {% elif category.slug == 'age-10-13' %}
                         <svg class="category-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <rect x="27" y="30" width="10" height="24" fill="#D4A373" rx="2"/>
                           <circle cx="32" cy="20" r="12" fill="#2ECC71"/>
@@ -126,7 +126,7 @@
                           <path d="M8 54C18 49 26 54 32 54C38 54 46 49 56 54" stroke="#81C3D7" stroke-width="3" stroke-linecap="round"/>
                           <rect x="8" y="56" width="48" height="3" fill="#27AE60" rx="1.5" opacity="0.35"/>
                         </svg>
-                    {% elif category.slug == 'eko-gorod' %}
+                    {% elif category.slug == 'age-14-17' %}
                         <svg class="category-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <rect x="6" y="24" width="22" height="30" fill="#E9C46A" rx="2"/>
                           <rect x="11" y="32" width="5" height="5" fill="#81C3D7" rx="1"/>
@@ -144,24 +144,12 @@
                     {% endif %}
                 </div>
                 <h3 class="category-name">{{ category.name }}</h3>
-                <p class="category-theme">{{ category.theme|default:"Тема будет добавлена" }}</p>
-                <p class="category-desc">
-                    {% if category.slug == 'moy-chistyy-dom' %}
-                        Сортировка мусора, кормление птиц, экономия воды и света
-                    {% elif category.slug == 'sohranim-lesa' %}
-                        Защита природы, посадка деревьев, субботники, помощь животным
-                    {% elif category.slug == 'eko-gorod' %}
-                        Эко-технологии, солнечные батареи, электротранспорт, переработка
-                    {% endif %}
-                </p>
+                <p class="category-theme">Тема: {{ category.theme }}</p>
+                <p class="category-desc">Возраст: {{ category.min_age }}–{{ category.max_age }} лет</p>
+                <p class="category-desc">{{ category.description }}</p>
                 {% if category.drawing_count > 0 %}
                     <span class="category-badge">{{ category.drawing_count }}</span>
                 {% endif %}
-            </a>
-        {% empty %}
-            <article class="category-card card">
-                <h3 class="category-name">Категории скоро появятся</h3>
-                <p class="category-theme">Добавьте категории в админке</p>
             </article>
         {% endfor %}
     </div>

@@ -65,6 +65,23 @@ class AuthFlowTests(TestCase):
         self.assertEqual(Drawing.objects.filter(user=self.user).count(), 1)
 
 
+class HomePageTests(TestCase):
+    def test_homepage_always_shows_all_age_topic_cards_without_gallery_links(self):
+        response = self.client.get(reverse("index"))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "6–9 лет")
+        self.assertContains(response, "10–13 лет")
+        self.assertContains(response, "14–17 лет")
+        self.assertContains(response, "Мой чистый дом")
+        self.assertContains(response, "Сохраним леса")
+        self.assertContains(response, "Эко-город будущего")
+
+        self.assertNotContains(response, "?category=age-6-9")
+        self.assertNotContains(response, "?category=age-10-13")
+        self.assertNotContains(response, "?category=age-14-17")
+
+
 class VotingTests(TestCase):
     def setUp(self):
         self.password = "StrongPass123!"
