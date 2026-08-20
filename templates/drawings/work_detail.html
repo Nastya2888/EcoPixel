@@ -13,7 +13,7 @@
 <section class="work-layout card">
     {% csrf_token %}
     <div class="work-image-card animate-on-scroll">
-        {% if work.image %}<img src="{{ work.image.url }}" alt="{{ work.title }}" loading="lazy">{% endif %}
+        {% if work.image or work.image_blob %}<img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">{% endif %}
     </div>
     <div class="work-info animate-on-scroll">
         <span class="work-badge">{{ work.category.name }}</span>

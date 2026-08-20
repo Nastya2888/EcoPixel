@@ -63,6 +63,8 @@ class AuthFlowTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Drawing.objects.filter(user=self.user).count(), 1)
+        drawing = Drawing.objects.get(user=self.user)
+        self.assertTrue(bool(drawing.image_blob))
 
 
 class HomePageTests(TestCase):
@@ -207,3 +209,42 @@ class GalleryTests(TestCase):
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.post(reverse("vote", args=[self.middle_pending_work.id]))
         self.assertEqual(response.status_code, 404)
+
+
+class DrawingImageFallbackTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="image@example.com",
+            email="image@example.com",
+            password="StrongPass123!",
+        )
+        self.category = Category.objects.create(name="6–9 лет", slug="age-6-9", theme="6–9 лет")
+        self.png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+            b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
+            b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
+            b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+
+    def test_drawing_image_uses_blob_when_file_missing(self):
+        drawing = Drawing.objects.create(
+            user=self.user,
+            title="Blob fallback",
+            author="Автор",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("fallback.png", self.png, content_type="image/png"),
+            image_blob=self.png,
+            image_blob_content_type="image/png",
+            is_approved=True,
+            votes=0,
+        )
+        if drawing.image and drawing.image.name:
+            drawing.image.storage.delete(drawing.image.name)
+
+        response = self.client.get(reverse("drawing_image", args=[drawing.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "image/png")
+        self.assertEqual(response.content, self.png)

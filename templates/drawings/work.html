@@ -12,7 +12,7 @@
     </div>
 
     <div class="work-image">
-        <img src="{{ drawing.image.url }}" alt="Работа {{ drawing.id }}" width="420" height="420" style="image-rendering: pixelated;">
+        <img src="{% url 'drawing_image' drawing.id %}" alt="Работа {{ drawing.id }}" width="420" height="420" style="image-rendering: pixelated;">
     </div>
 
     <div class="vote-block">

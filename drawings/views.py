@@ -1,11 +1,17 @@
-from django.http import Http404, JsonResponse
+from pathlib import Path
+from uuid import uuid4
+
+from django.http import Http404, HttpResponse, JsonResponse
 from django.db.models import Sum
 from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
@@ -116,12 +122,33 @@ def work_detail(request, pk):
     has_voted = False
     if request.user.is_authenticated:
         has_voted = Vote.objects.filter(drawing=work, user=request.user).exists()
-    og_image_url = request.build_absolute_uri(work.image.url) if work.image else ""
+    has_image = bool((work.image and work.image.name) or work.image_blob)
+    og_image_url = request.build_absolute_uri(reverse("drawing_image", args=[work.pk])) if has_image else ""
     return render(
         request,
         "drawings/work_detail.html",
         {"work": work, "has_voted": has_voted, "og_image_url": og_image_url},
     )
+
+
+@require_GET
+def drawing_image(request, pk):
+    drawing = get_object_or_404(Drawing, pk=pk)
+
+    if drawing.image and drawing.image.name and default_storage.exists(drawing.image.name):
+        with drawing.image.open("rb") as img_file:
+            return HttpResponse(
+                img_file.read(),
+                content_type=drawing.image_blob_content_type or "image/png",
+            )
+
+    if drawing.image_blob:
+        return HttpResponse(
+            bytes(drawing.image_blob),
+            content_type=drawing.image_blob_content_type or "image/png",
+        )
+
+    raise Http404("Изображение не найдено.")
 
 
 @require_GET
@@ -186,6 +213,10 @@ def submit_drawing(request):
     if image.content_type != "image/png":
         return JsonResponse({"success": False, "error": "Допускаются только PNG изображения."}, status=400)
 
+    image_bytes = image.read()
+    if not image_bytes:
+        return JsonResponse({"success": False, "error": "Пустой файл изображения."}, status=400)
+
     if not all([title, author_name, age_raw, city]):
         return JsonResponse({"success": False, "error": "Заполните все поля формы."}, status=400)
 
@@ -225,6 +256,10 @@ def submit_drawing(request):
         category.name = category_name
         category.save(update_fields=["name"])
 
+    original_name = Path(image.name or "drawing.png").name
+    ext = Path(original_name).suffix.lower() or ".png"
+    stored_name = f"drawing-{uuid4().hex}{ext}"
+
     drawing = Drawing.objects.create(
         user=request.user,
         title=title,
@@ -233,7 +268,9 @@ def submit_drawing(request):
         city=city,
         email=email,
         category=category,
-        image=image,
+        image=ContentFile(image_bytes, name=stored_name),
+        image_blob=image_bytes,
+        image_blob_content_type=image.content_type or "image/png",
         is_approved=False,
         votes=0,
     )

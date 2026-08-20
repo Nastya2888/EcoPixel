@@ -132,7 +132,7 @@
 
     {% if drawing.image %}
         <div class="preview">
-            <img src="{{ drawing.image.url }}" alt="Победный рисунок">
+            <img src="{% url 'drawing_image' drawing.id %}" alt="Победный рисунок">
         </div>
     {% endif %}
 

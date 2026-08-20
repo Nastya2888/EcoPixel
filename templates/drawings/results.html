@@ -11,7 +11,7 @@
                 <h2>{{ item.category.name }}</h2>
                 {% if item.winner %}
                     <p class="winner-place">🥇 ПОБЕДИТЕЛЬ</p>
-                    {% if item.winner.image %}<img src="{{ item.winner.image.url }}" alt="{{ item.winner.title }}" loading="lazy">{% endif %}
+                    {% if item.winner.image or item.winner.image_blob %}<img src="{% url 'drawing_image' item.winner.id %}" alt="{{ item.winner.title }}" loading="lazy">{% endif %}
                     <p class="winner-name">{{ item.winner.title }}</p>
                     <p>{{ item.winner.author }}, {{ item.winner.age }} лет</p>
                     <p class="winner-votes">{{ item.winner.votes }}</p>

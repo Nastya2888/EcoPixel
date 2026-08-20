@@ -41,6 +41,8 @@ class Drawing(models.Model):
         verbose_name="Категория",
     )
     image = models.FileField("Рисунок PNG", upload_to="drawings/%Y/%m")
+    image_blob = models.BinaryField("PNG данные", null=True, blank=True, editable=False)
+    image_blob_content_type = models.CharField("MIME", max_length=100, blank=True, default="image/png")
     is_approved = models.BooleanField("Одобрено", default=False)
     votes = models.PositiveIntegerField("Голоса", default=0)
     created_at = models.DateTimeField("Создано", auto_now_add=True)
