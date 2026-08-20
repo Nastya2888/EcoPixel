@@ -1,4 +1,5 @@
 import os
+import warnings
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
@@ -50,6 +51,58 @@ def _parse_postgres_database_url(db_url: str) -> dict:
             "sslmode": os.getenv("DJANGO_DB_SSLMODE", "require"),
         },
     }
+
+
+def _postgres_config_from_pg_vars() -> dict | None:
+    host = os.getenv("PGHOST", "").strip()
+    port = os.getenv("PGPORT", "").strip()
+    user = os.getenv("PGUSER", "").strip()
+    password = os.getenv("PGPASSWORD", "").strip()
+    database = os.getenv("PGDATABASE", "").strip()
+
+    if not all([host, port, user, password, database]):
+        return None
+
+    if (
+        host.lower() in {"host", "hostname"}
+        or user.lower() in {"user", "username"}
+        or password.lower() in {"password", "pass"}
+        or database.lower() in {"dbname", "database", "db"}
+    ):
+        return None
+
+    return {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": database,
+        "USER": user,
+        "PASSWORD": password,
+        "HOST": host,
+        "PORT": port,
+        "CONN_MAX_AGE": int(os.getenv("DJANGO_DB_CONN_MAX_AGE", "600")),
+        "OPTIONS": {
+            "sslmode": os.getenv("DJANGO_DB_SSLMODE", "require"),
+        },
+    }
+
+
+def _database_config_from_env() -> dict | None:
+    # Railway users often provide either DATABASE_URL or DATABASE_PRIVATE_URL.
+    for env_name in (
+        "DATABASE_URL",
+        "DATABASE_PRIVATE_URL",
+        "POSTGRES_URL",
+        "POSTGRESQL_URL",
+        "DATABASE_PUBLIC_URL",
+    ):
+        db_url = os.getenv(env_name, "").strip()
+        if not db_url or _is_placeholder_database_url(db_url):
+            continue
+        try:
+            return _parse_postgres_database_url(db_url)
+        except ValueError:
+            continue
+
+    return _postgres_config_from_pg_vars()
 
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "ecopixel-dev-key-change-in-production-7f4d6a9b2c1e")
@@ -114,14 +167,15 @@ DATABASES = {
     }
 }
 
-database_url = os.getenv("DATABASE_URL", "").strip()
-if database_url:
-    try:
-        if not _is_placeholder_database_url(database_url):
-            DATABASES["default"] = _parse_postgres_database_url(database_url)
-    except ValueError:
-        # Keep default sqlite DB when DATABASE_URL is invalid.
-        pass
+env_database_config = _database_config_from_env()
+if env_database_config:
+    DATABASES["default"] = env_database_config
+elif os.getenv("RAILWAY_PROJECT_ID") and not DEBUG:
+    warnings.warn(
+        "Running with SQLite on Railway. Configure DATABASE_URL=${{Postgres.DATABASE_URL}} "
+        "or PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE so data is persisted.",
+        RuntimeWarning,
+    )
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

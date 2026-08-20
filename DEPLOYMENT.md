@@ -10,6 +10,10 @@ Copy `.env.example` to `.env` and set real values:
 - `DJANGO_CSRF_TRUSTED_ORIGINS` (https URLs for domains)
 - `DATABASE_URL` (PostgreSQL connection string)
 
+For Railway, set database variable as a reference:
+
+- `DATABASE_URL=${{Postgres.DATABASE_URL}}`
+
 ## 2) Install dependencies
 
 ```bash
