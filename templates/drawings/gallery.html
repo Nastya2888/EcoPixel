@@ -50,6 +50,7 @@
                 <div class="work-card__body">
                     <h3 class="work-card__title"><a href="{% url 'work_detail' work.id %}">{{ work.title }}</a></h3>
                     <p class="work-card__meta">{{ work.author }}, {{ work.age }} лет, {{ work.city }}</p>
+                    <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
                     <div class="likes">
                         <span class="likes-heart" data-heart>
                             {% if work.id in voted_ids %}
@@ -63,9 +64,11 @@
                     <button
                         class="vote-btn btn-ripple {% if work.id in voted_ids %}voted{% endif %}"
                         data-id="{{ work.id }}"
-                        {% if not user.is_authenticated or work.id in voted_ids %}disabled{% endif %}
+                        {% if not work.is_approved or not user.is_authenticated or work.id in voted_ids %}disabled{% endif %}
                     >
-                        {% if not user.is_authenticated %}
+                        {% if not work.is_approved %}
+                            На модерации
+                        {% elif not user.is_authenticated %}
                             ❤️ Войти, чтобы голосовать
                         {% elif work.id in voted_ids %}
                             Вы проголосовали ❤️

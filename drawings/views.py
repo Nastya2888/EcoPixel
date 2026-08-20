@@ -39,7 +39,7 @@ def gallery(request):
     categories = Category.objects.all()
     current_slug = request.GET.get("category", "").strip()
     sort_mode = request.GET.get("sort", "popular").strip()
-    drawings = Drawing.objects.filter(is_approved=True)
+    drawings = Drawing.objects.select_related("category").all()
     selected_category = None
     if current_slug:
         selected_category = get_object_or_404(Category, slug=current_slug)

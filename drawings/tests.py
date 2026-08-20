@@ -108,3 +108,68 @@ class VotingTests(TestCase):
         self.assertEqual(first.status_code, 200)
         self.assertEqual(second.status_code, 403)
         self.assertEqual(Vote.objects.filter(drawing=self.drawing, user=self.user).count(), 1)
+
+
+class GalleryTests(TestCase):
+    def setUp(self):
+        self.password = "StrongPass123!"
+        self.user = User.objects.create_user(
+            username="gallery@example.com",
+            email="gallery@example.com",
+            password=self.password,
+        )
+        self.category = Category.objects.create(name="14–17 лет", slug="age-14-17", theme="14–17 лет")
+        image = SimpleUploadedFile(
+            "gallery.png",
+            (
+                b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+                b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
+                b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
+                b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+            ),
+            content_type="image/png",
+        )
+        self.approved = Drawing.objects.create(
+            user=self.user,
+            title="Опубликованная работа",
+            author="Автор",
+            age=14,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=image,
+            is_approved=True,
+            votes=1,
+        )
+        self.pending = Drawing.objects.create(
+            user=self.user,
+            title="Работа на модерации",
+            author="Автор",
+            age=14,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile(
+                "gallery2.png",
+                (
+                    b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+                    b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
+                    b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
+                    b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+                ),
+                content_type="image/png",
+            ),
+            is_approved=False,
+            votes=0,
+        )
+
+    def test_gallery_shows_approved_and_pending_drawings(self):
+        response = self.client.get(reverse("gallery"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.approved.title)
+        self.assertContains(response, self.pending.title)
+
+    def test_unapproved_drawing_vote_is_forbidden(self):
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.post(reverse("vote", args=[self.pending.id]))
+        self.assertEqual(response.status_code, 404)
