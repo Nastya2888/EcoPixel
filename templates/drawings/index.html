@@ -41,7 +41,7 @@
 
 <section>
     <h2 class="section-title animate-on-scroll">Выбери свою тему</h2>
-    <p class="section-subtitle animate-on-scroll">Три направления, чтобы каждый участник нашёл историю, которую хочется рассказать пикселями.</p>
+    <p class="section-subtitle animate-on-scroll">Четыре направления, чтобы каждый участник нашёл историю, которую хочется рассказать пикселями.</p>
     <div class="categories-grid">
         {% for category in home_categories %}
             <article class="category-card card animate-on-scroll">
@@ -80,6 +80,16 @@
                           <line x1="16" y1="8" x2="16" y2="4" stroke="#1B4332" stroke-width="2"/>
                           <line x1="24" y1="8" x2="24" y2="4" stroke="#1B4332" stroke-width="2"/>
                           <rect x="8" y="56" width="48" height="4" fill="#27AE60" rx="2"/>
+                        </svg>
+                    {% elif category.slug == 'age-18-25' %}
+                        <svg class="category-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="8" y="18" width="48" height="32" rx="4" fill="#F5F5DC"/>
+                          <rect x="12" y="22" width="16" height="24" rx="2" fill="#81C3D7"/>
+                          <rect x="36" y="22" width="16" height="24" rx="2" fill="#F4A261"/>
+                          <rect x="24" y="10" width="16" height="10" rx="2" fill="#2ECC71"/>
+                          <rect x="28" y="4" width="8" height="8" rx="2" fill="#27AE60"/>
+                          <path d="M18 56C23 50 29 54 34 56C39 58 45 54 50 56" stroke="#52B788" stroke-width="3" stroke-linecap="round"/>
+                          <rect x="10" y="54" width="44" height="4" rx="2" fill="#27AE60"/>
                         </svg>
                     {% endif %}
                 </div>

@@ -67,6 +67,29 @@ class AuthFlowTests(TestCase):
         drawing = Drawing.objects.get(user=self.user)
         self.assertTrue(bool(drawing.image_blob))
 
+    def test_submit_accepts_new_18_25_category(self):
+        self.client.login(username=self.user.email, password=self.password)
+        png = SimpleUploadedFile("test-adult.png", self.png, content_type="image/png")
+
+        response = self.client.post(
+            reverse("submit_drawing"),
+            {
+                "image": png,
+                "title": "Эко-проект района",
+                "author_name": "Аня",
+                "age": "20",
+                "city": "Алматы",
+                "email": self.user.email,
+                "consent": "on",
+                "category_slug": "age-18-25",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        drawing = Drawing.objects.latest("id")
+        self.assertEqual(drawing.age, 20)
+        self.assertEqual(drawing.category.slug, "age-18-25")
+
     def test_owner_can_restore_missing_image_from_profile(self):
         self.client.login(username=self.user.email, password=self.password)
         drawing = Drawing.objects.create(
@@ -134,13 +157,16 @@ class HomePageTests(TestCase):
         self.assertContains(response, "6–9 лет")
         self.assertContains(response, "10–13 лет")
         self.assertContains(response, "14–17 лет")
+        self.assertContains(response, "18–25 лет")
         self.assertContains(response, "Мой чистый дом")
         self.assertContains(response, "Сохраним леса")
         self.assertContains(response, "Эко-город будущего")
+        self.assertContains(response, "Эко-инициативы сообщества")
 
         self.assertNotContains(response, "?category=age-6-9")
         self.assertNotContains(response, "?category=age-10-13")
         self.assertNotContains(response, "?category=age-14-17")
+        self.assertNotContains(response, "?category=age-18-25")
 
 
 class VotingTests(TestCase):
@@ -199,6 +225,7 @@ class GalleryTests(TestCase):
         self.category_6_9 = Category.objects.create(name="6–9 лет", slug="age-6-9", theme="6–9 лет")
         self.category_10_13 = Category.objects.create(name="10–13 лет", slug="age-10-13", theme="10–13 лет")
         self.category_14_17 = Category.objects.create(name="14–17 лет", slug="age-14-17", theme="14–17 лет")
+        self.category_18_25 = Category.objects.create(name="18–25 лет", slug="age-18-25", theme="18–25 лет")
 
         png = (
             b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
@@ -243,6 +270,18 @@ class GalleryTests(TestCase):
             is_approved=True,
             votes=1,
         )
+        self.adult_work = Drawing.objects.create(
+            user=self.user,
+            title="Молодежная категория",
+            author="Автор",
+            age=20,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category_18_25,
+            image=SimpleUploadedFile("gallery-adult.png", png, content_type="image/png"),
+            is_approved=True,
+            votes=3,
+        )
 
     def test_gallery_shows_approved_and_pending_drawings(self):
         response = self.client.get(reverse("gallery"))
@@ -250,18 +289,29 @@ class GalleryTests(TestCase):
         self.assertContains(response, self.young_work.title)
         self.assertContains(response, self.middle_pending_work.title)
         self.assertContains(response, self.teen_work.title)
+        self.assertContains(response, self.adult_work.title)
 
     def test_gallery_has_all_age_filters(self):
         response = self.client.get(reverse("gallery"))
         self.assertContains(response, "6–9 лет")
         self.assertContains(response, "10–13 лет")
         self.assertContains(response, "14–17 лет")
+        self.assertContains(response, "18–25 лет")
 
     def test_gallery_filters_by_middle_age_group(self):
         response = self.client.get(reverse("gallery"), {"category": "age-10-13"})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.middle_pending_work.title)
         self.assertNotContains(response, self.young_work.title)
+        self.assertNotContains(response, self.teen_work.title)
+        self.assertNotContains(response, self.adult_work.title)
+
+    def test_gallery_filters_by_18_25_group(self):
+        response = self.client.get(reverse("gallery"), {"category": "age-18-25"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.adult_work.title)
+        self.assertNotContains(response, self.young_work.title)
+        self.assertNotContains(response, self.middle_pending_work.title)
         self.assertNotContains(response, self.teen_work.title)
 
     def test_unapproved_drawing_vote_is_forbidden(self):

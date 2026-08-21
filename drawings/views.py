@@ -79,6 +79,14 @@ AGE_CATEGORY_FILTERS = (
         "theme": "Эко-город будущего",
         "description": "Эко-технологии, солнечные батареи, электротранспорт и переработка.",
     },
+    {
+        "slug": "age-18-25",
+        "name": "18–25 лет",
+        "min_age": 18,
+        "max_age": 25,
+        "theme": "Эко-инициативы сообщества",
+        "description": "Волонтерские проекты, экопросвещение и устойчивые решения для города.",
+    },
 )
 
 
@@ -222,7 +230,7 @@ def certificate(request, pk):
 
 @require_GET
 def draw(request):
-    categories = Category.objects.all()
+    categories = AGE_CATEGORY_FILTERS
     return render(request, "drawings/draw.html", {"categories": categories})
 
 
@@ -267,8 +275,8 @@ def submit_drawing(request):
     except (TypeError, ValueError):
         return JsonResponse({"success": False, "error": "Возраст указан неверно."}, status=400)
 
-    if age < 6 or age > 17:
-        return JsonResponse({"success": False, "error": "Возраст должен быть от 6 до 17 лет."}, status=400)
+    if age < 6 or age > 25:
+        return JsonResponse({"success": False, "error": "Возраст должен быть от 6 до 25 лет."}, status=400)
 
     if request.user.is_authenticated:
         email = request.user.email or email
@@ -465,4 +473,4 @@ def _get_category_for_age(age):
             return category["name"], category["slug"]
 
     # Safety fallback, though age is validated earlier.
-    return "14–17 лет", "age-14-17"
+    return "18–25 лет", "age-18-25"

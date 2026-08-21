@@ -354,6 +354,7 @@
         if (age >= 6 && age <= 9) return { name: "6–9 лет", slug: "age-6-9" };
         if (age >= 10 && age <= 13) return { name: "10–13 лет", slug: "age-10-13" };
         if (age >= 14 && age <= 17) return { name: "14–17 лет", slug: "age-14-17" };
+        if (age >= 18 && age <= 25) return { name: "18–25 лет", slug: "age-18-25" };
         return { name: "", slug: "" };
     }
 
