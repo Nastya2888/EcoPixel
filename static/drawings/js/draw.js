@@ -115,6 +115,8 @@
         cursorCanvas.width = size;
         cursorCanvas.height = size;
         ctx.imageSmoothingEnabled = false;
+        gridCtx.imageSmoothingEnabled = false;
+        cursorCtx.imageSmoothingEnabled = false;
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, size, size);
         drawGrid();
@@ -180,21 +182,14 @@
     function colorWithAlpha(hex, alphaHex) {
         const normalized = normalizeHex(hex);
         if (/^#[0-9A-F]{6}$/.test(normalized)) return `${normalized}${alphaHex}`;
-        return "rgba(46, 204, 113, 0.4)";
+        return "rgba(46, 204, 113, 0.8)";
     }
 
     function drawCursorHighlight(x, y) {
         cursorCtx.clearRect(0, 0, gridSize, gridSize);
-        cursorCtx.fillStyle = colorWithAlpha(selectedColor, "66");
+        cursorCtx.imageSmoothingEnabled = false;
+        cursorCtx.fillStyle = colorWithAlpha(selectedColor, "CC");
         cursorCtx.fillRect(x, y, 1, 1);
-
-        cursorCtx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-        cursorCtx.lineWidth = 0.08;
-        cursorCtx.strokeRect(x, y, 1, 1);
-
-        cursorCtx.strokeStyle = "rgba(0, 0, 0, 0.3)";
-        cursorCtx.lineWidth = 0.05;
-        cursorCtx.strokeRect(x - 0.02, y - 0.02, 1.04, 1.04);
     }
 
     function clearCursorHighlight() {
