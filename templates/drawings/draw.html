@@ -25,6 +25,26 @@
                         <span>Заливка</span>
                         <kbd>F</kbd>
                     </button>
+                    <button class="tool tool-btn" data-tool="line" title="Прямая линия (L)" type="button">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20L20 4"></path><circle cx="5" cy="19" r="1.7"></circle><circle cx="19" cy="5" r="1.7"></circle></svg>
+                        <span>Прямая</span>
+                        <kbd>L</kbd>
+                    </button>
+                    <button class="tool tool-btn" data-tool="rectangle" title="Прямоугольник (R)" type="button">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="16" height="12" rx="1.5"></rect></svg>
+                        <span>Прямоугольник</span>
+                        <kbd>R</kbd>
+                    </button>
+                    <button class="tool tool-btn" data-tool="circle" title="Круг (C)" type="button">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"></circle></svg>
+                        <span>Круг</span>
+                        <kbd>C</kbd>
+                    </button>
+                    <button class="tool tool-btn" data-tool="eyedropper" title="Пипетка (I)" type="button">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21a3 3 0 0 1 0-4.2l6.6-6.6a2 2 0 0 0 0-2.8l-1-1 2.8-2.8 1 1a2 2 0 0 0 2.8 0l1.8 1.8-2.8 2.8-1-1a2 2 0 0 0-2.8 0L8.8 18A3 3 0 0 1 7 21z"></path></svg>
+                        <span>Пипетка</span>
+                        <kbd>I</kbd>
+                    </button>
                     <div class="tool-divider"></div>
                     <button class="tool tool-btn" id="undo-button" data-action="undo" type="button" title="Отмена (Ctrl+Z)">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
@@ -35,6 +55,11 @@
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         <span>Очистить</span>
                     </button>
+                </div>
+                <div class="tool-thickness">
+                    <label class="tool-thickness-label" for="tool-size-range">Толщина</label>
+                    <input id="tool-size-range" type="range" min="1" max="12" value="1">
+                    <span class="tool-thickness-value" id="tool-size-value">1 px</span>
                 </div>
             </div>
 
@@ -60,6 +85,8 @@
                     <span class="meta-dot divider"></span>
                     <span class="meta-color" id="meta-color">Коралл</span>
                     <span class="color-dot" id="current-color-dot"></span>
+                    <span class="meta-dot divider"></span>
+                    <span class="meta-color" id="meta-thickness">1 px</span>
                 </div>
             </div>
         </main>
@@ -206,5 +233,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260821-07"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260821-08"></script>
 {% endblock %}

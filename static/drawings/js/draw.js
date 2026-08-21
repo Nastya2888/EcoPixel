@@ -17,6 +17,8 @@
     const customWidthInput = document.getElementById("custom-width-input");
     const customHeightInput = document.getElementById("custom-height-input");
     const applyCustomSizeBtn = document.getElementById("apply-custom-size");
+    const toolSizeRange = document.getElementById("tool-size-range");
+    const toolSizeValue = document.getElementById("tool-size-value");
     const undoButton = document.getElementById("undo-button");
     const clearButton = document.getElementById("clear-button");
     const downloadButton = document.getElementById("download-btn");
@@ -27,6 +29,7 @@
     const currentSizeLabel = document.getElementById("canvas-size-badge");
     const currentColorLabel = document.getElementById("meta-color");
     const currentColorDot = document.getElementById("current-color-dot");
+    const currentThicknessLabel = document.getElementById("meta-thickness");
 
     const modal = document.getElementById("submit-modal");
     const cancelSubmitBtn = document.getElementById("cancel-submit");
@@ -84,9 +87,12 @@
     const EXPORT_TARGET_SIZE = 1024;
     const MIN_CUSTOM_GRID = 8;
     const MAX_CUSTOM_GRID = 128;
+    const MIN_BRUSH_SIZE = 1;
+    const MAX_BRUSH_SIZE = 12;
 
     let selectedColor = PALETTE[4];
     let selectedTool = "pencil";
+    let brushSize = 1;
     let gridWidth = 32;
     let gridHeight = 32;
     let isDrawing = false;
@@ -96,6 +102,10 @@
     let customColors = [];
     let progressTimer = null;
     let lastSubmittedUrl = "";
+    let dragStartPoint = null;
+    let lastDrawPoint = null;
+    let shapePreviewImageData = null;
+    let lastHoverPoint = null;
 
     function normalizeHex(hex) {
         return String(hex || "").trim().toUpperCase();
@@ -105,6 +115,145 @@
         const parsed = Number.parseInt(String(value ?? ""), 10);
         if (!Number.isFinite(parsed)) return fallback;
         return Math.max(MIN_CUSTOM_GRID, Math.min(MAX_CUSTOM_GRID, parsed));
+    }
+
+    function clampBrushSize(value, fallback = 1) {
+        const parsed = Number.parseInt(String(value ?? ""), 10);
+        if (!Number.isFinite(parsed)) return fallback;
+        return Math.max(MIN_BRUSH_SIZE, Math.min(MAX_BRUSH_SIZE, parsed));
+    }
+
+    function syncBrushSize(value) {
+        brushSize = clampBrushSize(value, brushSize);
+        if (toolSizeRange) toolSizeRange.value = String(brushSize);
+        if (toolSizeValue) toolSizeValue.textContent = `${brushSize} px`;
+        if (currentThicknessLabel) currentThicknessLabel.textContent = `${brushSize} px`;
+    }
+
+    function isShapeTool(tool) {
+        return tool === "line" || tool === "rectangle" || tool === "circle";
+    }
+
+    function setCanvasCursorByTool(tool) {
+        if (tool === "eyedropper") {
+            canvas.style.cursor = "cell";
+            return;
+        }
+        canvas.style.cursor = "crosshair";
+    }
+
+    function forEachBrushPixel(centerX, centerY, size, callback) {
+        const normalizedSize = clampBrushSize(size, 1);
+        const half = Math.floor(normalizedSize / 2);
+        const startX = centerX - half;
+        const startY = centerY - half;
+        const endX = startX + normalizedSize - 1;
+        const endY = startY + normalizedSize - 1;
+        for (let py = startY; py <= endY; py += 1) {
+            if (py < 0 || py >= gridHeight) continue;
+            for (let px = startX; px <= endX; px += 1) {
+                if (px < 0 || px >= gridWidth) continue;
+                callback(px, py);
+            }
+        }
+    }
+
+    function paintBrushAt(x, y, color, size = brushSize) {
+        ctx.fillStyle = color;
+        forEachBrushPixel(x, y, size, (px, py) => {
+            ctx.fillRect(px, py, 1, 1);
+        });
+    }
+
+    function drawLineSegment(startX, startY, endX, endY, color, size = brushSize) {
+        let x0 = startX;
+        let y0 = startY;
+        const dx = Math.abs(endX - x0);
+        const dy = Math.abs(endY - y0);
+        const sx = x0 < endX ? 1 : -1;
+        const sy = y0 < endY ? 1 : -1;
+        let err = dx - dy;
+
+        while (true) {
+            paintBrushAt(x0, y0, color, size);
+            if (x0 === endX && y0 === endY) break;
+            const e2 = err * 2;
+            if (e2 > -dy) {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y0 += sy;
+            }
+        }
+    }
+
+    function drawRectangleOutline(start, end, color, size = brushSize) {
+        const minX = Math.min(start.x, end.x);
+        const maxX = Math.max(start.x, end.x);
+        const minY = Math.min(start.y, end.y);
+        const maxY = Math.max(start.y, end.y);
+        drawLineSegment(minX, minY, maxX, minY, color, size);
+        drawLineSegment(maxX, minY, maxX, maxY, color, size);
+        drawLineSegment(maxX, maxY, minX, maxY, color, size);
+        drawLineSegment(minX, maxY, minX, minY, color, size);
+    }
+
+    function drawCircleFromPoints(start, end, color, size = brushSize) {
+        const radius = Math.round(Math.hypot(end.x - start.x, end.y - start.y));
+        if (radius <= 0) {
+            paintBrushAt(start.x, start.y, color, size);
+            return;
+        }
+        const step = 1 / Math.max(radius * 10, 48);
+        for (let angle = 0; angle <= Math.PI * 2; angle += step) {
+            const x = Math.round(start.x + radius * Math.cos(angle));
+            const y = Math.round(start.y + radius * Math.sin(angle));
+            paintBrushAt(x, y, color, size);
+        }
+    }
+
+    function drawShapeByTool(tool, start, end, color, size = brushSize) {
+        if (tool === "line") {
+            drawLineSegment(start.x, start.y, end.x, end.y, color, size);
+            return;
+        }
+        if (tool === "rectangle") {
+            drawRectangleOutline(start, end, color, size);
+            return;
+        }
+        if (tool === "circle") {
+            drawCircleFromPoints(start, end, color, size);
+        }
+    }
+
+    function rgbaToHex(r, g, b) {
+        return `#${[r, g, b].map((value) => value.toString(16).padStart(2, "0")).join("").toUpperCase()}`;
+    }
+
+    function activateColor(colorHex) {
+        const normalized = normalizeHex(colorHex);
+        if (!/^#[0-9A-F]{6}$/.test(normalized)) return;
+
+        if (!PALETTE.includes(normalized) && !customColors.includes(normalized)) {
+            if (customColors.length >= MAX_CUSTOM_COLORS) customColors.shift();
+            customColors.push(normalized);
+            saveCustomColors();
+            renderPalette();
+        }
+
+        const swatchButton = paletteEl.querySelector(`[data-color="${normalized}"]`);
+        if (swatchButton) {
+            setActiveSwatch(swatchButton, normalized);
+            return;
+        }
+        selectedColor = normalized;
+        updateStatusBar();
+    }
+
+    function getActiveDrawColor() {
+        return selectedTool === "eraser" ? "#FFFFFF" : selectedColor;
     }
 
     function syncCustomInputs(width, height) {
@@ -226,14 +375,18 @@
     }
 
     function drawCursorHighlight(x, y) {
+        lastHoverPoint = { x, y };
         cursorCtx.clearRect(0, 0, gridWidth, gridHeight);
         cursorCtx.imageSmoothingEnabled = false;
-        cursorCtx.fillStyle = colorWithAlpha(selectedColor, "CC");
-        cursorCtx.fillRect(x, y, 1, 1);
+        cursorCtx.fillStyle = colorWithAlpha(getActiveDrawColor(), "CC");
+        forEachBrushPixel(x, y, brushSize, (px, py) => {
+            cursorCtx.fillRect(px, py, 1, 1);
+        });
     }
 
     function clearCursorHighlight() {
         cursorCtx.clearRect(0, 0, gridWidth, gridHeight);
+        lastHoverPoint = null;
     }
 
     function setPixel(x, y, color) {
@@ -295,6 +448,7 @@
         toolButtons.forEach((button) => {
             button.classList.toggle("active", button.dataset.tool === tool);
         });
+        setCanvasCursorByTool(tool);
         updateStatusBar();
     }
 
@@ -336,44 +490,112 @@
         if (currentSizeLabel) currentSizeLabel.textContent = `${gridWidth} × ${gridHeight}`;
         if (currentColorLabel) currentColorLabel.textContent = COLOR_NAMES[selectedColor] || selectedColor;
         if (currentColorDot) currentColorDot.style.backgroundColor = selectedColor;
+        if (currentThicknessLabel) currentThicknessLabel.textContent = `${brushSize} px`;
+        if (toolSizeValue) toolSizeValue.textContent = `${brushSize} px`;
     }
 
-    function applyToolAtPoint(event) {
-        const { x, y } = getCanvasPoint(event);
-        if (selectedTool === "pencil") {
-            setPixel(x, y, selectedColor);
-        } else if (selectedTool === "eraser") {
-            setPixel(x, y, "#FFFFFF");
-        }
+    function pickColorAtPoint(point) {
+        const pixel = ctx.getImageData(point.x, point.y, 1, 1).data;
+        activateColor(rgbaToHex(pixel[0], pixel[1], pixel[2]));
+    }
+
+    function beginShapePreview(startPoint) {
+        shapePreviewImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        dragStartPoint = startPoint;
+        lastDrawPoint = startPoint;
+    }
+
+    function renderShapePreview(endPoint) {
+        if (!shapePreviewImageData || !dragStartPoint) return;
+        ctx.putImageData(shapePreviewImageData, 0, 0);
+        drawShapeByTool(selectedTool, dragStartPoint, endPoint, getActiveDrawColor(), brushSize);
+        lastDrawPoint = endPoint;
         renderPreview();
         markChanged();
     }
 
+    function applyFreehandAtPoint(point) {
+        const color = getActiveDrawColor();
+        if (!lastDrawPoint) {
+            drawLineSegment(point.x, point.y, point.x, point.y, color, brushSize);
+            lastDrawPoint = point;
+            return;
+        }
+        drawLineSegment(lastDrawPoint.x, lastDrawPoint.y, point.x, point.y, color, brushSize);
+        lastDrawPoint = point;
+    }
+
     function startDraw(event) {
         event.preventDefault();
-        isDrawing = true;
-        saveState();
+        const point = getCanvasPoint(event);
+
+        if (selectedTool === "eyedropper") {
+            pickColorAtPoint(point);
+            drawCursorHighlight(point.x, point.y);
+            return;
+        }
+
         if (selectedTool === "fill") {
-            const { x, y } = getCanvasPoint(event);
-            floodFill(x, y, selectedColor);
+            saveState();
+            floodFill(point.x, point.y, selectedColor);
             saveState();
             renderPreview();
             markChanged();
-            isDrawing = false;
             return;
         }
-        applyToolAtPoint(event);
+
+        isDrawing = true;
+        saveState();
+
+        if (isShapeTool(selectedTool)) {
+            beginShapePreview(point);
+            renderShapePreview(point);
+            return;
+        }
+
+        dragStartPoint = point;
+        lastDrawPoint = point;
+        applyFreehandAtPoint(point);
+        renderPreview();
+        markChanged();
     }
 
     function moveDraw(event) {
-        if (!isDrawing || selectedTool === "fill") return;
+        if (!isDrawing || selectedTool === "fill" || selectedTool === "eyedropper") return;
         if (event.cancelable) event.preventDefault();
-        applyToolAtPoint(event);
+        const point = getCanvasPoint(event);
+
+        if (isShapeTool(selectedTool)) {
+            renderShapePreview(point);
+            return;
+        }
+
+        applyFreehandAtPoint(point);
+        renderPreview();
+        markChanged();
     }
 
-    function stopDraw() {
-        if (isDrawing && selectedTool !== "fill") saveState();
+    function finalizeShapeDraw(event) {
+        const endPoint = event ? getCanvasPoint(event) : (lastDrawPoint || dragStartPoint);
+        if (!shapePreviewImageData || !dragStartPoint || !endPoint) return;
+        ctx.putImageData(shapePreviewImageData, 0, 0);
+        drawShapeByTool(selectedTool, dragStartPoint, endPoint, getActiveDrawColor(), brushSize);
+        renderPreview();
+        markChanged();
+    }
+
+    function resetDragState() {
+        dragStartPoint = null;
+        lastDrawPoint = null;
+        shapePreviewImageData = null;
+    }
+
+    function stopDraw(event) {
+        if (!isDrawing) return;
+        if (isShapeTool(selectedTool)) finalizeShapeDraw(event);
+        saveState();
         isDrawing = false;
+        resetDragState();
     }
 
     function clearCanvas() {
@@ -381,6 +603,8 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         saveState();
         renderPreview();
+        clearCursorHighlight();
+        resetDragState();
         localStorage.removeItem(DRAFT_KEY);
         isDrawingChanged = false;
     }
@@ -509,6 +733,10 @@
         if (key === "b") setTool("pencil");
         if (key === "e") setTool("eraser");
         if (key === "f") setTool("fill");
+        if (key === "l") setTool("line");
+        if (key === "r") setTool("rectangle");
+        if (key === "c") setTool("circle");
+        if (key === "i") setTool("eyedropper");
     }
 
     toolButtons.forEach((button) => {
@@ -518,6 +746,10 @@
     undoButton?.addEventListener("click", restoreState);
     clearButton?.addEventListener("click", clearCanvas);
     addCustomColorBtn?.addEventListener("click", () => customColorPicker?.click());
+    toolSizeRange?.addEventListener("input", (event) => {
+        syncBrushSize(event.target.value);
+        if (lastHoverPoint) drawCursorHighlight(lastHoverPoint.x, lastHoverPoint.y);
+    });
     downloadButton?.addEventListener("click", async () => {
         const defaultLabel = "Скачать PNG";
         downloadButton.disabled = true;
@@ -721,6 +953,7 @@
     }
 
     renderPalette();
+    syncBrushSize(brushSize);
     initCanvas(32, 32);
     setPresetSelection(32, 32);
     updateCategoryPreview();

@@ -2898,6 +2898,33 @@ main.container:has(.draw-v4) {
     background: rgba(27, 67, 50, 0.12);
 }
 
+.draw-v4 .tool-thickness {
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+}
+
+.draw-v4 .tool-thickness-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6f8479;
+}
+
+.draw-v4 #tool-size-range {
+    width: 100%;
+    accent-color: #22c55e;
+    cursor: pointer;
+}
+
+.draw-v4 .tool-thickness-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #5f776c;
+    text-align: right;
+}
+
 .draw-v4 .tool kbd {
     background: rgba(27, 67, 50, 0.08);
     color: #557366;
