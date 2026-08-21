@@ -19,6 +19,7 @@
     const applyCustomSizeBtn = document.getElementById("apply-custom-size");
     const undoButton = document.getElementById("undo-button");
     const clearButton = document.getElementById("clear-button");
+    const downloadButton = document.getElementById("download-btn");
     const submitButton = document.getElementById("submit-btn");
     const drawPage = document.querySelector(".draw-page");
     const authRequiredMessage = document.getElementById("auth-required-message");
@@ -425,6 +426,13 @@
         });
     }
 
+    function buildDownloadFileName() {
+        const now = new Date();
+        const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+        const timePart = `${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
+        return `ecopixel-${gridWidth}x${gridHeight}-${datePart}-${timePart}.png`;
+    }
+
     function openModal() {
         const isAuthenticated = drawPage?.dataset.authenticated === "true";
         if (!isAuthenticated) {
@@ -510,6 +518,40 @@
     undoButton?.addEventListener("click", restoreState);
     clearButton?.addEventListener("click", clearCanvas);
     addCustomColorBtn?.addEventListener("click", () => customColorPicker?.click());
+    downloadButton?.addEventListener("click", async () => {
+        const defaultLabel = "Скачать PNG";
+        downloadButton.disabled = true;
+        downloadButton.textContent = "Готовим PNG...";
+
+        try {
+            const blob = await createUploadBlob();
+            if (!blob) {
+                submitResultEl.textContent = "Не удалось подготовить файл для скачивания.";
+                return;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = buildDownloadFileName();
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            URL.revokeObjectURL(url);
+
+            submitResultEl.textContent = "PNG скачан.";
+            window.setTimeout(() => {
+                if (submitResultEl.textContent === "PNG скачан.") {
+                    submitResultEl.textContent = "";
+                }
+            }, 2200);
+        } catch (error) {
+            submitResultEl.textContent = "Ошибка при скачивании PNG.";
+        } finally {
+            downloadButton.disabled = false;
+            downloadButton.textContent = defaultLabel;
+        }
+    });
 
     gridSizeInputs.forEach((input) => {
         input.addEventListener("change", () => {

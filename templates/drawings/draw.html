@@ -104,6 +104,8 @@
                 <p class="preview-caption">Так работа будет в галерее</p>
             </div>
 
+            <button class="btn-secondary download-btn" id="download-btn" type="button">Скачать PNG</button>
+
             {% if user.is_authenticated %}
                 <button class="submit-btn" id="submit-btn" type="button">
                     <span>Готово</span>
@@ -204,5 +206,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260821-06"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260821-07"></script>
 {% endblock %}

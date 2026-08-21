@@ -2757,6 +2757,29 @@ input:focus, select:focus, textarea:focus {
     transform: translateY(0);
 }
 
+.draw-v4 .download-btn {
+    width: 100%;
+    margin-top: 2px;
+    margin-bottom: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-color: rgba(27, 67, 50, 0.2);
+    color: #1B4332;
+    background: rgba(255, 255, 255, 0.86);
+}
+
+.draw-v4 .download-btn:hover {
+    background: #1B4332;
+    border-color: #1B4332;
+    color: #FFFFFF;
+}
+
+.draw-v4 .download-btn:disabled {
+    opacity: 0.72;
+    cursor: wait;
+}
+
 .draw-v4 .auth-submit-box p {
     margin: 0 0 10px;
 }
