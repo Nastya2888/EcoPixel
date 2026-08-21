@@ -3,66 +3,6 @@
 {% block title %}Главная | ЭкоПиксель{% endblock %}
 
 {% block content %}
-<style>
-    .categories-grid {
-        display: grid !important;
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        gap: 24px !important;
-        align-items: stretch !important;
-        max-width: none !important;
-        width: 100% !important;
-    }
-
-    .categories-grid .category-card {
-        width: 100% !important;
-        min-height: 255px !important;
-        height: 255px !important;
-        padding: 28px 24px 36px !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        justify-content: flex-start !important;
-    }
-
-    .categories-grid .category-icon {
-        width: 64px !important;
-        height: 64px !important;
-        min-width: 64px !important;
-        min-height: 64px !important;
-        margin-bottom: 20px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-
-    .categories-grid .category-icon svg,
-    .categories-grid .category-svg {
-        width: 56px !important;
-        height: 56px !important;
-        display: block !important;
-        flex-shrink: 0 !important;
-    }
-
-    .categories-grid .category-name {
-        margin: 0 0 10px !important;
-    }
-
-    .categories-grid .category-theme {
-        margin: 0 0 12px !important;
-    }
-
-    .categories-grid .category-desc {
-        margin: 0 !important;
-        line-height: 1.55 !important;
-        padding-bottom: 6px !important;
-    }
-
-    @media (max-width: 768px) {
-        .categories-grid {
-            grid-template-columns: 1fr !important;
-        }
-    }
-</style>
 <section class="hero card animate-on-scroll">
     <div>
         <h1>Создай пиксельное <span class="gradient-word">будущее</span> планеты</h1>
