@@ -77,6 +77,7 @@
     const DRAFT_KEY = "ecopixel_draft";
     const CUSTOM_COLORS_KEY = "ecopixel_custom_colors";
     const MAX_CUSTOM_COLORS = 3;
+    const EXPORT_TARGET_SIZE = 1024;
 
     let selectedColor = PALETTE[4];
     let selectedTool = "pencil";
@@ -364,6 +365,28 @@
         categoryAuto.classList.toggle("has-value", Boolean(category.name));
     }
 
+    function createUploadBlob() {
+        return new Promise((resolve) => {
+            const sourceSize = Math.max(canvas.width, canvas.height) || 1;
+            const scale = Math.max(1, Math.floor(EXPORT_TARGET_SIZE / sourceSize));
+            const exportSize = sourceSize * scale;
+            const exportCanvas = document.createElement("canvas");
+            exportCanvas.width = exportSize;
+            exportCanvas.height = exportSize;
+            const exportCtx = exportCanvas.getContext("2d");
+            if (!exportCtx) {
+                resolve(null);
+                return;
+            }
+
+            exportCtx.imageSmoothingEnabled = false;
+            exportCtx.fillStyle = "#FFFFFF";
+            exportCtx.fillRect(0, 0, exportSize, exportSize);
+            exportCtx.drawImage(canvas, 0, 0, exportSize, exportSize);
+            exportCanvas.toBlob(resolve, "image/png");
+        });
+    }
+
     function openModal() {
         const isAuthenticated = drawPage?.dataset.authenticated === "true";
         if (!isAuthenticated) {
@@ -485,60 +508,59 @@
 
     ageInput?.addEventListener("input", updateCategoryPreview);
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
         event.preventDefault();
         errorsEl.textContent = "";
         submitResultEl.textContent = "";
         startUploadProgress();
 
-        canvas.toBlob(async (blob) => {
-            if (!blob) {
+        const blob = await createUploadBlob();
+        if (!blob) {
+            finishUploadProgress(false);
+            errorsEl.textContent = "Не удалось подготовить изображение.";
+            return;
+        }
+
+        const formData = new FormData(form);
+        formData.set("image", new File([blob], "drawing.png", { type: "image/png" }));
+
+        try {
+            const response = await fetch(form.dataset.submitUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRFToken": form.querySelector("[name=csrfmiddlewaretoken]").value,
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                credentials: "same-origin",
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
                 finishUploadProgress(false);
-                errorsEl.textContent = "Не удалось подготовить изображение.";
+                errorsEl.textContent = data.error || "Не удалось отправить работу.";
+                if (response.status === 403) {
+                    errorsEl.innerHTML = `${data.error || "Требуется авторизация."} <a href="/login/?next=/draw/">Войти</a>`;
+                }
                 return;
             }
 
-            const formData = new FormData(form);
-            formData.set("image", new File([blob], "drawing.png", { type: "image/png" }));
-
-            try {
-                const response = await fetch(form.dataset.submitUrl, {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        "X-CSRFToken": form.querySelector("[name=csrfmiddlewaretoken]").value,
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
-                    credentials: "same-origin",
-                });
-
-                const data = await response.json();
-                if (!response.ok || !data.success) {
-                    finishUploadProgress(false);
-                    errorsEl.textContent = data.error || "Не удалось отправить работу.";
-                    if (response.status === 403) {
-                        errorsEl.innerHTML = `${data.error || "Требуется авторизация."} <a href="/login/?next=/draw/">Войти</a>`;
-                    }
-                    return;
-                }
-
-                finishUploadProgress(true);
-                localStorage.removeItem(DRAFT_KEY);
-                isDrawingChanged = false;
-                lastSubmittedUrl = `${window.location.origin}/work/${data.id}/`;
-                submitProgressText.textContent = "Готово!";
-                submitSuccess.classList.remove("hidden");
-                submitSuccessText.textContent = `Готово! Номер работы: #${data.id}`;
-                vkShareLink.href = `https://vk.com/share.php?url=${encodeURIComponent(lastSubmittedUrl)}`;
-                tgShareLink.href = `https://t.me/share/url?url=${encodeURIComponent(lastSubmittedUrl)}&text=${encodeURIComponent("Мой рисунок на конкурсе ЭкоПиксель!")}`;
-                submitResultEl.innerHTML = `Рисунок принят! Номер работы: #${data.id}. <a href="/work/${data.id}/">Открыть работу</a>`;
-                form.reset();
-                updateCategoryPreview();
-            } catch (error) {
-                finishUploadProgress(false);
-                errorsEl.textContent = "Ошибка сети при отправке формы.";
-            }
-        }, "image/png");
+            finishUploadProgress(true);
+            localStorage.removeItem(DRAFT_KEY);
+            isDrawingChanged = false;
+            lastSubmittedUrl = `${window.location.origin}/work/${data.id}/`;
+            submitProgressText.textContent = "Готово!";
+            submitSuccess.classList.remove("hidden");
+            submitSuccessText.textContent = `Готово! Номер работы: #${data.id}`;
+            vkShareLink.href = `https://vk.com/share.php?url=${encodeURIComponent(lastSubmittedUrl)}`;
+            tgShareLink.href = `https://t.me/share/url?url=${encodeURIComponent(lastSubmittedUrl)}&text=${encodeURIComponent("Мой рисунок на конкурсе ЭкоПиксель!")}`;
+            submitResultEl.innerHTML = `Рисунок принят! Номер работы: #${data.id}. <a href="/work/${data.id}/">Открыть работу</a>`;
+            form.reset();
+            updateCategoryPreview();
+        } catch (error) {
+            finishUploadProgress(false);
+            errorsEl.textContent = "Ошибка сети при отправке формы.";
+        }
     });
 
     copyLinkBtn?.addEventListener("click", async () => {
