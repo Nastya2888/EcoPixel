@@ -147,9 +147,6 @@
                 <p class="category-theme">Тема: {{ category.theme }}</p>
                 <p class="category-desc">Возраст: {{ category.min_age }}–{{ category.max_age }} лет</p>
                 <p class="category-desc">{{ category.description }}</p>
-                {% if category.drawing_count > 0 %}
-                    <span class="category-badge">{{ category.drawing_count }}</span>
-                {% endif %}
             </article>
         {% endfor %}
     </div>
