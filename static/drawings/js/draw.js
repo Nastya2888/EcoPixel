@@ -20,6 +20,7 @@
     const toolSizeRange = document.getElementById("tool-size-range");
     const toolSizeValue = document.getElementById("tool-size-value");
     const undoButton = document.getElementById("undo-button");
+    const redoButton = document.getElementById("redo-button");
     const clearButton = document.getElementById("clear-button");
     const downloadButton = document.getElementById("download-btn");
     const submitButton = document.getElementById("submit-btn");
@@ -98,6 +99,7 @@
     let isDrawing = false;
     let isDrawingChanged = false;
     let history = [];
+    let redoHistory = [];
     let activeSwatch = null;
     let customColors = [];
     let progressTimer = null;
@@ -311,22 +313,41 @@
         syncCanvasDisplaySize();
         syncCustomInputs(gridWidth, gridHeight);
         history = [];
-        saveState();
+        redoHistory = [];
+        saveState(false);
         renderPreview();
         updateStatusBar();
         isDrawingChanged = false;
     }
 
-    function saveState() {
+    function saveState(clearRedo = true) {
         history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
         if (history.length > HISTORY_LIMIT) history.shift();
+        if (clearRedo) {
+            redoHistory = [];
+        }
     }
 
     function restoreState() {
         if (history.length <= 1) return;
-        history.pop();
+        const currentState = history.pop();
+        if (currentState) {
+            redoHistory.push(currentState);
+            if (redoHistory.length > HISTORY_LIMIT) redoHistory.shift();
+        }
         const prev = history[history.length - 1];
         ctx.putImageData(prev, 0, 0);
+        renderPreview();
+        markChanged();
+    }
+
+    function redoState() {
+        if (!redoHistory.length) return;
+        const next = redoHistory.pop();
+        if (!next) return;
+        ctx.putImageData(next, 0, 0);
+        history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        if (history.length > HISTORY_LIMIT) history.shift();
         renderPreview();
         markChanged();
     }
@@ -723,13 +744,22 @@
     }
 
     function handleKeyboard(event) {
-        if (event.ctrlKey && event.key.toLowerCase() === "z") {
+        const key = event.key.toLowerCase();
+        const withCtrl = event.ctrlKey || event.metaKey;
+
+        if (withCtrl && (key === "y" || (key === "z" && event.shiftKey))) {
+            event.preventDefault();
+            redoState();
+            return;
+        }
+
+        if (withCtrl && key === "z" && !event.shiftKey) {
             event.preventDefault();
             restoreState();
             return;
         }
+
         if (event.target && ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
-        const key = event.key.toLowerCase();
         if (key === "b") setTool("pencil");
         if (key === "e") setTool("eraser");
         if (key === "f") setTool("fill");
@@ -744,6 +774,7 @@
     });
 
     undoButton?.addEventListener("click", restoreState);
+    redoButton?.addEventListener("click", redoState);
     clearButton?.addEventListener("click", clearCanvas);
     addCustomColorBtn?.addEventListener("click", () => customColorPicker?.click());
     toolSizeRange?.addEventListener("input", (event) => {
