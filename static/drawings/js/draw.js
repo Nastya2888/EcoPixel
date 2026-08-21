@@ -747,7 +747,7 @@
         const key = event.key.toLowerCase();
         const withCtrl = event.ctrlKey || event.metaKey;
 
-        if (withCtrl && (key === "y" || (key === "z" && event.shiftKey))) {
+        if (withCtrl && key === "z" && event.shiftKey) {
             event.preventDefault();
             redoState();
             return;
