@@ -14,6 +14,9 @@
     const addCustomColorBtn = document.getElementById("addCustomColor");
     const canvasContainer = document.querySelector(".canvas-container");
     const gridSizeInputs = document.querySelectorAll("input[name='grid-size']");
+    const customWidthInput = document.getElementById("custom-width-input");
+    const customHeightInput = document.getElementById("custom-height-input");
+    const applyCustomSizeBtn = document.getElementById("apply-custom-size");
     const undoButton = document.getElementById("undo-button");
     const clearButton = document.getElementById("clear-button");
     const submitButton = document.getElementById("submit-btn");
@@ -78,10 +81,13 @@
     const CUSTOM_COLORS_KEY = "ecopixel_custom_colors";
     const MAX_CUSTOM_COLORS = 3;
     const EXPORT_TARGET_SIZE = 1024;
+    const MIN_CUSTOM_GRID = 8;
+    const MAX_CUSTOM_GRID = 128;
 
     let selectedColor = PALETTE[4];
     let selectedTool = "pencil";
-    let gridSize = 32;
+    let gridWidth = 32;
+    let gridHeight = 32;
     let isDrawing = false;
     let isDrawingChanged = false;
     let history = [];
@@ -94,34 +100,66 @@
         return String(hex || "").trim().toUpperCase();
     }
 
-    function syncCanvasDisplaySize() {
-        if (!canvasContainer) return;
-        const displaySize = Math.floor(canvasContainer.getBoundingClientRect().width);
-        if (!displaySize) return;
-        canvas.style.width = `${displaySize}px`;
-        canvas.style.height = `${displaySize}px`;
-        gridCanvas.style.width = `${displaySize}px`;
-        gridCanvas.style.height = `${displaySize}px`;
-        cursorCanvas.style.width = `${displaySize}px`;
-        cursorCanvas.style.height = `${displaySize}px`;
+    function clampGridValue(value, fallback) {
+        const parsed = Number.parseInt(String(value ?? ""), 10);
+        if (!Number.isFinite(parsed)) return fallback;
+        return Math.max(MIN_CUSTOM_GRID, Math.min(MAX_CUSTOM_GRID, parsed));
     }
 
-    function initCanvas(size) {
-        gridSize = size;
-        canvas.width = size;
-        canvas.height = size;
-        gridCanvas.width = size;
-        gridCanvas.height = size;
-        cursorCanvas.width = size;
-        cursorCanvas.height = size;
+    function syncCustomInputs(width, height) {
+        if (customWidthInput) customWidthInput.value = String(width);
+        if (customHeightInput) customHeightInput.value = String(height);
+    }
+
+    function confirmResizeIfNeeded() {
+        if (!isDrawingChanged) return true;
+        return window.confirm("Текущий рисунок будет очищен. Продолжить?");
+    }
+
+    function setPresetSelection(width, height) {
+        const matched = Array.from(gridSizeInputs).find(
+            (el) => Number(el.value) === width && width === height
+        );
+        gridSizeInputs.forEach((el) => {
+            el.checked = Boolean(matched && el === matched);
+        });
+    }
+
+    function syncCanvasDisplaySize() {
+        if (!canvasContainer) return;
+        const rect = canvasContainer.getBoundingClientRect();
+        const displayWidth = Math.floor(rect.width);
+        const displayHeight = Math.floor(rect.height);
+        if (!displayWidth || !displayHeight) return;
+        canvas.style.width = `${displayWidth}px`;
+        canvas.style.height = `${displayHeight}px`;
+        gridCanvas.style.width = `${displayWidth}px`;
+        gridCanvas.style.height = `${displayHeight}px`;
+        cursorCanvas.style.width = `${displayWidth}px`;
+        cursorCanvas.style.height = `${displayHeight}px`;
+    }
+
+    function initCanvas(nextWidth, nextHeight = nextWidth) {
+        gridWidth = clampGridValue(nextWidth, 32);
+        gridHeight = clampGridValue(nextHeight, 32);
+        canvas.width = gridWidth;
+        canvas.height = gridHeight;
+        gridCanvas.width = gridWidth;
+        gridCanvas.height = gridHeight;
+        cursorCanvas.width = gridWidth;
+        cursorCanvas.height = gridHeight;
+        if (canvasContainer) {
+            canvasContainer.style.aspectRatio = `${gridWidth} / ${gridHeight}`;
+        }
         ctx.imageSmoothingEnabled = false;
         gridCtx.imageSmoothingEnabled = false;
         cursorCtx.imageSmoothingEnabled = false;
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, size, size);
+        ctx.fillRect(0, 0, gridWidth, gridHeight);
         drawGrid();
         clearCursorHighlight();
         syncCanvasDisplaySize();
+        syncCustomInputs(gridWidth, gridHeight);
         history = [];
         saveState();
         renderPreview();
@@ -144,10 +182,9 @@
     }
 
     function drawGrid() {
-        const size = gridSize;
-        gridCanvas.width = size;
-        gridCanvas.height = size;
-        gridCtx.clearRect(0, 0, size, size);
+        gridCanvas.width = gridWidth;
+        gridCanvas.height = gridHeight;
+        gridCtx.clearRect(0, 0, gridWidth, gridHeight);
     }
 
     function renderPreview() {
@@ -165,17 +202,19 @@
     function getCanvasPoint(event) {
         const { x, y } = getRawGridCoords(event);
         return {
-            x: Math.max(0, Math.min(gridSize - 1, x)),
-            y: Math.max(0, Math.min(gridSize - 1, y)),
+            x: Math.max(0, Math.min(gridWidth - 1, x)),
+            y: Math.max(0, Math.min(gridHeight - 1, y)),
         };
     }
 
     function getRawGridCoords(event) {
         const p = getPointer(event);
         const rect = canvas.getBoundingClientRect();
-        const scale = gridSize / rect.width;
-        const x = Math.floor((p.clientX - rect.left) * scale);
-        const y = Math.floor((p.clientY - rect.top) * scale);
+        if (!rect.width || !rect.height) return { x: -1, y: -1 };
+        const scaleX = gridWidth / rect.width;
+        const scaleY = gridHeight / rect.height;
+        const x = Math.floor((p.clientX - rect.left) * scaleX);
+        const y = Math.floor((p.clientY - rect.top) * scaleY);
         return { x, y };
     }
 
@@ -186,14 +225,14 @@
     }
 
     function drawCursorHighlight(x, y) {
-        cursorCtx.clearRect(0, 0, gridSize, gridSize);
+        cursorCtx.clearRect(0, 0, gridWidth, gridHeight);
         cursorCtx.imageSmoothingEnabled = false;
         cursorCtx.fillStyle = colorWithAlpha(selectedColor, "CC");
         cursorCtx.fillRect(x, y, 1, 1);
     }
 
     function clearCursorHighlight() {
-        cursorCtx.clearRect(0, 0, gridSize, gridSize);
+        cursorCtx.clearRect(0, 0, gridWidth, gridHeight);
     }
 
     function setPixel(x, y, color) {
@@ -293,7 +332,7 @@
     }
 
     function updateStatusBar() {
-        if (currentSizeLabel) currentSizeLabel.textContent = `${gridSize} × ${gridSize}`;
+        if (currentSizeLabel) currentSizeLabel.textContent = `${gridWidth} × ${gridHeight}`;
         if (currentColorLabel) currentColorLabel.textContent = COLOR_NAMES[selectedColor] || selectedColor;
         if (currentColorDot) currentColorDot.style.backgroundColor = selectedColor;
     }
@@ -363,12 +402,15 @@
 
     function createUploadBlob() {
         return new Promise((resolve) => {
-            const sourceSize = Math.max(canvas.width, canvas.height) || 1;
-            const scale = Math.max(1, Math.floor(EXPORT_TARGET_SIZE / sourceSize));
-            const exportSize = sourceSize * scale;
+            const sourceWidth = Math.max(canvas.width, 1);
+            const sourceHeight = Math.max(canvas.height, 1);
+            const sourceMax = Math.max(sourceWidth, sourceHeight);
+            const scale = Math.max(1, Math.floor(EXPORT_TARGET_SIZE / sourceMax));
+            const exportWidth = sourceWidth * scale;
+            const exportHeight = sourceHeight * scale;
             const exportCanvas = document.createElement("canvas");
-            exportCanvas.width = exportSize;
-            exportCanvas.height = exportSize;
+            exportCanvas.width = exportWidth;
+            exportCanvas.height = exportHeight;
             const exportCtx = exportCanvas.getContext("2d");
             if (!exportCtx) {
                 resolve(null);
@@ -377,8 +419,8 @@
 
             exportCtx.imageSmoothingEnabled = false;
             exportCtx.fillStyle = "#FFFFFF";
-            exportCtx.fillRect(0, 0, exportSize, exportSize);
-            exportCtx.drawImage(canvas, 0, 0, exportSize, exportSize);
+            exportCtx.fillRect(0, 0, exportWidth, exportHeight);
+            exportCtx.drawImage(canvas, 0, 0, exportWidth, exportHeight);
             exportCanvas.toBlob(resolve, "image/png");
         });
     }
@@ -472,15 +514,31 @@
     gridSizeInputs.forEach((input) => {
         input.addEventListener("change", () => {
             if (!input.checked) return;
-            if (isDrawingChanged) {
-                const confirmed = window.confirm("Текущий рисунок будет очищен. Продолжить?");
-                if (!confirmed) {
-                    const prev = Array.from(gridSizeInputs).find((el) => Number(el.value) === gridSize);
-                    if (prev) prev.checked = true;
-                    return;
-                }
+            if (!confirmResizeIfNeeded()) {
+                setPresetSelection(gridWidth, gridHeight);
+                return;
             }
-            initCanvas(Number(input.value));
+            const value = clampGridValue(input.value, gridWidth);
+            initCanvas(value, value);
+            setPresetSelection(value, value);
+        });
+    });
+
+    applyCustomSizeBtn?.addEventListener("click", () => {
+        const nextWidth = clampGridValue(customWidthInput?.value, gridWidth);
+        const nextHeight = clampGridValue(customHeightInput?.value, gridHeight);
+        syncCustomInputs(nextWidth, nextHeight);
+        if (nextWidth === gridWidth && nextHeight === gridHeight) return;
+        if (!confirmResizeIfNeeded()) return;
+        initCanvas(nextWidth, nextHeight);
+        setPresetSelection(nextWidth, nextHeight);
+    });
+
+    [customWidthInput, customHeightInput].forEach((input) => {
+        input?.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            applyCustomSizeBtn?.click();
         });
     });
 
@@ -575,7 +633,7 @@
     canvas.addEventListener("mousedown", startDraw);
     canvas.addEventListener("mousemove", (event) => {
         const { x, y } = getRawGridCoords(event);
-        if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+        if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
             drawCursorHighlight(x, y);
         } else {
             clearCursorHighlight();
@@ -621,7 +679,8 @@
     }
 
     renderPalette();
-    initCanvas(32);
+    initCanvas(32, 32);
+    setPresetSelection(32, 32);
     updateCategoryPreview();
     restoreDraftIfExists();
     setTool("pencil");

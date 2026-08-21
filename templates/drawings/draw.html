@@ -87,6 +87,15 @@
                         <span>Для опытных</span>
                     </div>
                 </label>
+                <div class="size-custom">
+                    <div class="size-custom-title">Свой размер</div>
+                    <div class="size-custom-inputs">
+                        <input id="custom-width-input" type="number" min="8" max="128" value="32" aria-label="Ширина холста">
+                        <span>×</span>
+                        <input id="custom-height-input" type="number" min="8" max="128" value="32" aria-label="Высота холста">
+                    </div>
+                    <button id="apply-custom-size" class="btn-secondary" type="button">Применить размер</button>
+                </div>
             </div>
 
             <div class="panel preview-panel">
@@ -195,5 +204,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260821-05"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260821-06"></script>
 {% endblock %}
