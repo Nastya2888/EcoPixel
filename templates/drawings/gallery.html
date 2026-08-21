@@ -37,10 +37,10 @@
     </div>
 
     {% if selected_age_category %}
-        <p>Текущая категория: {{ selected_age_category.name }}</p>
+        <p class="gallery-current-category">Текущая категория: {{ selected_age_category.name }}</p>
     {% endif %}
 
-    <div class="gallery-grid">
+    <div class="gallery-grid gallery-grid-main">
         {% for work in page_obj %}
             <article class="work-card card animate-on-scroll">
                 <div class="work-image-wrap">

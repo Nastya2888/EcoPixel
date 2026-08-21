@@ -730,6 +730,10 @@ html[data-theme="dark"] .floating-card {
     gap: 24px;
 }
 
+.gallery-grid-main {
+    margin-top: 28px;
+}
+
 .work-card {
     overflow: hidden;
     transition: var(--transition);
@@ -851,6 +855,16 @@ html[data-theme="dark"] .floating-card {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
+}
+
+.filter-row + .filter-row {
+    margin-top: 10px;
+}
+
+.gallery-current-category {
+    margin: 12px 0 0;
+    font-size: 14px;
+    color: var(--color-text-muted);
 }
 
 .filter-btn {
