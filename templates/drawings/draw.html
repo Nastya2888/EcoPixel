@@ -45,6 +45,11 @@
                         <span>Пипетка</span>
                         <kbd>I</kbd>
                     </button>
+                    <button class="tool tool-btn" data-tool="hand" title="Рука (H)" type="button">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 11V5a1 1 0 0 1 2 0v5"></path><path d="M10 11V4a1 1 0 0 1 2 0v7"></path><path d="M13 11V6a1 1 0 0 1 2 0v6"></path><path d="M16 12V8a1 1 0 0 1 2 0v7a5 5 0 0 1-5 5h-1a7 7 0 0 1-7-7v-2a2 2 0 0 1 4 0v2"></path></svg>
+                        <span>Рука</span>
+                        <kbd>H</kbd>
+                    </button>
                     <div class="tool-divider"></div>
                     <button class="tool tool-btn" id="undo-button" data-action="undo" type="button" title="Отмена (Ctrl+Z)">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
@@ -248,5 +253,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260822-01"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260822-02"></script>
 {% endblock %}

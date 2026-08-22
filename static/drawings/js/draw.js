@@ -115,6 +115,7 @@
     let lastDrawPoint = null;
     let shapePreviewImageData = null;
     let lastHoverPoint = null;
+    let handDragState = null;
 
     function normalizeHex(hex) {
         return String(hex || "").trim().toUpperCase();
@@ -144,6 +145,10 @@
     }
 
     function setCanvasCursorByTool(tool) {
+        if (tool === "hand") {
+            canvas.style.cursor = isDrawing ? "grabbing" : "grab";
+            return;
+        }
         if (tool === "eyedropper") {
             canvas.style.cursor = "cell";
             return;
@@ -321,7 +326,160 @@
         layerIdCounter = Math.max(maxLayerId + 1, layers.length + 1);
         renderLayersPanel();
         renderComposite();
+        handDragState = null;
+        isDrawing = false;
+        setCanvasCursorByTool(selectedTool);
         updateStatusBar();
+    }
+
+    function alphaAt(data, width, x, y) {
+        return data[(y * width + x) * 4 + 3];
+    }
+
+    function captureConnectedRegion(imageData, startX, startY) {
+        const width = imageData.width;
+        const height = imageData.height;
+        const data = imageData.data;
+        if (startX < 0 || startY < 0 || startX >= width || startY >= height) return null;
+        if (alphaAt(data, width, startX, startY) === 0) return null;
+
+        const visited = new Uint8Array(width * height);
+        const mask = new Uint8Array(width * height);
+        const pixels = [];
+        const stack = [{ x: startX, y: startY }];
+        let minX = startX;
+        let maxX = startX;
+        let minY = startY;
+        let maxY = startY;
+
+        while (stack.length) {
+            const point = stack.pop();
+            const idx = point.y * width + point.x;
+            if (visited[idx]) continue;
+            visited[idx] = 1;
+            if (alphaAt(data, width, point.x, point.y) === 0) continue;
+
+            mask[idx] = 1;
+            const offset = idx * 4;
+            pixels.push({
+                x: point.x,
+                y: point.y,
+                r: data[offset],
+                g: data[offset + 1],
+                b: data[offset + 2],
+                a: data[offset + 3],
+            });
+            minX = Math.min(minX, point.x);
+            maxX = Math.max(maxX, point.x);
+            minY = Math.min(minY, point.y);
+            maxY = Math.max(maxY, point.y);
+
+            if (point.x > 0) stack.push({ x: point.x - 1, y: point.y });
+            if (point.x < width - 1) stack.push({ x: point.x + 1, y: point.y });
+            if (point.y > 0) stack.push({ x: point.x, y: point.y - 1 });
+            if (point.y < height - 1) stack.push({ x: point.x, y: point.y + 1 });
+        }
+
+        if (!pixels.length) return null;
+        return {
+            mask,
+            pixels,
+            minX,
+            maxX,
+            minY,
+            maxY,
+        };
+    }
+
+    function buildMovedRegionPreview(state, dx, dy) {
+        const source = state.baseImageData.data;
+        const previewData = new Uint8ClampedArray(source);
+        for (let i = 0; i < state.mask.length; i += 1) {
+            if (!state.mask[i]) continue;
+            const offset = i * 4;
+            previewData[offset] = 0;
+            previewData[offset + 1] = 0;
+            previewData[offset + 2] = 0;
+            previewData[offset + 3] = 0;
+        }
+        state.pixels.forEach((pixel) => {
+            const targetX = pixel.x + dx;
+            const targetY = pixel.y + dy;
+            if (targetX < 0 || targetY < 0 || targetX >= gridWidth || targetY >= gridHeight) return;
+            const targetOffset = (targetY * gridWidth + targetX) * 4;
+            previewData[targetOffset] = pixel.r;
+            previewData[targetOffset + 1] = pixel.g;
+            previewData[targetOffset + 2] = pixel.b;
+            previewData[targetOffset + 3] = pixel.a;
+        });
+        return new ImageData(previewData, gridWidth, gridHeight);
+    }
+
+    function clampHandDelta(state, rawDx, rawDy) {
+        const minDx = -state.minX;
+        const maxDx = (gridWidth - 1) - state.maxX;
+        const minDy = -state.minY;
+        const maxDy = (gridHeight - 1) - state.maxY;
+        return {
+            dx: Math.max(minDx, Math.min(maxDx, rawDx)),
+            dy: Math.max(minDy, Math.min(maxDy, rawDy)),
+        };
+    }
+
+    function renderHandDragPreview() {
+        if (!handDragState) return;
+        const layerCtx = getActiveLayerCtx();
+        if (!layerCtx) return;
+        const preview = buildMovedRegionPreview(handDragState, handDragState.dx, handDragState.dy);
+        layerCtx.putImageData(preview, 0, 0);
+        renderComposite();
+    }
+
+    function beginHandDrag(startPoint) {
+        const layerCtx = getActiveLayerCtx();
+        if (!layerCtx) return false;
+        submitResultEl.textContent = "";
+        const baseImageData = layerCtx.getImageData(0, 0, gridWidth, gridHeight);
+        const region = captureConnectedRegion(baseImageData, startPoint.x, startPoint.y);
+        if (!region) {
+            submitResultEl.textContent = "Выбери нарисованный объект для перемещения.";
+            return false;
+        }
+        saveState();
+        handDragState = {
+            ...region,
+            baseImageData,
+            startPoint,
+            dx: 0,
+            dy: 0,
+        };
+        canvas.style.cursor = "grabbing";
+        return true;
+    }
+
+    function updateHandDrag(point) {
+        if (!handDragState) return;
+        const rawDx = point.x - handDragState.startPoint.x;
+        const rawDy = point.y - handDragState.startPoint.y;
+        const clamped = clampHandDelta(handDragState, rawDx, rawDy);
+        handDragState.dx = clamped.dx;
+        handDragState.dy = clamped.dy;
+        renderHandDragPreview();
+    }
+
+    function finalizeHandDrag() {
+        if (!handDragState) return;
+        const moved = handDragState.dx !== 0 || handDragState.dy !== 0;
+        const layerCtx = getActiveLayerCtx();
+        if (layerCtx && !moved) {
+            layerCtx.putImageData(handDragState.baseImageData, 0, 0);
+            renderComposite();
+        } else if (moved) {
+            saveState();
+            markChanged();
+        }
+        handDragState = null;
+        canvas.style.cursor = "grab";
     }
 
     function forEachBrushPixel(centerX, centerY, size, callback) {
@@ -515,6 +673,7 @@
         redoHistory = [];
         saveState(false);
         renderComposite();
+        setCanvasCursorByTool(selectedTool);
         updateStatusBar();
         isDrawingChanged = false;
     }
@@ -593,6 +752,10 @@
     }
 
     function drawCursorHighlight(x, y) {
+        if (selectedTool === "hand") {
+            clearCursorHighlight();
+            return;
+        }
         lastHoverPoint = { x, y };
         cursorCtx.clearRect(0, 0, gridWidth, gridHeight);
         cursorCtx.imageSmoothingEnabled = false;
@@ -763,6 +926,11 @@
             return;
         }
 
+        if (selectedTool === "hand") {
+            isDrawing = beginHandDrag(point);
+            return;
+        }
+
         if (selectedTool === "fill") {
             saveState();
             floodFill(point.x, point.y, selectedColor);
@@ -793,6 +961,11 @@
         if (event.cancelable) event.preventDefault();
         const point = getCanvasPoint(event);
 
+        if (selectedTool === "hand") {
+            updateHandDrag(point);
+            return;
+        }
+
         if (isShapeTool(selectedTool)) {
             renderShapePreview(point);
             return;
@@ -817,10 +990,17 @@
         dragStartPoint = null;
         lastDrawPoint = null;
         shapePreviewImageData = null;
+        handDragState = null;
     }
 
     function stopDraw(event) {
         if (!isDrawing) return;
+        if (selectedTool === "hand") {
+            finalizeHandDrag();
+            isDrawing = false;
+            resetDragState();
+            return;
+        }
         if (isShapeTool(selectedTool)) finalizeShapeDraw(event);
         saveState();
         isDrawing = false;
@@ -980,6 +1160,7 @@
         if (key === "r") setTool("rectangle");
         if (key === "c") setTool("circle");
         if (key === "i") setTool("eyedropper");
+        if (key === "h") setTool("hand");
     }
 
     toolButtons.forEach((button) => {
@@ -1151,6 +1332,10 @@
 
     canvas.addEventListener("mousedown", startDraw);
     canvas.addEventListener("mousemove", (event) => {
+        if (selectedTool === "hand") {
+            clearCursorHighlight();
+            return;
+        }
         const { x, y } = getRawGridCoords(event);
         if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight) {
             drawCursorHighlight(x, y);
