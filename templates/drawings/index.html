@@ -164,8 +164,13 @@
 </section>
 <script>
 (() => {
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 14);
+    const now = new Date();
+    let targetYear = now.getFullYear();
+    let endDate = new Date(targetYear, 8, 15, 23, 59, 59); // 15 September, local time.
+    if (now.getTime() > endDate.getTime()) {
+        targetYear += 1;
+        endDate = new Date(targetYear, 8, 15, 23, 59, 59);
+    }
     const daysEl = document.getElementById("cd-days");
     const hoursEl = document.getElementById("cd-hours");
     const minutesEl = document.getElementById("cd-minutes");
