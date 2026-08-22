@@ -29,7 +29,9 @@
             <div class="work-card__body">
                 <h3 class="work-card__title"><a href="{% url 'work_detail' work.id %}">{{ work.title }}</a></h3>
                 <p class="work-card__meta">Голосов: {{ work.votes }}</p>
-                <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
+                {% if request.user.is_staff %}
+                    <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
+                {% endif %}
                 {% if work.id in missing_image_ids %}
                     <form
                         class="restore-image-form"

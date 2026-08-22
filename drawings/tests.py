@@ -148,6 +148,54 @@ class AuthFlowTests(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
+    def test_profile_hides_status_for_regular_user(self):
+        drawing = Drawing.objects.create(
+            user=self.user,
+            title="Профиль без статуса",
+            author="Аня",
+            age=9,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("profile-ok.png", self.png, content_type="image/png"),
+            is_approved=True,
+            votes=0,
+        )
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.get(reverse("profile"))
+        self.assertContains(response, drawing.title)
+        self.assertNotContains(response, "Статус:")
+
+    def test_profile_hides_pending_drawings_for_regular_user(self):
+        approved = Drawing.objects.create(
+            user=self.user,
+            title="Опубликованная",
+            author="Аня",
+            age=9,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("profile-approved.png", self.png, content_type="image/png"),
+            is_approved=True,
+            votes=1,
+        )
+        pending = Drawing.objects.create(
+            user=self.user,
+            title="На модерации",
+            author="Аня",
+            age=9,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("profile-pending.png", self.png, content_type="image/png"),
+            is_approved=False,
+            votes=0,
+        )
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.get(reverse("profile"))
+        self.assertContains(response, approved.title)
+        self.assertNotContains(response, pending.title)
+
 
 class HomePageTests(TestCase):
     def test_homepage_always_shows_all_age_topic_cards_without_gallery_links(self):
@@ -222,6 +270,12 @@ class GalleryTests(TestCase):
             email="gallery@example.com",
             password=self.password,
         )
+        self.admin_user = User.objects.create_user(
+            username="admin@example.com",
+            email="admin@example.com",
+            password=self.password,
+            is_staff=True,
+        )
         self.category_6_9 = Category.objects.create(name="6–9 лет", slug="age-6-9", theme="6–9 лет")
         self.category_10_13 = Category.objects.create(name="10–13 лет", slug="age-10-13", theme="10–13 лет")
         self.category_14_17 = Category.objects.create(name="14–17 лет", slug="age-14-17", theme="14–17 лет")
@@ -283,13 +337,14 @@ class GalleryTests(TestCase):
             votes=3,
         )
 
-    def test_gallery_shows_approved_and_pending_drawings(self):
+    def test_gallery_hides_pending_drawings_for_regular_users(self):
         response = self.client.get(reverse("gallery"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.young_work.title)
-        self.assertContains(response, self.middle_pending_work.title)
+        self.assertNotContains(response, self.middle_pending_work.title)
         self.assertContains(response, self.teen_work.title)
         self.assertContains(response, self.adult_work.title)
+        self.assertNotContains(response, "Статус:")
 
     def test_gallery_has_all_age_filters(self):
         response = self.client.get(reverse("gallery"))
@@ -301,7 +356,8 @@ class GalleryTests(TestCase):
     def test_gallery_filters_by_middle_age_group(self):
         response = self.client.get(reverse("gallery"), {"category": "age-10-13"})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.middle_pending_work.title)
+        self.assertNotContains(response, self.middle_pending_work.title)
+        self.assertContains(response, "Работы не найдены.")
         self.assertNotContains(response, self.young_work.title)
         self.assertNotContains(response, self.teen_work.title)
         self.assertNotContains(response, self.adult_work.title)
@@ -313,6 +369,33 @@ class GalleryTests(TestCase):
         self.assertNotContains(response, self.young_work.title)
         self.assertNotContains(response, self.middle_pending_work.title)
         self.assertNotContains(response, self.teen_work.title)
+
+    def test_admin_sees_pending_drawings_and_status(self):
+        self.client.login(username=self.admin_user.email, password=self.password)
+        response = self.client.get(reverse("gallery"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.middle_pending_work.title)
+        self.assertContains(response, "Статус: На модерации")
+
+    def test_pending_work_detail_is_hidden_from_regular_users(self):
+        response = self.client.get(reverse("work_detail", args=[self.middle_pending_work.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_admin_can_open_pending_work_detail(self):
+        self.client.login(username=self.admin_user.email, password=self.password)
+        response = self.client.get(reverse("work_detail", args=[self.middle_pending_work.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.middle_pending_work.title)
+
+    def test_pending_work_image_is_hidden_from_regular_users(self):
+        response = self.client.get(reverse("drawing_image", args=[self.middle_pending_work.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_admin_can_open_pending_work_image(self):
+        self.client.login(username=self.admin_user.email, password=self.password)
+        response = self.client.get(reverse("drawing_image", args=[self.middle_pending_work.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "image/png")
 
     def test_unapproved_drawing_vote_is_forbidden(self):
         self.client.login(username=self.user.email, password=self.password)

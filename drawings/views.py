@@ -21,6 +21,10 @@ from .models import Category, Drawing, Vote
 from .utils import send_notification
 
 
+def _can_view_moderation_content(request) -> bool:
+    return bool(request.user.is_authenticated and request.user.is_staff)
+
+
 def _build_stored_image_name(original_name: str) -> str:
     safe_name = Path(original_name or "drawing.png").name
     ext = Path(safe_name).suffix.lower() or ".png"
@@ -124,6 +128,8 @@ def gallery(request):
     current_slug = request.GET.get("category", "").strip()
     sort_mode = request.GET.get("sort", "popular").strip()
     drawings = Drawing.objects.select_related("category").all()
+    if not _can_view_moderation_content(request):
+        drawings = drawings.filter(is_approved=True)
     selected_age_category = category_by_slug.get(current_slug)
     if selected_age_category:
         drawings = drawings.filter(
@@ -161,6 +167,8 @@ def gallery(request):
 @require_GET
 def work_detail(request, pk):
     work = get_object_or_404(Drawing, pk=pk)
+    if not work.is_approved and not _can_view_moderation_content(request):
+        raise Http404("Работа недоступна.")
     has_voted = False
     if request.user.is_authenticated:
         has_voted = Vote.objects.filter(drawing=work, user=request.user).exists()
@@ -175,6 +183,8 @@ def work_detail(request, pk):
 @require_GET
 def drawing_image(request, pk):
     drawing = get_object_or_404(Drawing, pk=pk)
+    if not drawing.is_approved and not _can_view_moderation_content(request):
+        raise Http404("Изображение недоступно.")
 
     if drawing.image and drawing.image.name and default_storage.exists(drawing.image.name):
         with drawing.image.open("rb") as img_file:
@@ -435,7 +445,10 @@ def user_logout(request):
 
 @login_required
 def profile(request):
-    drawings = list(Drawing.objects.filter(user=request.user).order_by("-created_at"))
+    drawings_qs = Drawing.objects.filter(user=request.user)
+    if not _can_view_moderation_content(request):
+        drawings_qs = drawings_qs.filter(is_approved=True)
+    drawings = list(drawings_qs.order_by("-created_at"))
     missing_image_ids = set()
     for drawing in drawings:
         has_file = bool(

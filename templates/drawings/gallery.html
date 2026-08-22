@@ -50,7 +50,9 @@
                 <div class="work-card__body">
                     <h3 class="work-card__title"><a href="{% url 'work_detail' work.id %}">{{ work.title }}</a></h3>
                     <p class="work-card__meta">{{ work.author }}, {{ work.age }} лет, {{ work.city }}</p>
-                    <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
+                    {% if user.is_staff %}
+                        <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
+                    {% endif %}
                     <div class="likes">
                         <span class="likes-heart" data-heart>
                             {% if work.id in voted_ids %}
