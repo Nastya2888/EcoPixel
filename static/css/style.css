@@ -2925,6 +2925,130 @@ main.container:has(.draw-v4) {
     text-align: right;
 }
 
+.draw-v4 .layers-panel {
+    display: grid;
+    gap: 10px;
+}
+
+.draw-v4 .layers-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.draw-v4 .layers-head .panel-title {
+    margin: 0;
+}
+
+.draw-v4 .layer-add-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid rgba(27, 67, 50, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+    color: #1b4332;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.draw-v4 .layer-add-btn:hover {
+    background: #1b4332;
+    color: #ffffff;
+    border-color: #1b4332;
+}
+
+.draw-v4 .layers-list {
+    display: grid;
+    gap: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.draw-v4 .layer-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(27, 67, 50, 0.12);
+    border-radius: 10px;
+    padding: 7px;
+    background: rgba(255, 255, 255, 0.74);
+    transition: all 0.2s ease;
+}
+
+.draw-v4 .layer-item.active {
+    border-color: rgba(34, 197, 94, 0.55);
+    background: rgba(34, 197, 94, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.2);
+}
+
+.draw-v4 .layer-select-btn {
+    display: grid;
+    gap: 1px;
+    text-align: left;
+    border: none;
+    background: transparent;
+    color: #26463b;
+    padding: 0;
+}
+
+.draw-v4 .layer-select-btn:hover {
+    transform: none;
+}
+
+.draw-v4 .layer-name {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.draw-v4 .layer-subtitle {
+    font-size: 11px;
+    color: #6f8479;
+    line-height: 1.2;
+}
+
+.draw-v4 .layer-action-btn {
+    min-width: 34px;
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(27, 67, 50, 0.2);
+    background: rgba(255, 255, 255, 0.92);
+    color: #355246;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.draw-v4 .layer-action-btn:hover {
+    transform: none;
+    background: #1b4332;
+    border-color: #1b4332;
+    color: #ffffff;
+}
+
+.draw-v4 .layer-action-btn.off {
+    opacity: 0.65;
+}
+
+.draw-v4 .layer-action-btn.layer-remove-btn {
+    color: #8e2f2f;
+    border-color: rgba(142, 47, 47, 0.25);
+}
+
+.draw-v4 .layer-action-btn.layer-remove-btn:hover {
+    background: #8e2f2f;
+    border-color: #8e2f2f;
+    color: #ffffff;
+}
+
 .draw-v4 .tool kbd {
     background: rgba(27, 67, 50, 0.08);
     color: #557366;

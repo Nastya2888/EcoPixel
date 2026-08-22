@@ -19,6 +19,8 @@
     const applyCustomSizeBtn = document.getElementById("apply-custom-size");
     const toolSizeRange = document.getElementById("tool-size-range");
     const toolSizeValue = document.getElementById("tool-size-value");
+    const layersList = document.getElementById("layers-list");
+    const addLayerBtn = document.getElementById("add-layer-btn");
     const undoButton = document.getElementById("undo-button");
     const redoButton = document.getElementById("redo-button");
     const clearButton = document.getElementById("clear-button");
@@ -31,6 +33,7 @@
     const currentColorLabel = document.getElementById("meta-color");
     const currentColorDot = document.getElementById("current-color-dot");
     const currentThicknessLabel = document.getElementById("meta-thickness");
+    const currentLayerLabel = document.getElementById("meta-layer");
 
     const modal = document.getElementById("submit-modal");
     const cancelSubmitBtn = document.getElementById("cancel-submit");
@@ -90,12 +93,16 @@
     const MAX_CUSTOM_GRID = 128;
     const MIN_BRUSH_SIZE = 1;
     const MAX_BRUSH_SIZE = 12;
+    const MAX_LAYERS = 16;
 
     let selectedColor = PALETTE[4];
     let selectedTool = "pencil";
     let brushSize = 1;
     let gridWidth = 32;
     let gridHeight = 32;
+    let layers = [];
+    let activeLayerId = null;
+    let layerIdCounter = 1;
     let isDrawing = false;
     let isDrawingChanged = false;
     let history = [];
@@ -144,6 +151,179 @@
         canvas.style.cursor = "crosshair";
     }
 
+    function createLayer(width, height, options = {}) {
+        const layerCanvas = document.createElement("canvas");
+        layerCanvas.width = width;
+        layerCanvas.height = height;
+        const layerCtx = layerCanvas.getContext("2d", { willReadFrequently: true });
+        if (!layerCtx) return null;
+        layerCtx.imageSmoothingEnabled = false;
+        if (options.imageData) {
+            layerCtx.putImageData(options.imageData, 0, 0);
+        }
+        const id = options.id || `layer-${layerIdCounter++}`;
+        return {
+            id,
+            name: options.name || `Слой ${layers.length + 1}`,
+            visible: options.visible !== false,
+            canvas: layerCanvas,
+            ctx: layerCtx,
+        };
+    }
+
+    function getActiveLayer() {
+        return layers.find((layer) => layer.id === activeLayerId) || layers[layers.length - 1] || null;
+    }
+
+    function getActiveLayerCtx() {
+        return getActiveLayer()?.ctx || null;
+    }
+
+    function getActiveLayerName() {
+        return getActiveLayer()?.name || "Слой";
+    }
+
+    function renderComposite() {
+        ctx.clearRect(0, 0, gridWidth, gridHeight);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, gridWidth, gridHeight);
+        layers.forEach((layer) => {
+            if (!layer.visible) return;
+            ctx.drawImage(layer.canvas, 0, 0);
+        });
+        renderPreview();
+    }
+
+    function setActiveLayer(layerId) {
+        if (!layers.some((layer) => layer.id === layerId)) return;
+        activeLayerId = layerId;
+        renderLayersPanel();
+        updateStatusBar();
+        if (lastHoverPoint) drawCursorHighlight(lastHoverPoint.x, lastHoverPoint.y);
+    }
+
+    function toggleLayerVisibility(layerId) {
+        const layer = layers.find((item) => item.id === layerId);
+        if (!layer) return;
+        layer.visible = !layer.visible;
+        if (!layer.visible && layer.id === activeLayerId) {
+            const visibleFallback = layers.find((item) => item.visible);
+            if (visibleFallback) {
+                activeLayerId = visibleFallback.id;
+            }
+        }
+        renderLayersPanel();
+        renderComposite();
+        updateStatusBar();
+        saveState();
+        markChanged();
+    }
+
+    function removeLayer(layerId) {
+        if (layers.length <= 1) {
+            submitResultEl.textContent = "Нельзя удалить последний слой.";
+            return;
+        }
+        const index = layers.findIndex((layer) => layer.id === layerId);
+        if (index < 0) return;
+        layers.splice(index, 1);
+        if (activeLayerId === layerId) {
+            const fallback = layers[Math.max(0, index - 1)] || layers[layers.length - 1];
+            activeLayerId = fallback.id;
+        }
+        renderLayersPanel();
+        renderComposite();
+        updateStatusBar();
+        saveState();
+        markChanged();
+    }
+
+    function renderLayersPanel() {
+        if (!layersList) return;
+        layersList.innerHTML = "";
+        const orderedLayers = [...layers].reverse();
+        orderedLayers.forEach((layer) => {
+            const item = document.createElement("div");
+            item.className = `layer-item${layer.id === activeLayerId ? " active" : ""}`;
+
+            const selectButton = document.createElement("button");
+            selectButton.type = "button";
+            selectButton.className = "layer-select-btn";
+            selectButton.innerHTML = `<span class="layer-name">${layer.name}</span><span class="layer-subtitle">${layer.visible ? "Виден" : "Скрыт"}</span>`;
+            selectButton.addEventListener("click", () => setActiveLayer(layer.id));
+            item.appendChild(selectButton);
+
+            const visibilityButton = document.createElement("button");
+            visibilityButton.type = "button";
+            visibilityButton.className = `layer-action-btn layer-visibility-btn${layer.visible ? "" : " off"}`;
+            visibilityButton.textContent = layer.visible ? "ON" : "OFF";
+            visibilityButton.title = layer.visible ? "Скрыть слой" : "Показать слой";
+            visibilityButton.addEventListener("click", () => toggleLayerVisibility(layer.id));
+            item.appendChild(visibilityButton);
+
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "layer-action-btn layer-remove-btn";
+            removeButton.textContent = "X";
+            removeButton.title = "Удалить слой";
+            removeButton.disabled = layers.length <= 1;
+            removeButton.addEventListener("click", () => removeLayer(layer.id));
+            item.appendChild(removeButton);
+
+            layersList.appendChild(item);
+        });
+    }
+
+    function addLayer() {
+        if (layers.length >= MAX_LAYERS) {
+            submitResultEl.textContent = `Максимум слоёв: ${MAX_LAYERS}.`;
+            return;
+        }
+        const layer = createLayer(gridWidth, gridHeight, {
+            name: `Слой ${layers.length + 1}`,
+        });
+        if (!layer) return;
+        layers.push(layer);
+        activeLayerId = layer.id;
+        renderLayersPanel();
+        renderComposite();
+        updateStatusBar();
+        saveState();
+        markChanged();
+    }
+
+    function snapshotLayersState() {
+        return {
+            activeLayerId,
+            layers: layers.map((layer) => ({
+                id: layer.id,
+                name: layer.name,
+                visible: layer.visible,
+                imageData: layer.ctx.getImageData(0, 0, gridWidth, gridHeight),
+            })),
+        };
+    }
+
+    function applyLayersSnapshot(snapshot) {
+        if (!snapshot || !Array.isArray(snapshot.layers) || !snapshot.layers.length) return;
+        const rebuiltLayers = snapshot.layers
+            .map((layer) => createLayer(gridWidth, gridHeight, layer))
+            .filter(Boolean);
+        if (!rebuiltLayers.length) return;
+        layers = rebuiltLayers;
+        const hasActiveLayer = layers.some((layer) => layer.id === snapshot.activeLayerId);
+        activeLayerId = hasActiveLayer ? snapshot.activeLayerId : layers[layers.length - 1].id;
+        const maxLayerId = layers.reduce((max, layer) => {
+            const match = /^layer-(\d+)$/.exec(layer.id);
+            if (!match) return max;
+            return Math.max(max, Number.parseInt(match[1], 10));
+        }, 0);
+        layerIdCounter = Math.max(maxLayerId + 1, layers.length + 1);
+        renderLayersPanel();
+        renderComposite();
+        updateStatusBar();
+    }
+
     function forEachBrushPixel(centerX, centerY, size, callback) {
         const normalizedSize = clampBrushSize(size, 1);
         const half = Math.floor(normalizedSize / 2);
@@ -160,14 +340,21 @@
         }
     }
 
-    function paintBrushAt(x, y, color, size = brushSize) {
-        ctx.fillStyle = color;
+    function paintBrushAt(x, y, color, size = brushSize, targetCtx = getActiveLayerCtx(), erase = false) {
+        if (!targetCtx) return;
+        if (!erase) {
+            targetCtx.fillStyle = color;
+        }
         forEachBrushPixel(x, y, size, (px, py) => {
-            ctx.fillRect(px, py, 1, 1);
+            if (erase) {
+                targetCtx.clearRect(px, py, 1, 1);
+            } else {
+                targetCtx.fillRect(px, py, 1, 1);
+            }
         });
     }
 
-    function drawLineSegment(startX, startY, endX, endY, color, size = brushSize) {
+    function drawLineSegment(startX, startY, endX, endY, color, size = brushSize, targetCtx = getActiveLayerCtx(), erase = false) {
         let x0 = startX;
         let y0 = startY;
         const dx = Math.abs(endX - x0);
@@ -177,7 +364,7 @@
         let err = dx - dy;
 
         while (true) {
-            paintBrushAt(x0, y0, color, size);
+            paintBrushAt(x0, y0, color, size, targetCtx, erase);
             if (x0 === endX && y0 === endY) break;
             const e2 = err * 2;
             if (e2 > -dy) {
@@ -191,42 +378,42 @@
         }
     }
 
-    function drawRectangleOutline(start, end, color, size = brushSize) {
+    function drawRectangleOutline(start, end, color, size = brushSize, targetCtx = getActiveLayerCtx(), erase = false) {
         const minX = Math.min(start.x, end.x);
         const maxX = Math.max(start.x, end.x);
         const minY = Math.min(start.y, end.y);
         const maxY = Math.max(start.y, end.y);
-        drawLineSegment(minX, minY, maxX, minY, color, size);
-        drawLineSegment(maxX, minY, maxX, maxY, color, size);
-        drawLineSegment(maxX, maxY, minX, maxY, color, size);
-        drawLineSegment(minX, maxY, minX, minY, color, size);
+        drawLineSegment(minX, minY, maxX, minY, color, size, targetCtx, erase);
+        drawLineSegment(maxX, minY, maxX, maxY, color, size, targetCtx, erase);
+        drawLineSegment(maxX, maxY, minX, maxY, color, size, targetCtx, erase);
+        drawLineSegment(minX, maxY, minX, minY, color, size, targetCtx, erase);
     }
 
-    function drawCircleFromPoints(start, end, color, size = brushSize) {
+    function drawCircleFromPoints(start, end, color, size = brushSize, targetCtx = getActiveLayerCtx(), erase = false) {
         const radius = Math.round(Math.hypot(end.x - start.x, end.y - start.y));
         if (radius <= 0) {
-            paintBrushAt(start.x, start.y, color, size);
+            paintBrushAt(start.x, start.y, color, size, targetCtx, erase);
             return;
         }
         const step = 1 / Math.max(radius * 10, 48);
         for (let angle = 0; angle <= Math.PI * 2; angle += step) {
             const x = Math.round(start.x + radius * Math.cos(angle));
             const y = Math.round(start.y + radius * Math.sin(angle));
-            paintBrushAt(x, y, color, size);
+            paintBrushAt(x, y, color, size, targetCtx, erase);
         }
     }
 
-    function drawShapeByTool(tool, start, end, color, size = brushSize) {
+    function drawShapeByTool(tool, start, end, color, size = brushSize, targetCtx = getActiveLayerCtx(), erase = false) {
         if (tool === "line") {
-            drawLineSegment(start.x, start.y, end.x, end.y, color, size);
+            drawLineSegment(start.x, start.y, end.x, end.y, color, size, targetCtx, erase);
             return;
         }
         if (tool === "rectangle") {
-            drawRectangleOutline(start, end, color, size);
+            drawRectangleOutline(start, end, color, size, targetCtx, erase);
             return;
         }
         if (tool === "circle") {
-            drawCircleFromPoints(start, end, color, size);
+            drawCircleFromPoints(start, end, color, size, targetCtx, erase);
         }
     }
 
@@ -255,7 +442,10 @@
     }
 
     function getActiveDrawColor() {
-        return selectedTool === "eraser" ? "#FFFFFF" : selectedColor;
+        if (selectedTool === "eraser") {
+            return "#1B4332";
+        }
+        return selectedColor;
     }
 
     function syncCustomInputs(width, height) {
@@ -306,22 +496,32 @@
         ctx.imageSmoothingEnabled = false;
         gridCtx.imageSmoothingEnabled = false;
         cursorCtx.imageSmoothingEnabled = false;
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, gridWidth, gridHeight);
+
+        layers = [];
+        activeLayerId = null;
+        layerIdCounter = 1;
+        const baseLayer = createLayer(gridWidth, gridHeight, { name: "Слой 1" });
+        if (baseLayer) {
+            layers.push(baseLayer);
+            activeLayerId = baseLayer.id;
+        }
+
         drawGrid();
         clearCursorHighlight();
         syncCanvasDisplaySize();
         syncCustomInputs(gridWidth, gridHeight);
+        renderLayersPanel();
         history = [];
         redoHistory = [];
         saveState(false);
-        renderPreview();
+        renderComposite();
         updateStatusBar();
         isDrawingChanged = false;
     }
 
     function saveState(clearRedo = true) {
-        history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        if (!layers.length) return;
+        history.push(snapshotLayersState());
         if (history.length > HISTORY_LIMIT) history.shift();
         if (clearRedo) {
             redoHistory = [];
@@ -335,21 +535,18 @@
             redoHistory.push(currentState);
             if (redoHistory.length > HISTORY_LIMIT) redoHistory.shift();
         }
-        const prev = history[history.length - 1];
-        ctx.putImageData(prev, 0, 0);
-        renderPreview();
-        markChanged();
+        applyLayersSnapshot(history[history.length - 1]);
+        isDrawingChanged = history.length > 1;
     }
 
     function redoState() {
         if (!redoHistory.length) return;
         const next = redoHistory.pop();
         if (!next) return;
-        ctx.putImageData(next, 0, 0);
-        history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        history.push(next);
         if (history.length > HISTORY_LIMIT) history.shift();
-        renderPreview();
-        markChanged();
+        applyLayersSnapshot(next);
+        isDrawingChanged = history.length > 1;
     }
 
     function drawGrid() {
@@ -411,8 +608,10 @@
     }
 
     function setPixel(x, y, color) {
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, 1, 1);
+        const layerCtx = getActiveLayerCtx();
+        if (!layerCtx) return;
+        layerCtx.fillStyle = color;
+        layerCtx.fillRect(x, y, 1, 1);
     }
 
     function hexToRgba(hex) {
@@ -422,7 +621,9 @@
     }
 
     function floodFill(startX, startY, fillColorHex) {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const layerCtx = getActiveLayerCtx();
+        if (!layerCtx) return;
+        const imageData = layerCtx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
         const width = canvas.width;
         const height = canvas.height;
@@ -457,7 +658,7 @@
             stack.push({ x, y: y - 1 });
         }
 
-        ctx.putImageData(imageData, 0, 0);
+        layerCtx.putImageData(imageData, 0, 0);
     }
 
     function markChanged() {
@@ -512,6 +713,7 @@
         if (currentColorLabel) currentColorLabel.textContent = COLOR_NAMES[selectedColor] || selectedColor;
         if (currentColorDot) currentColorDot.style.backgroundColor = selectedColor;
         if (currentThicknessLabel) currentThicknessLabel.textContent = `${brushSize} px`;
+        if (currentLayerLabel) currentLayerLabel.textContent = getActiveLayerName();
         if (toolSizeValue) toolSizeValue.textContent = `${brushSize} px`;
     }
 
@@ -521,28 +723,33 @@
     }
 
     function beginShapePreview(startPoint) {
-        shapePreviewImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const layerCtx = getActiveLayerCtx();
+        if (!layerCtx) return;
+        shapePreviewImageData = layerCtx.getImageData(0, 0, canvas.width, canvas.height);
         dragStartPoint = startPoint;
         lastDrawPoint = startPoint;
     }
 
     function renderShapePreview(endPoint) {
-        if (!shapePreviewImageData || !dragStartPoint) return;
-        ctx.putImageData(shapePreviewImageData, 0, 0);
-        drawShapeByTool(selectedTool, dragStartPoint, endPoint, getActiveDrawColor(), brushSize);
+        const layerCtx = getActiveLayerCtx();
+        if (!shapePreviewImageData || !dragStartPoint || !layerCtx) return;
+        layerCtx.putImageData(shapePreviewImageData, 0, 0);
+        drawShapeByTool(selectedTool, dragStartPoint, endPoint, selectedColor, brushSize, layerCtx, false);
         lastDrawPoint = endPoint;
-        renderPreview();
+        renderComposite();
         markChanged();
     }
 
     function applyFreehandAtPoint(point) {
-        const color = getActiveDrawColor();
+        const layerCtx = getActiveLayerCtx();
+        if (!layerCtx) return;
+        const erase = selectedTool === "eraser";
         if (!lastDrawPoint) {
-            drawLineSegment(point.x, point.y, point.x, point.y, color, brushSize);
+            drawLineSegment(point.x, point.y, point.x, point.y, selectedColor, brushSize, layerCtx, erase);
             lastDrawPoint = point;
             return;
         }
-        drawLineSegment(lastDrawPoint.x, lastDrawPoint.y, point.x, point.y, color, brushSize);
+        drawLineSegment(lastDrawPoint.x, lastDrawPoint.y, point.x, point.y, selectedColor, brushSize, layerCtx, erase);
         lastDrawPoint = point;
     }
 
@@ -560,7 +767,7 @@
             saveState();
             floodFill(point.x, point.y, selectedColor);
             saveState();
-            renderPreview();
+            renderComposite();
             markChanged();
             return;
         }
@@ -577,7 +784,7 @@
         dragStartPoint = point;
         lastDrawPoint = point;
         applyFreehandAtPoint(point);
-        renderPreview();
+        renderComposite();
         markChanged();
     }
 
@@ -592,16 +799,17 @@
         }
 
         applyFreehandAtPoint(point);
-        renderPreview();
+        renderComposite();
         markChanged();
     }
 
     function finalizeShapeDraw(event) {
         const endPoint = event ? getCanvasPoint(event) : (lastDrawPoint || dragStartPoint);
-        if (!shapePreviewImageData || !dragStartPoint || !endPoint) return;
-        ctx.putImageData(shapePreviewImageData, 0, 0);
-        drawShapeByTool(selectedTool, dragStartPoint, endPoint, getActiveDrawColor(), brushSize);
-        renderPreview();
+        const layerCtx = getActiveLayerCtx();
+        if (!shapePreviewImageData || !dragStartPoint || !endPoint || !layerCtx) return;
+        layerCtx.putImageData(shapePreviewImageData, 0, 0);
+        drawShapeByTool(selectedTool, dragStartPoint, endPoint, selectedColor, brushSize, layerCtx, false);
+        renderComposite();
         markChanged();
     }
 
@@ -620,10 +828,11 @@
     }
 
     function clearCanvas() {
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        layers.forEach((layer) => {
+            layer.ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
         saveState();
-        renderPreview();
+        renderComposite();
         clearCursorHighlight();
         resetDragState();
         localStorage.removeItem(DRAFT_KEY);
@@ -734,10 +943,14 @@
         if (!window.confirm("У вас есть несохраненный рисунок. Восстановить?")) return;
         const image = new Image();
         image.onload = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const layerCtx = getActiveLayerCtx();
+            if (!layerCtx) return;
+            layers.forEach((layer) => {
+                layer.ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+            layerCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
             saveState();
-            renderPreview();
+            renderComposite();
             markChanged();
         };
         image.src = draft;
@@ -776,6 +989,7 @@
     undoButton?.addEventListener("click", restoreState);
     redoButton?.addEventListener("click", redoState);
     clearButton?.addEventListener("click", clearCanvas);
+    addLayerBtn?.addEventListener("click", addLayer);
     addCustomColorBtn?.addEventListener("click", () => customColorPicker?.click());
     toolSizeRange?.addEventListener("input", (event) => {
         syncBrushSize(event.target.value);

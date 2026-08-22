@@ -92,6 +92,8 @@
                     <span class="color-dot" id="current-color-dot"></span>
                     <span class="meta-dot divider"></span>
                     <span class="meta-color" id="meta-thickness">1 px</span>
+                    <span class="meta-dot divider"></span>
+                    <span class="meta-color" id="meta-layer">Слой 1</span>
                 </div>
             </div>
         </main>
@@ -128,6 +130,14 @@
                     </div>
                     <button id="apply-custom-size" class="btn-secondary" type="button">Применить размер</button>
                 </div>
+            </div>
+
+            <div class="panel layers-panel">
+                <div class="layers-head">
+                    <div class="panel-title">Слои</div>
+                    <button id="add-layer-btn" class="layer-add-btn" type="button" title="Добавить слой">+</button>
+                </div>
+                <div id="layers-list" class="layers-list"></div>
             </div>
 
             <div class="panel preview-panel">
@@ -238,5 +248,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260821-10"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260822-01"></script>
 {% endblock %}
