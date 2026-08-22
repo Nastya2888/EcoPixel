@@ -87,6 +87,7 @@
             <div class="canvas-frame">
                 <div class="canvas-wrapper canvas-container">
                     <canvas id="main-canvas" width="32" height="32"></canvas>
+                    <canvas id="template-canvas" width="32" height="32" class="template-overlay"></canvas>
                     <canvas id="grid-canvas" width="32" height="32" class="grid-overlay"></canvas>
                     <canvas id="cursor-canvas" width="32" height="32"></canvas>
                 </div>
@@ -126,6 +127,16 @@
                         <span>Для опытных</span>
                     </div>
                 </label>
+                <label class="size-card">
+                    <input type="radio" name="grid-size" value="36">
+                    <div class="size-visual">
+                        <div class="size-grid grid-36"></div>
+                    </div>
+                    <div class="size-text">
+                        <strong>36×36</strong>
+                        <span>Для шаблонов</span>
+                    </div>
+                </label>
                 <div class="size-custom">
                     <div class="size-custom-title">Свой размер</div>
                     <div class="size-custom-inputs">
@@ -134,6 +145,22 @@
                         <input id="custom-height-input" type="number" min="8" max="128" value="32" aria-label="Высота холста">
                     </div>
                     <button id="apply-custom-size" class="btn-secondary" type="button">Применить размер</button>
+                </div>
+                <div class="template-picker">
+                    <div class="template-picker-title">Шаблоны для малышей</div>
+                    <select id="template-select" aria-label="Выбор шаблона">
+                        <option value="">Без шаблона</option>
+                        <option value="forest">Лес (36×36)</option>
+                        <option value="house">Домик и деревья (36×36)</option>
+                        <option value="mountains">Горы и река (36×36)</option>
+                    </select>
+                    <label class="template-opacity-label" for="template-opacity-range">
+                        Прозрачность шаблона
+                        <span id="template-opacity-value">45%</span>
+                    </label>
+                    <input id="template-opacity-range" type="range" min="15" max="80" value="45">
+                    <button id="clear-template-btn" class="btn-secondary" type="button">Убрать шаблон</button>
+                    <p class="template-picker-hint">Шаблон отображается поверх холста и не попадет в итоговый PNG.</p>
                 </div>
             </div>
 
@@ -253,5 +280,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260822-02"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260822-03"></script>
 {% endblock %}

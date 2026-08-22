@@ -2529,6 +2529,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .draw-v4 #main-canvas,
+.draw-v4 #template-canvas,
 .draw-v4 #grid-canvas {
     position: absolute;
     top: 0;
@@ -2544,9 +2545,16 @@ input:focus, select:focus, textarea:focus {
     z-index: 1;
 }
 
-.draw-v4 #grid-canvas {
+.draw-v4 #template-canvas {
     pointer-events: none;
     z-index: 2;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.draw-v4 #grid-canvas {
+    pointer-events: none;
+    z-index: 3;
     display: none;
 }
 
@@ -2559,7 +2567,7 @@ input:focus, select:focus, textarea:focus {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     pointer-events: none;
-    z-index: 3;
+    z-index: 4;
 }
 
 .draw-v4 .canvas-meta {
@@ -2648,6 +2656,10 @@ input:focus, select:focus, textarea:focus {
     background-size: 6px 6px;
 }
 
+.draw-v4 .grid-36 {
+    background-size: 5px 5px;
+}
+
 .draw-v4 .grid-64 {
     background-size: 3px 3px;
 }
@@ -2708,6 +2720,77 @@ input:focus, select:focus, textarea:focus {
 .draw-v4 #apply-custom-size {
     width: 100%;
     justify-content: center;
+}
+
+.draw-v4 .template-picker {
+    margin-top: 10px;
+    padding: 12px;
+    border: 1px dashed rgba(27, 67, 50, 0.2);
+    border-radius: 14px;
+    background: rgba(46, 204, 113, 0.04);
+    display: grid;
+    gap: 10px;
+}
+
+.draw-v4 .template-picker-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6F8479;
+    font-weight: 700;
+}
+
+.draw-v4 #template-select {
+    width: 100%;
+    border: 1px solid rgba(27, 67, 50, 0.18);
+    border-radius: 10px;
+    padding: 9px 10px;
+    background: #FFFFFF;
+    color: #1B4332;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.draw-v4 .template-opacity-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+    color: #5A7566;
+    font-weight: 600;
+}
+
+.draw-v4 #template-opacity-range {
+    width: 100%;
+    accent-color: #22C55E;
+    cursor: pointer;
+}
+
+.draw-v4 #clear-template-btn {
+    width: 100%;
+    justify-content: center;
+    border-color: rgba(27, 67, 50, 0.2);
+    color: #1B4332;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.draw-v4 #clear-template-btn:hover {
+    background: #1B4332;
+    border-color: #1B4332;
+    color: #FFFFFF;
+}
+
+.draw-v4 #clear-template-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.draw-v4 .template-picker-hint {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.35;
+    color: #769182;
 }
 
 .draw-v4 .preview-panel {

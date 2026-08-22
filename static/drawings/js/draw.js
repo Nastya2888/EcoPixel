@@ -1,10 +1,12 @@
 (() => {
     const canvas = document.getElementById("main-canvas");
+    const templateCanvas = document.getElementById("template-canvas");
     const gridCanvas = document.getElementById("grid-canvas");
     const cursorCanvas = document.getElementById("cursor-canvas");
-    if (!canvas || !gridCanvas || !cursorCanvas) return;
+    if (!canvas || !templateCanvas || !gridCanvas || !cursorCanvas) return;
 
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const templateCtx = templateCanvas.getContext("2d");
     const gridCtx = gridCanvas.getContext("2d");
     const cursorCtx = cursorCanvas.getContext("2d");
     const previewCanvas = document.getElementById("preview-canvas");
@@ -19,6 +21,10 @@
     const applyCustomSizeBtn = document.getElementById("apply-custom-size");
     const toolSizeRange = document.getElementById("tool-size-range");
     const toolSizeValue = document.getElementById("tool-size-value");
+    const templateSelect = document.getElementById("template-select");
+    const clearTemplateButton = document.getElementById("clear-template-btn");
+    const templateOpacityRange = document.getElementById("template-opacity-range");
+    const templateOpacityValue = document.getElementById("template-opacity-value");
     const layersList = document.getElementById("layers-list");
     const addLayerBtn = document.getElementById("add-layer-btn");
     const undoButton = document.getElementById("undo-button");
@@ -52,7 +58,7 @@
     const vkShareLink = document.getElementById("vk-share-link");
     const tgShareLink = document.getElementById("tg-share-link");
 
-    if (!previewCanvas || !previewCtx || !paletteEl || !form) return;
+    if (!previewCanvas || !previewCtx || !paletteEl || !form || !templateCtx) return;
 
     const PALETTE = [
         "#1B4332", "#FFFFFF", "#B7B7B7", "#F5F5DC",
@@ -94,6 +100,15 @@
     const MIN_BRUSH_SIZE = 1;
     const MAX_BRUSH_SIZE = 12;
     const MAX_LAYERS = 16;
+    const TEMPLATE_GRID_SIZE = 36;
+    const MIN_TEMPLATE_OPACITY = 15;
+    const MAX_TEMPLATE_OPACITY = 80;
+    const DEFAULT_TEMPLATE_OPACITY = 45;
+    const TEMPLATE_LIBRARY = [
+        { id: "forest", name: "Лес", width: TEMPLATE_GRID_SIZE, height: TEMPLATE_GRID_SIZE, draw: drawForestTemplate },
+        { id: "house", name: "Домик и деревья", width: TEMPLATE_GRID_SIZE, height: TEMPLATE_GRID_SIZE, draw: drawHouseTemplate },
+        { id: "mountains", name: "Горы и река", width: TEMPLATE_GRID_SIZE, height: TEMPLATE_GRID_SIZE, draw: drawMountainsTemplate },
+    ];
 
     let selectedColor = PALETTE[4];
     let selectedTool = "pencil";
@@ -116,6 +131,8 @@
     let shapePreviewImageData = null;
     let lastHoverPoint = null;
     let handDragState = null;
+    let selectedTemplateId = "";
+    let templateOpacity = DEFAULT_TEMPLATE_OPACITY;
 
     function normalizeHex(hex) {
         return String(hex || "").trim().toUpperCase();
@@ -131,6 +148,12 @@
         const parsed = Number.parseInt(String(value ?? ""), 10);
         if (!Number.isFinite(parsed)) return fallback;
         return Math.max(MIN_BRUSH_SIZE, Math.min(MAX_BRUSH_SIZE, parsed));
+    }
+
+    function clampTemplateOpacity(value, fallback = DEFAULT_TEMPLATE_OPACITY) {
+        const parsed = Number.parseInt(String(value ?? ""), 10);
+        if (!Number.isFinite(parsed)) return fallback;
+        return Math.max(MIN_TEMPLATE_OPACITY, Math.min(MAX_TEMPLATE_OPACITY, parsed));
     }
 
     function syncBrushSize(value) {
@@ -154,6 +177,209 @@
             return;
         }
         canvas.style.cursor = "crosshair";
+    }
+
+    function getTemplateById(templateId) {
+        return TEMPLATE_LIBRARY.find((template) => template.id === templateId) || null;
+    }
+
+    function drawTemplatePixel(targetCtx, x, y) {
+        if (x < 0 || y < 0 || x >= targetCtx.canvas.width || y >= targetCtx.canvas.height) return;
+        targetCtx.fillRect(x, y, 1, 1);
+    }
+
+    function drawTemplateLine(targetCtx, startX, startY, endX, endY) {
+        let x0 = startX;
+        let y0 = startY;
+        const dx = Math.abs(endX - x0);
+        const dy = Math.abs(endY - y0);
+        const sx = x0 < endX ? 1 : -1;
+        const sy = y0 < endY ? 1 : -1;
+        let err = dx - dy;
+
+        while (true) {
+            drawTemplatePixel(targetCtx, x0, y0);
+            if (x0 === endX && y0 === endY) break;
+            const e2 = err * 2;
+            if (e2 > -dy) {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y0 += sy;
+            }
+        }
+    }
+
+    function drawTemplatePolyline(targetCtx, points, close = false) {
+        if (!Array.isArray(points) || points.length < 2) return;
+        for (let i = 1; i < points.length; i += 1) {
+            drawTemplateLine(targetCtx, points[i - 1].x, points[i - 1].y, points[i].x, points[i].y);
+        }
+        if (close) {
+            drawTemplateLine(
+                targetCtx,
+                points[points.length - 1].x,
+                points[points.length - 1].y,
+                points[0].x,
+                points[0].y
+            );
+        }
+    }
+
+    function drawTemplateRect(targetCtx, startX, startY, width, height) {
+        if (width <= 0 || height <= 0) return;
+        const endX = startX + width - 1;
+        const endY = startY + height - 1;
+        drawTemplateLine(targetCtx, startX, startY, endX, startY);
+        drawTemplateLine(targetCtx, endX, startY, endX, endY);
+        drawTemplateLine(targetCtx, endX, endY, startX, endY);
+        drawTemplateLine(targetCtx, startX, endY, startX, startY);
+    }
+
+    function drawTemplateCircle(targetCtx, centerX, centerY, radius) {
+        if (radius <= 0) return;
+        let x = radius;
+        let y = 0;
+        let error = 1 - x;
+
+        while (x >= y) {
+            drawTemplatePixel(targetCtx, centerX + x, centerY + y);
+            drawTemplatePixel(targetCtx, centerX + y, centerY + x);
+            drawTemplatePixel(targetCtx, centerX - y, centerY + x);
+            drawTemplatePixel(targetCtx, centerX - x, centerY + y);
+            drawTemplatePixel(targetCtx, centerX - x, centerY - y);
+            drawTemplatePixel(targetCtx, centerX - y, centerY - x);
+            drawTemplatePixel(targetCtx, centerX + y, centerY - x);
+            drawTemplatePixel(targetCtx, centerX + x, centerY - y);
+            y += 1;
+            if (error < 0) {
+                error += 2 * y + 1;
+            } else {
+                x -= 1;
+                error += 2 * (y - x) + 1;
+            }
+        }
+    }
+
+    function drawPineGuide(targetCtx, centerX, topY, crownWidths, trunkHeight = 5) {
+        let levelTop = topY;
+        crownWidths.forEach((crownWidth) => {
+            const half = Math.floor(crownWidth / 2);
+            const baseY = levelTop + 4;
+            drawTemplatePolyline(targetCtx, [
+                { x: centerX, y: levelTop },
+                { x: centerX - half, y: baseY },
+                { x: centerX + half, y: baseY },
+            ], true);
+            levelTop += 4;
+        });
+        drawTemplateRect(targetCtx, centerX - 1, levelTop, 3, trunkHeight);
+    }
+
+    function drawForestTemplate(targetCtx) {
+        drawTemplateLine(targetCtx, 1, 31, 34, 31);
+        drawTemplateLine(targetCtx, 1, 32, 34, 32);
+        drawPineGuide(targetCtx, 18, 5, [13, 17, 21], 7);
+        drawPineGuide(targetCtx, 8, 12, [9, 11], 5);
+        drawPineGuide(targetCtx, 28, 11, [9, 11], 6);
+        drawTemplateCircle(targetCtx, 30, 6, 3);
+        drawTemplatePolyline(targetCtx, [{ x: 11, y: 7 }, { x: 12, y: 6 }, { x: 13, y: 7 }]);
+        drawTemplatePolyline(targetCtx, [{ x: 15, y: 6 }, { x: 16, y: 5 }, { x: 17, y: 6 }]);
+    }
+
+    function drawHouseTemplate(targetCtx) {
+        drawTemplateLine(targetCtx, 1, 31, 34, 31);
+        drawTemplateLine(targetCtx, 1, 32, 34, 32);
+        drawTemplateRect(targetCtx, 10, 15, 16, 13);
+        drawTemplatePolyline(targetCtx, [
+            { x: 18, y: 8 },
+            { x: 9, y: 15 },
+            { x: 27, y: 15 },
+        ], true);
+        drawTemplateRect(targetCtx, 16, 21, 4, 7);
+        drawTemplateRect(targetCtx, 12, 18, 3, 3);
+        drawTemplateRect(targetCtx, 21, 18, 3, 3);
+        drawPineGuide(targetCtx, 5, 13, [7, 9], 5);
+        drawPineGuide(targetCtx, 31, 13, [7, 9], 5);
+    }
+
+    function drawMountainsTemplate(targetCtx) {
+        drawTemplateLine(targetCtx, 1, 31, 34, 31);
+        drawTemplateLine(targetCtx, 1, 32, 34, 32);
+        drawTemplatePolyline(targetCtx, [
+            { x: 2, y: 24 },
+            { x: 10, y: 12 },
+            { x: 18, y: 24 },
+        ], true);
+        drawTemplatePolyline(targetCtx, [
+            { x: 12, y: 24 },
+            { x: 21, y: 10 },
+            { x: 32, y: 24 },
+        ], true);
+        drawTemplatePolyline(targetCtx, [
+            { x: 3, y: 27 },
+            { x: 10, y: 29 },
+            { x: 16, y: 29 },
+            { x: 22, y: 31 },
+            { x: 28, y: 32 },
+            { x: 33, y: 34 },
+        ]);
+        drawTemplatePolyline(targetCtx, [
+            { x: 4, y: 29 },
+            { x: 10, y: 31 },
+            { x: 16, y: 31 },
+            { x: 23, y: 33 },
+            { x: 29, y: 34 },
+            { x: 33, y: 35 },
+        ]);
+        drawTemplateCircle(targetCtx, 7, 7, 3);
+    }
+
+    function updateTemplateOverlayVisibility() {
+        const hasTemplate = Boolean(selectedTemplateId);
+        templateCanvas.style.display = hasTemplate ? "block" : "none";
+        if (clearTemplateButton) clearTemplateButton.disabled = !hasTemplate;
+    }
+
+    function renderTemplateOverlay() {
+        templateCtx.clearRect(0, 0, gridWidth, gridHeight);
+        const activeTemplate = getTemplateById(selectedTemplateId);
+        if (!activeTemplate) return;
+
+        const templateSourceCanvas = document.createElement("canvas");
+        templateSourceCanvas.width = activeTemplate.width;
+        templateSourceCanvas.height = activeTemplate.height;
+        const templateSourceCtx = templateSourceCanvas.getContext("2d");
+        if (!templateSourceCtx) return;
+
+        templateSourceCtx.imageSmoothingEnabled = false;
+        templateSourceCtx.fillStyle = "#1B4332";
+        activeTemplate.draw(templateSourceCtx);
+
+        templateCtx.imageSmoothingEnabled = false;
+        templateCtx.drawImage(templateSourceCanvas, 0, 0, gridWidth, gridHeight);
+    }
+
+    function syncTemplateOpacity(value) {
+        templateOpacity = clampTemplateOpacity(value, templateOpacity);
+        if (templateOpacityRange) templateOpacityRange.value = String(templateOpacity);
+        if (templateOpacityValue) templateOpacityValue.textContent = `${templateOpacity}%`;
+        templateCanvas.style.opacity = String(templateOpacity / 100);
+    }
+
+    function confirmResizeForTemplate(template) {
+        if (!template) return true;
+        if (gridWidth === template.width && gridHeight === template.height) return true;
+        const warning = isDrawingChanged ? "\nТекущий рисунок будет очищен." : "";
+        const confirmed = window.confirm(
+            `Шаблон "${template.name}" рассчитан на ${template.width}×${template.height}. Переключить размер холста?${warning}`
+        );
+        if (!confirmed) return false;
+        initCanvas(template.width, template.height);
+        setPresetSelection(template.width, template.height);
+        return true;
     }
 
     function createLayer(width, height, options = {}) {
@@ -625,6 +851,27 @@
         });
     }
 
+    function applyTemplateSelection(nextTemplateId, options = {}) {
+        const shouldPromptResize = options.shouldPromptResize !== false;
+        const normalizedId = getTemplateById(nextTemplateId)?.id || "";
+        const previousTemplateId = selectedTemplateId;
+        selectedTemplateId = normalizedId;
+
+        const template = getTemplateById(selectedTemplateId);
+        if (template && shouldPromptResize && !confirmResizeForTemplate(template)) {
+            selectedTemplateId = previousTemplateId;
+            if (templateSelect) templateSelect.value = previousTemplateId;
+            updateTemplateOverlayVisibility();
+            renderTemplateOverlay();
+            return false;
+        }
+
+        if (templateSelect) templateSelect.value = selectedTemplateId;
+        updateTemplateOverlayVisibility();
+        renderTemplateOverlay();
+        return true;
+    }
+
     function syncCanvasDisplaySize() {
         if (!canvasContainer) return;
         const rect = canvasContainer.getBoundingClientRect();
@@ -633,6 +880,8 @@
         if (!displayWidth || !displayHeight) return;
         canvas.style.width = `${displayWidth}px`;
         canvas.style.height = `${displayHeight}px`;
+        templateCanvas.style.width = `${displayWidth}px`;
+        templateCanvas.style.height = `${displayHeight}px`;
         gridCanvas.style.width = `${displayWidth}px`;
         gridCanvas.style.height = `${displayHeight}px`;
         cursorCanvas.style.width = `${displayWidth}px`;
@@ -644,6 +893,8 @@
         gridHeight = clampGridValue(nextHeight, 32);
         canvas.width = gridWidth;
         canvas.height = gridHeight;
+        templateCanvas.width = gridWidth;
+        templateCanvas.height = gridHeight;
         gridCanvas.width = gridWidth;
         gridCanvas.height = gridHeight;
         cursorCanvas.width = gridWidth;
@@ -652,6 +903,7 @@
             canvasContainer.style.aspectRatio = `${gridWidth} / ${gridHeight}`;
         }
         ctx.imageSmoothingEnabled = false;
+        templateCtx.imageSmoothingEnabled = false;
         gridCtx.imageSmoothingEnabled = false;
         cursorCtx.imageSmoothingEnabled = false;
 
@@ -667,6 +919,8 @@
         drawGrid();
         clearCursorHighlight();
         syncCanvasDisplaySize();
+        renderTemplateOverlay();
+        updateTemplateOverlayVisibility();
         syncCustomInputs(gridWidth, gridHeight);
         renderLayersPanel();
         history = [];
@@ -1176,6 +1430,15 @@
         syncBrushSize(event.target.value);
         if (lastHoverPoint) drawCursorHighlight(lastHoverPoint.x, lastHoverPoint.y);
     });
+    templateSelect?.addEventListener("change", (event) => {
+        applyTemplateSelection(event.target.value);
+    });
+    clearTemplateButton?.addEventListener("click", () => {
+        applyTemplateSelection("", { shouldPromptResize: false });
+    });
+    templateOpacityRange?.addEventListener("input", (event) => {
+        syncTemplateOpacity(event.target.value);
+    });
     downloadButton?.addEventListener("click", async () => {
         const defaultLabel = "Скачать PNG";
         downloadButton.disabled = true;
@@ -1384,6 +1647,7 @@
 
     renderPalette();
     syncBrushSize(brushSize);
+    syncTemplateOpacity(templateOpacity);
     initCanvas(32, 32);
     setPresetSelection(32, 32);
     updateCategoryPreview();
