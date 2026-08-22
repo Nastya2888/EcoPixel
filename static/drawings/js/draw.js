@@ -360,6 +360,15 @@
 
         templateCtx.imageSmoothingEnabled = false;
         templateCtx.drawImage(templateSourceCanvas, 0, 0, gridWidth, gridHeight);
+
+        // Hide template under already painted pixels to avoid darkening colors.
+        templateCtx.save();
+        templateCtx.globalCompositeOperation = "destination-out";
+        layers.forEach((layer) => {
+            if (!layer.visible) return;
+            templateCtx.drawImage(layer.canvas, 0, 0);
+        });
+        templateCtx.restore();
     }
 
     function syncTemplateOpacity(value) {
@@ -422,6 +431,7 @@
             if (!layer.visible) return;
             ctx.drawImage(layer.canvas, 0, 0);
         });
+        renderTemplateOverlay();
         renderPreview();
     }
 
