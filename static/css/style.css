@@ -3617,6 +3617,7 @@ main.container:has(.draw-v4) {
 }
 
 .draw-v4 .canvas-stage {
+    grid-row: 1;
     min-height: 0;
     overflow: auto;
     display: flex;
@@ -3637,9 +3638,8 @@ body.page-draw .draw-v4 .editor-canvas-area .canvas-wrapper,
 .draw-v4 .editor-canvas-area .canvas-wrapper {
     position: relative;
     overflow: hidden;
-    width: auto !important;
     max-width: none !important;
-    height: auto !important;
+    max-height: none !important;
     aspect-ratio: auto !important;
     flex-shrink: 0;
     border-radius: 0;
@@ -3656,6 +3656,7 @@ body.page-draw .draw-v4 .editor-canvas-area .canvas-wrapper,
 }
 
 .draw-v4 .canvas-meta.canvas-status {
+    grid-row: 2;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
