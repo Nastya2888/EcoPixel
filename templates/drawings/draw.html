@@ -340,7 +340,10 @@
 
             <div class="draw-submit-actions">
                 <button type="submit" class="btn draw-submit-primary">Отправить на конкурс</button>
-                <button type="button" id="cancel-submit" class="btn-secondary draw-submit-back">← Вернуться к редактированию</button>
+                <button type="button" id="cancel-submit" class="btn-secondary draw-submit-back">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    <span>Вернуться к редактированию</span>
+                </button>
             </div>
         </form>
 
@@ -355,7 +358,9 @@
         </div>
 
         <div id="submit-success" class="submit-success draw-submit-success hidden">
-            <div class="draw-submit-success-badge" aria-hidden="true">✓</div>
+            <div class="draw-submit-success-badge" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
             <p id="submit-success-text"></p>
             <div class="share-actions draw-submit-share">
                 <button type="button" id="copy-link-btn" class="btn-secondary">Скопировать ссылку</button>

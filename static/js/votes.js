@@ -1,12 +1,22 @@
 (() => {
-    const FILLED_HEART =
-        '<svg class="icon-heart-filled" width="20" height="20" viewBox="0 0 24 24" fill="#E74C3C" stroke="#E74C3C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-    const EMPTY_HEART =
-        '<svg class="icon-heart" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+    const HEART_PATH =
+        "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z";
+
+    const FILLED_HEART = `<svg class="icon-heart-filled" width="20" height="20" viewBox="0 0 24 24" fill="#E74C3C" stroke="#E74C3C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${HEART_PATH}"/></svg>`;
+    const EMPTY_HEART = `<svg class="icon-heart" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${HEART_PATH}"/></svg>`;
+    const INLINE_HEART = `<svg class="icon-heart-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${HEART_PATH}"/></svg>`;
 
     function getCsrfToken() {
         const input = document.querySelector("input[name='csrfmiddlewaretoken']");
         return input ? input.value : "";
+    }
+
+    function setVoteButtonLabel(button, text, withHeart = false) {
+        if (withHeart) {
+            button.innerHTML = `<span class="vote-btn-label">${INLINE_HEART}<span>${text}</span></span>`;
+            return;
+        }
+        button.textContent = text;
     }
 
     function isVotedButton(button) {
@@ -26,7 +36,7 @@
             button.disabled = false;
             button.dataset.voted = "true";
             button.classList.add("voted");
-            button.textContent = "Убрать голос";
+            setVoteButtonLabel(button, "Убрать голос");
         }
     }
 
@@ -74,7 +84,7 @@
 
         button.dataset.voted = voted ? "true" : "false";
         button.classList.toggle("voted", voted);
-        button.textContent = voted ? "Убрать голос" : "❤️ Голосовать";
+        setVoteButtonLabel(button, voted ? "Убрать голос" : "Голосовать", !voted);
     }
 
     document.querySelectorAll(".vote-btn").forEach((button) => {
@@ -172,7 +182,7 @@
                 const voted = resolveVotedState(voteButton, data);
                 voteButton.dataset.voted = voted ? "true" : "false";
                 voteButton.classList.toggle("voted", voted);
-                voteButton.textContent = voted ? "Убрать голос" : "❤️ Проголосовать";
+                setVoteButtonLabel(voteButton, voted ? "Убрать голос" : "Проголосовать", !voted);
                 voteMessage.textContent = voted ? "Спасибо! Голос учтен." : "Голос убран.";
                 voteButton.animate(
                     [{ transform: "scale(1)" }, { transform: "scale(1.3)" }, { transform: "scale(1)" }],

@@ -848,8 +848,45 @@ html[data-theme="dark"] .floating-card {
 }
 
 .likes-heart {
+    display: inline-flex;
+    align-items: center;
     color: var(--color-danger);
-    font-size: 18px;
+}
+
+.likes-heart svg {
+    display: block;
+}
+
+.vote-btn-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.icon-heart-inline {
+    flex-shrink: 0;
+}
+
+.draw-submit-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.draw-submit-success-badge svg {
+    display: block;
+}
+
+.footer-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-logo-icon {
+    flex-shrink: 0;
 }
 
 .filter-head {
@@ -2264,6 +2301,9 @@ input:focus, select:focus, textarea:focus {
     transform: translateY(8px);
     transition: var(--transition);
     z-index: 90;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .to-top-btn.visible {
