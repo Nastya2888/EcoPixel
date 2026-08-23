@@ -26,6 +26,10 @@ def _can_view_moderation_content(request) -> bool:
     return bool(request.user.is_authenticated and request.user.is_staff)
 
 
+def _is_own_drawing(drawing, user) -> bool:
+    return bool(user.is_authenticated and drawing.user_id == user.id)
+
+
 def _build_stored_image_name(original_name: str) -> str:
     safe_name = Path(original_name or "drawing.png").name
     ext = Path(safe_name).suffix.lower() or ".png"
@@ -171,13 +175,20 @@ def work_detail(request, pk):
     if not work.is_approved and not _can_view_moderation_content(request):
         raise Http404("Работа недоступна.")
     has_voted = False
+    is_own_work = False
     if request.user.is_authenticated:
         has_voted = Vote.objects.filter(drawing=work, user=request.user).exists()
+        is_own_work = _is_own_drawing(work, request.user)
     og_image_url = request.build_absolute_uri(reverse("drawing_image", args=[work.pk]))
     return render(
         request,
         "drawings/work_detail.html",
-        {"work": work, "has_voted": has_voted, "og_image_url": og_image_url},
+        {
+            "work": work,
+            "has_voted": has_voted,
+            "is_own_work": is_own_work,
+            "og_image_url": og_image_url,
+        },
     )
 
 
@@ -372,6 +383,13 @@ def vote(request, pk):
         )
 
     drawing = get_object_or_404(Drawing, pk=pk, is_approved=True)
+
+    if _is_own_drawing(drawing, request.user):
+        return JsonResponse(
+            {"success": False, "error": "Нельзя голосовать за свою работу."},
+            status=403,
+        )
+
     existing_vote = Vote.objects.filter(drawing=drawing, user=request.user).first()
 
     if existing_vote:

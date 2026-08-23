@@ -69,12 +69,14 @@
                         class="vote-btn btn-ripple {% if work.id in voted_ids %}voted{% endif %}"
                         data-id="{{ work.id }}"
                         data-voted="{% if work.id in voted_ids %}true{% else %}false{% endif %}"
-                        {% if not work.is_approved or not user.is_authenticated %}disabled{% endif %}
+                        {% if not work.is_approved or not user.is_authenticated or work.user_id == user.id %}disabled{% endif %}
                     >
                         {% if not work.is_approved %}
                             На модерации
                         {% elif not user.is_authenticated %}
                             ❤️ Войти, чтобы голосовать
+                        {% elif work.user_id == user.id %}
+                            Это ваша работа
                         {% elif work.id in voted_ids %}
                             Убрать голос
                         {% else %}

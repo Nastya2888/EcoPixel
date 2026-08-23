@@ -220,19 +220,24 @@ class HomePageTests(TestCase):
 class VotingTests(TestCase):
     def setUp(self):
         self.password = "StrongPass123!"
-        self.user = User.objects.create_user(
+        self.owner = User.objects.create_user(
+            username="owner@example.com",
+            email="owner@example.com",
+            password=self.password,
+        )
+        self.voter = User.objects.create_user(
             username="vote@example.com",
             email="vote@example.com",
             password=self.password,
         )
         self.category = Category.objects.create(name="10–13 лет", slug="age-10-13", theme="10–13 лет")
         self.drawing = Drawing.objects.create(
-            user=self.user,
+            user=self.owner,
             title="Тест",
             author="Тест",
             age=10,
             city="Астана",
-            email=self.user.email,
+            email=self.owner.email,
             category=self.category,
             image=SimpleUploadedFile(
                 "drawing.png",
@@ -252,8 +257,21 @@ class VotingTests(TestCase):
         response = self.client.post(reverse("vote", args=[self.drawing.id]))
         self.assertEqual(response.status_code, 401)
 
+    def test_user_cannot_vote_for_own_drawing(self):
+        self.client.login(username=self.owner.email, password=self.password)
+        response = self.client.post(reverse("vote", args=[self.drawing.id]))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(
+            response.content,
+            {"success": False, "error": "Нельзя голосовать за свою работу."},
+        )
+        self.assertEqual(Vote.objects.filter(drawing=self.drawing).count(), 0)
+        self.drawing.refresh_from_db()
+        self.assertEqual(self.drawing.votes, 0)
+
     def test_user_can_toggle_vote_off(self):
-        self.client.login(username=self.user.email, password=self.password)
+        self.client.login(username=self.voter.email, password=self.password)
         first = self.client.post(reverse("vote", args=[self.drawing.id]))
         second = self.client.post(reverse("vote", args=[self.drawing.id]))
 
@@ -261,7 +279,7 @@ class VotingTests(TestCase):
         self.assertJSONEqual(first.content, {"success": True, "votes": 1, "voted": True})
         self.assertEqual(second.status_code, 200)
         self.assertJSONEqual(second.content, {"success": True, "votes": 0, "voted": False})
-        self.assertEqual(Vote.objects.filter(drawing=self.drawing, user=self.user).count(), 0)
+        self.assertEqual(Vote.objects.filter(drawing=self.drawing, user=self.voter).count(), 0)
         self.drawing.refresh_from_db()
         self.assertEqual(self.drawing.votes, 0)
 

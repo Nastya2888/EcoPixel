@@ -39,10 +39,12 @@
                 class="btn-ripple {% if has_voted %}voted{% endif %}"
                 data-id="{{ work.id }}"
                 data-voted="{% if has_voted %}true{% else %}false{% endif %}"
-                {% if not user.is_authenticated %}disabled{% endif %}
+                {% if not user.is_authenticated or is_own_work %}disabled{% endif %}
             >
                 {% if not user.is_authenticated %}
                     ❤️ Войти, чтобы голосовать
+                {% elif is_own_work %}
+                    Это ваша работа
                 {% elif has_voted %}
                     Убрать голос
                 {% else %}
