@@ -3514,6 +3514,48 @@ main.container:has(.draw-v4) {
     overflow: hidden;
 }
 
+.draw-v4 .canvas-sidebar-preview {
+    flex-shrink: 0;
+    margin: 0 10px 8px;
+    padding: 12px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    text-align: center;
+}
+
+.draw-v4 .canvas-sidebar-preview-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 10px;
+    background:
+        linear-gradient(45deg, #edf1ee 25%, transparent 25%),
+        linear-gradient(-45deg, #edf1ee 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #edf1ee 75%),
+        linear-gradient(-45deg, transparent 75%, #edf1ee 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+    border: 1px solid rgba(27, 67, 50, 0.1);
+}
+
+.draw-v4 .canvas-sidebar-preview #preview-canvas {
+    display: block;
+    width: 96px;
+    height: 96px;
+    border-radius: 8px;
+    background: transparent;
+    image-rendering: pixelated;
+    box-shadow: 0 0 0 1px rgba(27, 67, 50, 0.08);
+}
+
+.draw-v4 .canvas-sidebar-preview .preview-caption {
+    margin-top: 8px;
+    margin-bottom: 0;
+    font-size: 11px;
+}
+
 .draw-v4 .canvas-sidebar-meta {
     flex-shrink: 0;
     margin: 0 10px 10px;
@@ -3853,6 +3895,17 @@ html[data-theme="dark"] .draw-v4 .sidebar-tab.is-active {
 html[data-theme="dark"] .draw-v4 .editor-canvas-area,
 html[data-theme="dark"] .draw-v4 .canvas-stage {
     background: #151f1b;
+}
+
+html[data-theme="dark"] .draw-v4 .canvas-sidebar-preview-frame {
+    background:
+        linear-gradient(45deg, #1a2723 25%, transparent 25%),
+        linear-gradient(-45deg, #1a2723 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #1a2723 75%),
+        linear-gradient(-45deg, transparent 75%, #1a2723 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+    border-color: rgba(126, 168, 148, 0.2);
 }
 
 html[data-theme="dark"] .draw-v4 .canvas-sidebar-meta {

@@ -86,9 +86,6 @@
         </aside>
 
         <main class="editor-canvas-area" id="canvas-viewport">
-            <div class="canvas-preview-float" title="Предпросмотр в галерее">
-                <canvas id="preview-canvas" width="96" height="96"></canvas>
-            </div>
             <div class="canvas-stage">
                 <div class="canvas-wrapper canvas-container">
                     <canvas id="main-canvas" width="32" height="32"></canvas>
@@ -198,6 +195,14 @@
                         <p id="submit-result" class="submit-result-inline"></p>
                     </div>
                 </section>
+            </div>
+
+            <div class="panel canvas-sidebar-preview preview-panel" title="Предпросмотр в галерее">
+                <div class="panel-title">Предпросмотр</div>
+                <div class="canvas-sidebar-preview-frame">
+                    <canvas id="preview-canvas" width="96" height="96"></canvas>
+                </div>
+                <p class="preview-caption">Как будет в галерее</p>
             </div>
 
             <div class="panel canvas-sidebar-meta" aria-label="Параметры холста">
@@ -331,5 +336,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260823-11"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260823-12"></script>
 {% endblock %}
