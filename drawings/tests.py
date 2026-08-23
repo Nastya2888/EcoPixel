@@ -252,14 +252,18 @@ class VotingTests(TestCase):
         response = self.client.post(reverse("vote", args=[self.drawing.id]))
         self.assertEqual(response.status_code, 401)
 
-    def test_user_cannot_vote_twice(self):
+    def test_user_can_toggle_vote_off(self):
         self.client.login(username=self.user.email, password=self.password)
         first = self.client.post(reverse("vote", args=[self.drawing.id]))
         second = self.client.post(reverse("vote", args=[self.drawing.id]))
 
         self.assertEqual(first.status_code, 200)
-        self.assertEqual(second.status_code, 403)
-        self.assertEqual(Vote.objects.filter(drawing=self.drawing, user=self.user).count(), 1)
+        self.assertJSONEqual(first.content, {"success": True, "votes": 1, "voted": True})
+        self.assertEqual(second.status_code, 200)
+        self.assertJSONEqual(second.content, {"success": True, "votes": 0, "voted": False})
+        self.assertEqual(Vote.objects.filter(drawing=self.drawing, user=self.user).count(), 0)
+        self.drawing.refresh_from_db()
+        self.assertEqual(self.drawing.votes, 0)
 
 
 class GalleryTests(TestCase):

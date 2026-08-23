@@ -370,17 +370,18 @@ def vote(request, pk):
         )
 
     drawing = get_object_or_404(Drawing, pk=pk, is_approved=True)
+    existing_vote = Vote.objects.filter(drawing=drawing, user=request.user).first()
 
-    if Vote.objects.filter(drawing=drawing, user=request.user).exists():
-        return JsonResponse(
-            {"success": False, "error": "Вы уже голосовали за эту работу"},
-            status=403,
-        )
+    if existing_vote:
+        existing_vote.delete()
+        drawing.votes = max(0, drawing.votes - 1)
+        drawing.save(update_fields=["votes"])
+        return JsonResponse({"success": True, "votes": drawing.votes, "voted": False})
 
+    Vote.objects.create(drawing=drawing, user=request.user)
     drawing.votes += 1
     drawing.save(update_fields=["votes"])
-    Vote.objects.create(drawing=drawing, user=request.user)
-    return JsonResponse({"success": True, "votes": drawing.votes})
+    return JsonResponse({"success": True, "votes": drawing.votes, "voted": True})
 
 
 def register(request):

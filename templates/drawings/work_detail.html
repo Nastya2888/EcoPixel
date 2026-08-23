@@ -36,12 +36,13 @@
                 id="vote-btn"
                 class="btn-ripple {% if has_voted %}voted{% endif %}"
                 data-id="{{ work.id }}"
-                {% if not user.is_authenticated or has_voted %}disabled{% endif %}
+                data-voted="{% if has_voted %}true{% else %}false{% endif %}"
+                {% if not user.is_authenticated %}disabled{% endif %}
             >
                 {% if not user.is_authenticated %}
                     ❤️ Войти, чтобы голосовать
                 {% elif has_voted %}
-                    Вы проголосовали ❤️
+                    Убрать голос
                 {% else %}
                     ❤️ Проголосовать
                 {% endif %}
@@ -97,11 +98,10 @@
         return;
     }
 
-    if (voteButton.disabled) return;
-
     voteButton.addEventListener("click", async () => {
+        const currentlyVoted = voteButton.dataset.voted === "true";
         voteButton.disabled = true;
-        voteMessage.textContent = "Отправляем голос...";
+        voteMessage.textContent = currentlyVoted ? "Убираем голос..." : "Отправляем голос...";
         const id = voteButton.dataset.id;
 
         try {
@@ -120,21 +120,16 @@
             }
 
             if (response.ok && data.success) {
-                voteMessage.textContent = "Спасибо! Голос учтен.";
-                voteButton.textContent = "Вы проголосовали ❤️";
-                voteButton.classList.add("voted");
+                const voted = Boolean(data.voted);
+                voteButton.dataset.voted = voted ? "true" : "false";
+                voteButton.classList.toggle("voted", voted);
+                voteButton.textContent = voted ? "Убрать голос" : "❤️ Проголосовать";
+                voteMessage.textContent = voted ? "Спасибо! Голос учтен." : "Голос убран.";
                 voteButton.animate(
                     [{ transform: "scale(1)" }, { transform: "scale(1.3)" }, { transform: "scale(1)" }],
                     { duration: 230 }
                 );
-                return;
-            }
-
-            if (response.status === 403) {
-                alert("Вы уже голосовали");
-                voteButton.textContent = "Вы уже голосовали ❤️";
-                voteButton.classList.add("voted");
-                voteMessage.textContent = data.error || "Вы уже голосовали за эту работу.";
+                voteButton.disabled = false;
                 return;
             }
 
@@ -145,7 +140,7 @@
 
             voteButton.disabled = false;
             alert("Ошибка, попробуйте позже");
-            voteMessage.textContent = data.error || "Не удалось проголосовать.";
+            voteMessage.textContent = data.error || "Не удалось изменить голос.";
         } catch (error) {
             voteButton.disabled = false;
             alert("Ошибка, попробуйте позже");
