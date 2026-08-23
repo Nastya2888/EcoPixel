@@ -898,6 +898,8 @@ html[data-theme="dark"] .floating-card {
     padding: 12px 14px;
     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     color: var(--color-white);
+    position: relative;
+    z-index: 1;
 }
 
 .vote-btn svg,
@@ -905,7 +907,17 @@ html[data-theme="dark"] .floating-card {
     vertical-align: middle;
 }
 
-.vote-btn.voted, #vote-btn.voted,
+.vote-btn.voted, #vote-btn.voted {
+    background: var(--color-muted-bg);
+    color: var(--color-text);
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.vote-btn.voted:hover, #vote-btn.voted:hover {
+    background: var(--color-border);
+}
+
 .vote-btn:disabled, #vote-btn:disabled {
     background: var(--color-muted-bg);
     color: var(--color-text);
@@ -1039,6 +1051,7 @@ html[data-theme="dark"] .floating-card {
     background: radial-gradient(circle, var(--color-white-35), var(--color-white-00));
     opacity: 0;
     transition: var(--transition);
+    pointer-events: none;
 }
 
 .vote-btn-wrap:active:after { opacity: 1; }

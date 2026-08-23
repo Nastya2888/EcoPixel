@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Галерея | ЭкоПиксель{% endblock %}
 
@@ -64,6 +65,7 @@
                         <span class="votes-count">{{ work.votes }}</span>
                     </div>
                     <button
+                        type="button"
                         class="vote-btn btn-ripple {% if work.id in voted_ids %}voted{% endif %}"
                         data-id="{{ work.id }}"
                         data-voted="{% if work.id in voted_ids %}true{% else %}false{% endif %}"
@@ -97,78 +99,5 @@
     </div>
 </section>
 
-<script>
-(() => {
-    const csrfInput = document.querySelector("input[name='csrfmiddlewaretoken']");
-    const token = csrfInput ? csrfInput.value : "";
-    const buttons = document.querySelectorAll(".vote-btn");
-    const filledHeart = '<svg class="icon-heart-filled" width="20" height="20" viewBox="0 0 24 24" fill="#E74C3C" stroke="#E74C3C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-    const emptyHeart = '<svg class="icon-heart" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-
-    function applyVoteState(button, card, voted, votes) {
-        const counter = card ? card.querySelector(".votes-count") : null;
-        const heart = card ? card.querySelector("[data-heart]") : null;
-        if (counter && typeof votes === "number") {
-            counter.textContent = String(votes);
-        }
-        if (heart) {
-            heart.innerHTML = voted ? filledHeart : emptyHeart;
-            heart.animate(
-                [{ transform: "scale(1)" }, { transform: "scale(1.4)" }, { transform: "scale(1)" }],
-                { duration: 220 }
-            );
-        }
-        button.dataset.voted = voted ? "true" : "false";
-        button.classList.toggle("voted", voted);
-        button.textContent = voted ? "Убрать голос" : "❤️ Голосовать";
-        button.disabled = false;
-    }
-
-    buttons.forEach((button) => {
-        if (button.disabled) {
-            if (button.textContent.includes("Войти")) {
-                button.addEventListener("click", () => {
-                    window.location.href = "/login/?next=/gallery/";
-                });
-                button.disabled = false;
-            }
-            return;
-        }
-
-        button.addEventListener("click", async () => {
-            const id = button.dataset.id;
-            const card = button.closest(".work-card");
-            button.disabled = true;
-
-            try {
-                const response = await fetch(`/vote/${id}/`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": token,
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
-                    credentials: "same-origin",
-                });
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    applyVoteState(button, card, Boolean(data.voted), data.votes);
-                    return;
-                }
-
-                if (response.status === 401) {
-                    window.location.href = "/login/?next=/gallery/";
-                    return;
-                }
-
-                alert("Ошибка, попробуйте позже");
-                button.disabled = false;
-            } catch (error) {
-                alert("Ошибка, попробуйте позже");
-                button.disabled = false;
-            }
-        });
-    });
-})();
-</script>
+<script src="{% static 'js/votes.js' %}?v=20260823-02"></script>
 {% endblock %}

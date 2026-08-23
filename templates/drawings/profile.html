@@ -47,9 +47,6 @@
                         <button class="btn-secondary" type="submit">Восстановить изображение</button>
                     </form>
                 {% endif %}
-                {% if work.id in winner_ids %}
-                    <a class="btn-secondary" href="{% url 'certificate' work.id %}">Сертификат</a>
-                {% endif %}
             </div>
         </article>
     {% empty %}

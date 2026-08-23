@@ -3,6 +3,7 @@ from uuid import uuid4
 from html import escape
 
 from django.http import Http404, HttpResponse, JsonResponse
+from django.db import transaction
 from django.db.models import Sum
 from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
@@ -362,6 +363,7 @@ def restore_drawing_image(request, pk):
 
 
 @require_POST
+@transaction.atomic
 def vote(request, pk):
     if not request.user.is_authenticated:
         return JsonResponse(
@@ -459,22 +461,11 @@ def profile(request):
         if not has_file and not has_blob:
             missing_image_ids.add(drawing.id)
 
-    winner_ids = set()
-    for category in Category.objects.all():
-        winner = (
-            Drawing.objects.filter(category=category, is_approved=True)
-            .order_by("-votes", "-created_at")
-            .first()
-        )
-        if winner:
-            winner_ids.add(winner.id)
-
     return render(
         request,
         "drawings/profile.html",
         {
             "drawings": drawings,
-            "winner_ids": winner_ids,
             "missing_image_ids": missing_image_ids,
             "restore_status": request.GET.get("restore", ""),
         },
