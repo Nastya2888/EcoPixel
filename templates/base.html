@@ -27,7 +27,7 @@
     </script>
     <link rel="icon" type="image/png" href="{% static 'img/logoeco.png' %}">
     <link rel="apple-touch-icon" href="{% static 'img/logoeco.png' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260823-19">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260823-20">
 </head>
 <body{% block body_attrs %}{% endblock %}>
 <div class="bg-pixels" aria-hidden="true">
@@ -81,19 +81,21 @@
     {% block content %}{% endblock %}
 </main>
 <footer class="site-footer">
-    <div class="footer-gradient"></div>
-    <div class="container">
-        <p class="footer-logo">
-            <img class="footer-logo-icon" src="{% static 'img/logoeco.png' %}" width="22" height="22" alt="">
-            <span>ЭкоПиксель</span>
-        </p>
-        <p>ЭкоПиксель — конкурс пиксельных рисунков</p>
-        <nav class="footer-nav">
-            <a href="{% url 'rules' %}">Правила</a>
-            <a href="{% url 'gallery' %}">Галерея</a>
-            <a href="{% url 'results' %}">Результаты</a>
-        </nav>
-        <p>&copy; ЭкоПиксель 2026</p>
+    <div class="footer-forest" aria-hidden="true"></div>
+    <div class="footer-ground">
+        <div class="container footer-inner">
+            <p class="footer-logo">
+                <img class="footer-logo-icon" src="{% static 'img/logoeco.png' %}" width="22" height="22" alt="">
+                <span>ЭкоПиксель</span>
+            </p>
+            <p class="footer-tagline">ЭкоПиксель — конкурс пиксельных рисунков</p>
+            <nav class="footer-nav">
+                <a href="{% url 'rules' %}">Правила</a>
+                <a href="{% url 'gallery' %}">Галерея</a>
+                <a href="{% url 'results' %}">Результаты</a>
+            </nav>
+            <p class="footer-copy">&copy; ЭкоПиксель 2026</p>
+        </div>
     </div>
 </footer>
 <button id="to-top-btn" class="to-top-btn" aria-label="Наверх">

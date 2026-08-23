@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 64" shape-rendering="crispEdges">
+  <rect width="256" height="64" fill="none"/>
+  <!-- ground -->
+  <rect y="56" width="256" height="8" fill="#1B4332"/>
+  <!-- pine 1 -->
+  <rect x="8" y="48" width="8" height="8" fill="#1B4332"/>
+  <rect x="4" y="40" width="16" height="8" fill="#1B4332"/>
+  <rect x="0" y="32" width="24" height="8" fill="#234F3D"/>
+  <rect x="4" y="24" width="16" height="8" fill="#1B4332"/>
+  <rect x="8" y="16" width="8" height="8" fill="#2D6A4F"/>
+  <!-- bush 2 -->
+  <rect x="36" y="48" width="8" height="8" fill="#1B4332"/>
+  <rect x="32" y="40" width="16" height="8" fill="#234F3D"/>
+  <rect x="28" y="32" width="24" height="8" fill="#1B4332"/>
+  <rect x="32" y="24" width="16" height="8" fill="#2D6A4F"/>
+  <!-- tall pine 3 -->
+  <rect x="68" y="48" width="8" height="8" fill="#1B4332"/>
+  <rect x="64" y="40" width="16" height="8" fill="#1B4332"/>
+  <rect x="60" y="32" width="24" height="8" fill="#234F3D"/>
+  <rect x="56" y="24" width="32" height="8" fill="#1B4332"/>
+  <rect x="60" y="16" width="24" height="8" fill="#234F3D"/>
+  <rect x="64" y="8" width="16" height="8" fill="#1B4332"/>
+  <rect x="68" y="0" width="8" height="8" fill="#2D6A4F"/>
+  <!-- round tree 4 -->
+  <rect x="104" y="48" width="8" height="8" fill="#1B4332"/>
+  <rect x="96" y="40" width="24" height="8" fill="#1B4332"/>
+  <rect x="92" y="32" width="32" height="8" fill="#234F3D"/>
+  <rect x="96" y="24" width="24" height="8" fill="#1B4332"/>
+  <rect x="100" y="16" width="16" height="8" fill="#2D6A4F"/>
+  <!-- small pine 5 -->
+  <rect x="140" y="48" width="8" height="8" fill="#1B4332"/>
+  <rect x="136" y="40" width="16" height="8" fill="#1B4332"/>
+  <rect x="132" y="32" width="24" height="8" fill="#234F3D"/>
+  <rect x="136" y="24" width="16" height="8" fill="#1B4332"/>
+  <!-- bush 6 -->
+  <rect x="168" y="48" width="8" height="8" fill="#1B4332"/>
+  <rect x="160" y="40" width="24" height="8" fill="#1B4332"/>
+  <rect x="156" y="32" width="32" height="8" fill="#234F3D"/>
+  <rect x="164" y="24" width="16" height="8" fill="#2D6A4F"/>
+  <!-- tall pine 7 -->
+  <rect x="200" y="48" width="8" height="8" fill="#1B4332"/>
+  <rect x="196" y="40" width="16" height="8" fill="#1B4332"/>
+  <rect x="192" y="32" width="24" height="8" fill="#234F3D"/>
+  <rect x="188" y="24" width="32" height="8" fill="#1B4332"/>
+  <rect x="192" y="16" width="24" height="8" fill="#1B4332"/>
+  <rect x="196" y="8" width="16" height="8" fill="#234F3D"/>
+  <rect x="200" y="0" width="8" height="8" fill="#2D6A4F"/>
+  <!-- pine 8 -->
+  <rect x="232" y="48" width="8" height="8" fill="#1B4332"/>
+  <rect x="228" y="40" width="16" height="8" fill="#1B4332"/>
+  <rect x="224" y="32" width="24" height="8" fill="#234F3D"/>
+  <rect x="228" y="24" width="16" height="8" fill="#1B4332"/>
+  <rect x="232" y="16" width="8" height="8" fill="#2D6A4F"/>
+</svg>

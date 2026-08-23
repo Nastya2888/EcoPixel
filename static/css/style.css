@@ -93,9 +93,16 @@ html[data-theme="dark"] .tool-button.active {
 }
 
 html[data-theme="dark"] .site-footer {
-    background: #0C1412;
-    color: #8FA99C;
-    border-top: 1px solid rgba(82, 183, 136, 0.24);
+    --footer-bg: #0C1412;
+    --footer-bg-deep: #060a09;
+}
+
+html[data-theme="dark"] .footer-ground {
+    background: linear-gradient(180deg, var(--footer-bg) 0%, var(--footer-bg-deep) 100%);
+}
+
+html[data-theme="dark"] .footer-forest {
+    filter: brightness(0.82);
 }
 
 html[data-theme="dark"] .footer-logo {
@@ -2306,21 +2313,45 @@ input:focus, select:focus, textarea:focus {
 }
 
 .site-footer {
-    margin-top: 24px;
-    background: var(--color-text);
-    color: var(--color-text-muted);
+    --footer-bg: #1B4332;
+    --footer-bg-deep: #0f2919;
+    margin-top: 64px;
+    padding: 0;
+    background: transparent;
+    color: #A8C4B4;
     text-align: center;
     position: relative;
-    padding: 40px 0;
+}
+
+.footer-forest {
+    height: 64px;
+    background-image: url("../img/footer-forest.svg");
+    background-repeat: repeat-x;
+    background-position: bottom center;
+    background-size: 256px 64px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.footer-ground {
+    background: linear-gradient(180deg, var(--footer-bg) 0%, var(--footer-bg-deep) 100%);
+    padding: 28px 0 36px;
+}
+
+.footer-inner {
+    display: grid;
+    gap: 8px;
+}
+
+.footer-tagline,
+.footer-copy {
+    margin: 0;
+    font-size: 14px;
+    color: #8FA99C;
 }
 
 .footer-gradient {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    display: none;
 }
 
 .footer-logo {
@@ -2334,11 +2365,11 @@ input:focus, select:focus, textarea:focus {
     justify-content: center;
     gap: 14px;
     flex-wrap: wrap;
-    margin: 10px 0;
+    margin: 6px 0 4px;
 }
 
 .footer-nav a {
-    color: var(--color-text-muted);
+    color: #A8C4B4;
 }
 
 .footer-nav a:hover { color: var(--color-white); }
