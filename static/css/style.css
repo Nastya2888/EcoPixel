@@ -3433,6 +3433,9 @@ body.page-draw #to-top-btn {
 body.page-draw .draw-page {
     height: 100%;
     min-height: 0;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
 }
 
 body.page-draw .draw-v4 .editor-workspace {
@@ -3618,6 +3621,8 @@ main.container:has(.draw-v4) {
 
 .draw-v4 .canvas-stage {
     grid-row: 1;
+    align-self: stretch;
+    width: 100%;
     min-height: 0;
     overflow: auto;
     display: flex;
@@ -3638,6 +3643,8 @@ body.page-draw .draw-v4 .editor-canvas-area .canvas-wrapper,
 .draw-v4 .editor-canvas-area .canvas-wrapper {
     position: relative;
     overflow: hidden;
+    width: var(--canvas-display-width, 100%) !important;
+    height: var(--canvas-display-height, auto) !important;
     max-width: none !important;
     max-height: none !important;
     aspect-ratio: auto !important;

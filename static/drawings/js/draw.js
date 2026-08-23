@@ -186,14 +186,19 @@
     let canvasZoom = 1;
 
     function getAvailableCanvasBounds() {
-        const stage = canvasStage || canvasViewport;
-        if (!stage) {
+        const viewport = canvasViewport;
+        if (!viewport) {
             return { width: 480, height: 480 };
         }
-        const rect = stage.getBoundingClientRect();
+
+        const rect = viewport.getBoundingClientRect();
+        const statusBar = viewport.querySelector(".canvas-meta");
+        const statusHeight = statusBar ? statusBar.getBoundingClientRect().height : 0;
+        const padding = 32;
+
         return {
-            width: Math.max(120, rect.width - 32),
-            height: Math.max(120, rect.height - 32),
+            width: Math.max(160, rect.width - padding),
+            height: Math.max(160, rect.height - statusHeight - padding),
         };
     }
 
@@ -212,12 +217,22 @@
             baseHeight = baseWidth / aspect;
         }
 
-        const width = Math.max(120, Math.round(baseWidth * canvasZoom));
-        const height = Math.max(120, Math.round(baseHeight * canvasZoom));
+        const width = Math.max(160, Math.round(baseWidth * canvasZoom));
+        const height = Math.max(160, Math.round(baseHeight * canvasZoom));
+        canvasContainer.style.setProperty("--canvas-display-width", `${width}px`);
+        canvasContainer.style.setProperty("--canvas-display-height", `${height}px`);
         canvasContainer.style.width = `${width}px`;
         canvasContainer.style.height = `${height}px`;
         syncCanvasDisplaySize();
         if (zoomLabel) zoomLabel.textContent = `${Math.round(canvasZoom * 100)}%`;
+    }
+
+    function scheduleCanvasLayout() {
+        applyCanvasZoom();
+        requestAnimationFrame(() => {
+            applyCanvasZoom();
+            requestAnimationFrame(applyCanvasZoom);
+        });
     }
 
     function setCanvasZoom(nextZoom) {
@@ -1010,7 +1025,7 @@
         cursorCanvas.width = gridWidth;
         cursorCanvas.height = gridHeight;
         if (canvasContainer) {
-            canvasContainer.style.aspectRatio = `${gridWidth} / ${gridHeight}`;
+            canvasContainer.style.removeProperty("aspect-ratio");
         }
         ctx.imageSmoothingEnabled = false;
         templateCtx.imageSmoothingEnabled = false;
@@ -1740,7 +1755,7 @@
     );
 
     window.addEventListener("keydown", handleKeyboard);
-    window.addEventListener("resize", applyCanvasZoom);
+    window.addEventListener("resize", scheduleCanvasLayout);
 
     setInterval(() => {
         if (!isDrawingChanged) return;
@@ -1773,10 +1788,11 @@
     syncBrushSize(brushSize);
     syncTemplateOpacity(templateOpacity);
     initCanvas(32, 32);
-    requestAnimationFrame(() => applyCanvasZoom());
-    if (canvasStage && typeof ResizeObserver !== "undefined") {
-        const stageObserver = new ResizeObserver(() => applyCanvasZoom());
-        stageObserver.observe(canvasStage);
+    scheduleCanvasLayout();
+    if (typeof ResizeObserver !== "undefined") {
+        const layoutObserver = new ResizeObserver(() => scheduleCanvasLayout());
+        if (canvasViewport) layoutObserver.observe(canvasViewport);
+        if (canvasStage) layoutObserver.observe(canvasStage);
     }
     setPresetSelection(32, 32);
     updateCategoryPreview();
