@@ -138,10 +138,15 @@
                         </div>
                         <div class="size-custom size-custom-compact">
                             <div class="size-custom-title">Свой размер</div>
-                            <div class="size-custom-inputs">
-                                <input id="custom-width-input" type="number" min="8" max="128" value="32" aria-label="Ширина холста">
-                                <span>×</span>
-                                <input id="custom-height-input" type="number" min="8" max="128" value="32" aria-label="Высота холста">
+                            <div class="size-custom-fields">
+                                <label class="size-field" for="custom-width-input">
+                                    <span>Ширина</span>
+                                    <input id="custom-width-input" type="number" min="8" max="128" value="32">
+                                </label>
+                                <label class="size-field" for="custom-height-input">
+                                    <span>Высота</span>
+                                    <input id="custom-height-input" type="number" min="8" max="128" value="32">
+                                </label>
                             </div>
                             <button id="apply-custom-size" class="btn-secondary btn-compact" type="button">Применить</button>
                         </div>
