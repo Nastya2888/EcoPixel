@@ -192,12 +192,10 @@
         }
 
         const rect = viewport.getBoundingClientRect();
-        const metaRail = viewport.querySelector(".canvas-meta");
-        const metaWidth = metaRail ? metaRail.getBoundingClientRect().width : 0;
         const padding = 32;
 
         return {
-            width: Math.max(160, rect.width - metaWidth - padding),
+            width: Math.max(160, rect.width - padding),
             height: Math.max(160, rect.height - padding),
         };
     }

@@ -97,17 +97,10 @@
                     <canvas id="cursor-canvas" width="32" height="32"></canvas>
                 </div>
             </div>
-            <aside class="canvas-meta canvas-info canvas-status canvas-meta-rail" aria-label="Параметры холста">
-                <span class="meta-badge" id="canvas-size-badge">32×32</span>
-                <span class="meta-badge" id="meta-zoom">100%</span>
-                <span class="meta-color" id="meta-color">Коралл</span>
-                <span class="color-dot" id="current-color-dot"></span>
-                <span class="meta-color" id="meta-thickness">1 px</span>
-                <span class="meta-color" id="meta-layer">Слой 1</span>
-            </aside>
         </main>
 
         <aside class="editor-sidebar right">
+            <div class="sidebar-body">
             <div class="sidebar-panel-stack">
                 <section class="sidebar-panel is-active" data-panel="size">
                     <div class="panel settings-panel">
@@ -205,6 +198,36 @@
                         <p id="submit-result" class="submit-result-inline"></p>
                     </div>
                 </section>
+            </div>
+
+            <div class="panel canvas-sidebar-meta" aria-label="Параметры холста">
+                <div class="panel-title">Холст</div>
+                <div class="canvas-sidebar-meta-list">
+                    <div class="meta-row">
+                        <span class="meta-label">Размер</span>
+                        <span class="meta-badge" id="canvas-size-badge">32×32</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Масштаб</span>
+                        <span class="meta-badge" id="meta-zoom">100%</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Цвет</span>
+                        <span class="meta-row-value">
+                            <span class="meta-color" id="meta-color">Коралл</span>
+                            <span class="color-dot" id="current-color-dot"></span>
+                        </span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Толщина</span>
+                        <span class="meta-color" id="meta-thickness">1 px</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Слой</span>
+                        <span class="meta-color" id="meta-layer">Слой 1</span>
+                    </div>
+                </div>
+            </div>
             </div>
 
             <nav class="sidebar-tab-rail" aria-label="Панели редактора">
@@ -308,5 +331,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260823-10"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260823-11"></script>
 {% endblock %}
