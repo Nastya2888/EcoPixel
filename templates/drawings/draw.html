@@ -9,7 +9,7 @@
         <aside class="editor-sidebar left">
             <div class="panel tools-panel" id="tools">
                 <div class="panel-title">Инструменты</div>
-                <div class="tools-list">
+                <div class="tools-list tools-grid">
                     <button class="tool tool-btn active" data-tool="pencil" title="Карандаш (B)" type="button">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                         <span>Карандаш</span>
@@ -83,7 +83,10 @@
             </div>
         </aside>
 
-        <main class="editor-canvas-area">
+        <main class="editor-canvas-area" id="canvas-viewport">
+            <div class="canvas-preview-float" title="Предпросмотр в галерее">
+                <canvas id="preview-canvas" width="96" height="96"></canvas>
+            </div>
             <div class="canvas-frame">
                 <div class="canvas-wrapper canvas-container">
                     <canvas id="main-canvas" width="32" height="32"></canvas>
@@ -93,6 +96,8 @@
                 </div>
                 <div class="canvas-meta canvas-info">
                     <span class="meta-badge" id="canvas-size-badge">32×32</span>
+                    <span class="meta-dot divider"></span>
+                    <span class="meta-badge" id="meta-zoom">100%</span>
                     <span class="meta-dot divider"></span>
                     <span class="meta-color" id="meta-color">Коралл</span>
                     <span class="color-dot" id="current-color-dot"></span>
@@ -105,91 +110,118 @@
         </main>
 
         <aside class="editor-sidebar right">
-            <div class="panel settings-panel">
-                <div class="panel-title">Размер</div>
-                <label class="size-card">
-                    <input type="radio" name="grid-size" value="32" checked>
-                    <div class="size-visual">
-                        <div class="size-grid grid-32"></div>
+            <div class="sidebar-panel-stack">
+                <section class="sidebar-panel is-active" data-panel="size">
+                    <div class="panel settings-panel">
+                        <div class="panel-title">Размер холста</div>
+                        <div class="size-presets">
+                            <label class="size-card size-card-compact">
+                                <input type="radio" name="grid-size" value="32" checked>
+                                <div class="size-visual">
+                                    <div class="size-grid grid-32"></div>
+                                </div>
+                                <div class="size-text">
+                                    <strong>32×32</strong>
+                                    <span>Начинающим</span>
+                                </div>
+                            </label>
+                            <label class="size-card size-card-compact">
+                                <input type="radio" name="grid-size" value="64">
+                                <div class="size-visual">
+                                    <div class="size-grid grid-64"></div>
+                                </div>
+                                <div class="size-text">
+                                    <strong>64×64</strong>
+                                    <span>Опытным</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="size-custom size-custom-compact">
+                            <div class="size-custom-title">Свой размер</div>
+                            <div class="size-custom-inputs">
+                                <input id="custom-width-input" type="number" min="8" max="128" value="32" aria-label="Ширина холста">
+                                <span>×</span>
+                                <input id="custom-height-input" type="number" min="8" max="128" value="32" aria-label="Высота холста">
+                            </div>
+                            <button id="apply-custom-size" class="btn-secondary btn-compact" type="button">Применить</button>
+                        </div>
                     </div>
-                    <div class="size-text">
-                        <strong>32×32</strong>
-                        <span>Для начинающих</span>
+                </section>
+
+                <section class="sidebar-panel" data-panel="templates">
+                    <div class="panel template-picker">
+                        <div class="panel-title">Шаблоны</div>
+                        <select id="template-select" aria-label="Выбор шаблона">
+                            <option value="">Без шаблона</option>
+                            <option value="forest-32">Лес (32×32)</option>
+                            <option value="house-32">Домик и деревья (32×32)</option>
+                            <option value="mountains-32">Горы и река (32×32)</option>
+                            <option value="forest-64">Лес (64×64)</option>
+                            <option value="house-64">Домик и деревья (64×64)</option>
+                            <option value="mountains-64">Горы и река (64×64)</option>
+                        </select>
+                        <label class="template-opacity-label" for="template-opacity-range">
+                            Прозрачность
+                            <span id="template-opacity-value">45%</span>
+                        </label>
+                        <input id="template-opacity-range" type="range" min="15" max="80" value="45">
+                        <button id="clear-template-btn" class="btn-secondary btn-compact" type="button">Убрать шаблон</button>
+                        <p class="template-picker-hint">Шаблон не попадёт в итоговый PNG.</p>
                     </div>
-                </label>
-                <label class="size-card">
-                    <input type="radio" name="grid-size" value="64">
-                    <div class="size-visual">
-                        <div class="size-grid grid-64"></div>
+                </section>
+
+                <section class="sidebar-panel" data-panel="layers">
+                    <div class="panel layers-panel">
+                        <div class="layers-head">
+                            <div class="panel-title">Слои</div>
+                            <button id="add-layer-btn" class="layer-add-btn" type="button" title="Добавить слой">+</button>
+                        </div>
+                        <div id="layers-list" class="layers-list"></div>
                     </div>
-                    <div class="size-text">
-                        <strong>64×64</strong>
-                        <span>Для опытных</span>
+                </section>
+
+                <section class="sidebar-panel" data-panel="file">
+                    <div class="panel file-panel">
+                        <div class="panel-title">Файл</div>
+                        <button class="btn-secondary download-btn btn-compact" id="download-btn" type="button">Скачать PNG</button>
+                        {% if user.is_authenticated %}
+                            <button class="submit-btn btn-compact" id="submit-btn" type="button">
+                                <span>Готово — отправить</span>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                        {% else %}
+                            <div class="auth-submit-box auth-submit-box-compact">
+                                <p>Войдите, чтобы отправить работу</p>
+                                <div class="auth-submit-actions">
+                                    <a class="btn-secondary btn-compact" href="{% url 'login' %}?next=/draw/">Войти</a>
+                                    <a class="btn btn-compact" href="{% url 'register' %}">Регистрация</a>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <p id="auth-required-message" class="form-errors"></p>
+                        <p id="submit-result" class="submit-result-inline"></p>
                     </div>
-                </label>
-                <div class="size-custom">
-                    <div class="size-custom-title">Свой размер</div>
-                    <div class="size-custom-inputs">
-                        <input id="custom-width-input" type="number" min="8" max="128" value="32" aria-label="Ширина холста">
-                        <span>×</span>
-                        <input id="custom-height-input" type="number" min="8" max="128" value="32" aria-label="Высота холста">
-                    </div>
-                    <button id="apply-custom-size" class="btn-secondary" type="button">Применить размер</button>
-                </div>
-                <div class="template-picker">
-                    <div class="template-picker-title">Шаблоны</div>
-                    <select id="template-select" aria-label="Выбор шаблона">
-                        <option value="">Без шаблона</option>
-                        <option value="forest-32">Лес (32×32)</option>
-                        <option value="house-32">Домик и деревья (32×32)</option>
-                        <option value="mountains-32">Горы и река (32×32)</option>
-                        <option value="forest-64">Лес (64×64)</option>
-                        <option value="house-64">Домик и деревья (64×64)</option>
-                        <option value="mountains-64">Горы и река (64×64)</option>
-                    </select>
-                    <label class="template-opacity-label" for="template-opacity-range">
-                        Прозрачность шаблона
-                        <span id="template-opacity-value">45%</span>
-                    </label>
-                    <input id="template-opacity-range" type="range" min="15" max="80" value="45">
-                    <button id="clear-template-btn" class="btn-secondary" type="button">Убрать шаблон</button>
-                    <p class="template-picker-hint">Шаблон отображается поверх холста и не попадет в итоговый PNG.</p>
-                </div>
+                </section>
             </div>
 
-            <div class="panel layers-panel">
-                <div class="layers-head">
-                    <div class="panel-title">Слои</div>
-                    <button id="add-layer-btn" class="layer-add-btn" type="button" title="Добавить слой">+</button>
-                </div>
-                <div id="layers-list" class="layers-list"></div>
-            </div>
-
-            <div class="panel preview-panel">
-                <div class="panel-title">Предпросмотр</div>
-                <canvas id="preview-canvas" width="128" height="128"></canvas>
-                <p class="preview-caption">Так работа будет в галерее</p>
-            </div>
-
-            <button class="btn-secondary download-btn" id="download-btn" type="button">Скачать PNG</button>
-
-            {% if user.is_authenticated %}
-                <button class="submit-btn" id="submit-btn" type="button">
-                    <span>Готово</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <nav class="sidebar-tab-rail" aria-label="Панели редактора">
+                <button type="button" class="sidebar-tab is-active" data-tab="size" title="Размер">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 3v18"></path></svg>
+                    <span>Размер</span>
                 </button>
-            {% else %}
-                <div class="panel auth-submit-box">
-                    <p>Войдите, чтобы отправить работу</p>
-                    <div class="auth-submit-actions">
-                        <a class="btn-secondary" href="{% url 'login' %}?next=/draw/">Войти</a>
-                        <a class="btn" href="{% url 'register' %}">Регистрация</a>
-                    </div>
-                </div>
-            {% endif %}
-
-            <p id="auth-required-message" class="form-errors"></p>
-            <p id="submit-result"></p>
+                <button type="button" class="sidebar-tab" data-tab="templates" title="Шаблоны">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    <span>Шаблоны</span>
+                </button>
+                <button type="button" class="sidebar-tab" data-tab="layers" title="Слои">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    <span>Слои</span>
+                </button>
+                <button type="button" class="sidebar-tab" data-tab="file" title="Файл">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Файл</span>
+                </button>
+            </nav>
         </aside>
     </div>
 </section>
@@ -273,5 +305,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260823-03"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260823-04"></script>
 {% endblock %}

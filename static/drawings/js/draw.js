@@ -15,6 +15,10 @@
     const customColorPicker = document.getElementById("customColorPicker");
     const addCustomColorBtn = document.getElementById("addCustomColor");
     const canvasContainer = document.querySelector(".canvas-container");
+    const canvasViewport = document.getElementById("canvas-viewport");
+    const zoomLabel = document.getElementById("meta-zoom");
+    const sidebarTabs = document.querySelectorAll(".sidebar-tab");
+    const sidebarPanels = document.querySelectorAll(".sidebar-panel");
     const gridSizeInputs = document.querySelectorAll("input[name='grid-size']");
     const customWidthInput = document.getElementById("custom-width-input");
     const customHeightInput = document.getElementById("custom-height-input");
@@ -100,6 +104,9 @@
     const MIN_BRUSH_SIZE = 1;
     const MAX_BRUSH_SIZE = 12;
     const MAX_LAYERS = 16;
+    const MIN_CANVAS_ZOOM = 0.5;
+    const MAX_CANVAS_ZOOM = 8;
+    const CANVAS_ZOOM_STEP = 0.12;
     const TEMPLATE_SIZE_32 = 32;
     const TEMPLATE_SIZE_64 = 64;
     const MIN_TEMPLATE_OPACITY = 15;
@@ -175,6 +182,46 @@
     let handDragState = null;
     let selectedTemplateId = "";
     let templateOpacity = DEFAULT_TEMPLATE_OPACITY;
+    let canvasZoom = 1;
+
+    function getBaseCanvasDisplaySize() {
+        if (!canvasViewport) return 480;
+        const rect = canvasViewport.getBoundingClientRect();
+        const padding = 56;
+        const maxW = Math.max(160, rect.width - padding);
+        const maxH = Math.max(160, rect.height - padding - 56);
+        return Math.min(maxW, maxH, 560);
+    }
+
+    function applyCanvasZoom() {
+        if (!canvasContainer) return;
+        const baseSize = getBaseCanvasDisplaySize();
+        const aspect = gridWidth / gridHeight;
+        let width = Math.max(120, Math.round(baseSize * canvasZoom));
+        let height = Math.max(120, Math.round(width / aspect));
+        if (height > Math.round(baseSize * canvasZoom * 1.15)) {
+            height = Math.max(120, Math.round(baseSize * canvasZoom));
+            width = Math.max(120, Math.round(height * aspect));
+        }
+        canvasContainer.style.width = `${width}px`;
+        canvasContainer.style.height = `${height}px`;
+        syncCanvasDisplaySize();
+        if (zoomLabel) zoomLabel.textContent = `${Math.round(canvasZoom * 100)}%`;
+    }
+
+    function setCanvasZoom(nextZoom) {
+        canvasZoom = Math.min(MAX_CANVAS_ZOOM, Math.max(MIN_CANVAS_ZOOM, nextZoom));
+        applyCanvasZoom();
+    }
+
+    function activateSidebarPanel(panelId) {
+        sidebarTabs.forEach((tab) => {
+            tab.classList.toggle("is-active", tab.dataset.tab === panelId);
+        });
+        sidebarPanels.forEach((panel) => {
+            panel.classList.toggle("is-active", panel.dataset.panel === panelId);
+        });
+    }
 
     function normalizeHex(hex) {
         return String(hex || "").trim().toUpperCase();
@@ -970,7 +1017,7 @@
 
         drawGrid();
         clearCursorHighlight();
-        syncCanvasDisplaySize();
+        applyCanvasZoom();
         renderTemplateOverlay();
         updateTemplateOverlayVisibility();
         syncCustomInputs(gridWidth, gridHeight);
@@ -1667,8 +1714,22 @@
     canvas.addEventListener("touchend", stopDraw, { passive: false });
     canvas.addEventListener("touchcancel", stopDraw, { passive: false });
 
+    sidebarTabs.forEach((tab) => {
+        tab.addEventListener("click", () => activateSidebarPanel(tab.dataset.tab));
+    });
+
+    canvasViewport?.addEventListener(
+        "wheel",
+        (event) => {
+            event.preventDefault();
+            const delta = event.deltaY > 0 ? -CANVAS_ZOOM_STEP : CANVAS_ZOOM_STEP;
+            setCanvasZoom(canvasZoom + delta);
+        },
+        { passive: false }
+    );
+
     window.addEventListener("keydown", handleKeyboard);
-    window.addEventListener("resize", syncCanvasDisplaySize);
+    window.addEventListener("resize", applyCanvasZoom);
 
     setInterval(() => {
         if (!isDrawingChanged) return;

@@ -3419,3 +3419,339 @@ html[data-theme="dark"] .draw-v4 .layer-subtitle {
 html[data-theme="dark"] .draw-v4 .palette-color.active {
     box-shadow: 0 0 0 2px #13201B, 0 0 0 4px #FACC15;
 }
+
+/* Draw v4 compact no-scroll layout */
+body:has(.draw-v4) {
+    overflow: hidden;
+}
+
+body:has(.draw-v4) .site-footer,
+body:has(.draw-v4) #to-top-btn {
+    display: none;
+}
+
+main.container:has(.draw-v4) {
+    max-width: none;
+    padding: 0;
+    height: calc(100vh - 72px);
+    overflow: hidden;
+}
+
+.draw-v4 .editor-workspace {
+    grid-template-columns: 248px minmax(0, 1fr) 300px;
+    gap: 12px;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    padding: 12px;
+    overflow: hidden;
+}
+
+.draw-v4 .editor-sidebar {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    padding: 10px;
+    gap: 10px;
+}
+
+.draw-v4 .editor-sidebar.left {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-content: start;
+}
+
+.draw-v4 .editor-sidebar.right {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 52px;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.draw-v4 .sidebar-panel-stack {
+    min-width: 0;
+    min-height: 0;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.draw-v4 .sidebar-panel {
+    display: none;
+    height: 100%;
+    min-height: 0;
+}
+
+.draw-v4 .sidebar-panel.is-active {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.draw-v4 .sidebar-panel .panel {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    overflow: hidden;
+}
+
+.draw-v4 .sidebar-tab-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 6px;
+    border-left: 1px solid rgba(27, 67, 50, 0.1);
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.draw-v4 .sidebar-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 54px;
+    padding: 8px 4px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #6f8479;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.draw-v4 .sidebar-tab span {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.draw-v4 .sidebar-tab:hover {
+    background: rgba(46, 204, 113, 0.1);
+    color: #1b4332;
+}
+
+.draw-v4 .sidebar-tab.is-active {
+    background: #1b4332;
+    color: #fff;
+}
+
+.draw-v4 .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.draw-v4 .tools-grid .tool-divider {
+    grid-column: 1 / -1;
+    margin: 4px 0;
+}
+
+.draw-v4 .tools-grid .tool {
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 4px;
+    text-align: center;
+}
+
+.draw-v4 .tools-grid .tool span {
+    font-size: 10px;
+    line-height: 1.1;
+}
+
+.draw-v4 .tools-grid .tool kbd {
+    display: none;
+}
+
+.draw-v4 .palette-panel {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.draw-v4 .palette {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.draw-v4 .editor-canvas-area {
+    position: relative;
+    height: 100%;
+    min-height: 0;
+    padding: 12px;
+    overflow: hidden;
+}
+
+.draw-v4 .canvas-frame {
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    gap: 12px;
+}
+
+.draw-v4 .canvas-wrapper {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    flex-shrink: 0;
+}
+
+.draw-v4 .canvas-preview-float {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 5;
+    padding: 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(27, 67, 50, 0.12);
+    box-shadow: 0 8px 24px rgba(27, 67, 50, 0.08);
+}
+
+.draw-v4 .canvas-preview-float canvas {
+    display: block;
+    width: 72px;
+    height: 72px;
+    image-rendering: pixelated;
+    border-radius: 6px;
+    background:
+        linear-gradient(45deg, #edf1ee 25%, transparent 25%),
+        linear-gradient(-45deg, #edf1ee 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #edf1ee 75%),
+        linear-gradient(-45deg, transparent 75%, #edf1ee 75%);
+    background-size: 10px 10px;
+    background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+}
+
+.draw-v4 .size-presets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.draw-v4 .size-card-compact {
+    padding: 10px;
+    gap: 8px;
+}
+
+.draw-v4 .size-card-compact .size-visual {
+    width: 36px;
+    height: 36px;
+}
+
+.draw-v4 .size-custom-compact {
+    margin-top: 0;
+    padding: 10px;
+    gap: 8px;
+}
+
+.draw-v4 .btn-compact {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
+}
+
+.draw-v4 .file-panel {
+    justify-content: flex-start;
+}
+
+.draw-v4 .submit-btn.btn-compact {
+    width: 100%;
+    margin-top: 0;
+}
+
+.draw-v4 .download-btn.btn-compact {
+    margin-top: 0;
+}
+
+.draw-v4 .auth-submit-box-compact {
+    display: grid;
+    gap: 8px;
+}
+
+.draw-v4 .auth-submit-box-compact p {
+    margin: 0;
+    font-size: 13px;
+}
+
+.draw-v4 .submit-result-inline {
+    margin: 0;
+    font-size: 12px;
+    color: #5f776c;
+}
+
+.draw-v4 .layers-list {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+}
+
+.draw-v4 .template-picker-hint {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+html[data-theme="dark"] .draw-v4 .sidebar-tab-rail {
+    background: rgba(18, 28, 24, 0.72);
+    border-left-color: rgba(126, 168, 148, 0.2);
+}
+
+html[data-theme="dark"] .draw-v4 .sidebar-tab {
+    color: #9abCAF;
+}
+
+html[data-theme="dark"] .draw-v4 .sidebar-tab.is-active {
+    background: #24362f;
+    color: #e6f4ec;
+}
+
+html[data-theme="dark"] .draw-v4 .canvas-preview-float {
+    background: rgba(18, 28, 24, 0.9);
+    border-color: rgba(126, 168, 148, 0.24);
+}
+
+@media (max-width: 1100px) {
+    body:has(.draw-v4) {
+        overflow: auto;
+    }
+
+    main.container:has(.draw-v4) {
+        height: auto;
+        overflow: visible;
+    }
+
+    .draw-v4 .editor-workspace {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+    }
+
+    .draw-v4 .editor-sidebar.right {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+    }
+
+    .draw-v4 .sidebar-tab-rail {
+        flex-direction: row;
+        border-left: none;
+        border-top: 1px solid rgba(27, 67, 50, 0.1);
+        overflow-x: auto;
+    }
+
+    .draw-v4 .sidebar-tab {
+        min-width: 72px;
+        min-height: auto;
+        flex: 1;
+    }
+
+    .draw-v4 .editor-canvas-area {
+        min-height: 420px;
+    }
+}
