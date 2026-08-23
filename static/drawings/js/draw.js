@@ -62,6 +62,8 @@
     const copyLinkBtn = document.getElementById("copy-link-btn");
     const vkShareLink = document.getElementById("vk-share-link");
     const tgShareLink = document.getElementById("tg-share-link");
+    const submitPreviewCanvas = document.getElementById("submit-preview-canvas");
+    const submitPreviewCtx = submitPreviewCanvas?.getContext("2d");
 
     if (!previewCanvas || !previewCtx || !paletteEl || !form || !templateCtx) return;
 
@@ -1097,6 +1099,13 @@
         previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
     }
 
+    function updateSubmitPreview() {
+        if (!submitPreviewCanvas || !submitPreviewCtx) return;
+        submitPreviewCtx.clearRect(0, 0, submitPreviewCanvas.width, submitPreviewCanvas.height);
+        submitPreviewCtx.imageSmoothingEnabled = false;
+        submitPreviewCtx.drawImage(canvas, 0, 0, submitPreviewCanvas.width, submitPreviewCanvas.height);
+    }
+
     function getPointer(event) {
         if (event.touches?.[0]) return event.touches[0];
         if (event.changedTouches?.[0]) return event.changedTouches[0];
@@ -1455,6 +1464,7 @@
         form.classList.remove("hidden");
         submitProgress.classList.add("hidden");
         submitSuccess.classList.add("hidden");
+        updateSubmitPreview();
         modal.classList.remove("hidden");
         modal.classList.add("active");
         modal.setAttribute("aria-hidden", "false");
@@ -1689,7 +1699,7 @@
             localStorage.removeItem(DRAFT_KEY);
             isDrawingChanged = false;
             lastSubmittedUrl = `${window.location.origin}/work/${data.id}/`;
-            submitProgressText.textContent = "Готово!";
+            submitProgress.classList.add("hidden");
             submitSuccess.classList.remove("hidden");
             submitSuccessText.textContent = `Готово! Номер работы: #${data.id}`;
             vkShareLink.href = `https://vk.com/share.php?url=${encodeURIComponent(lastSubmittedUrl)}`;

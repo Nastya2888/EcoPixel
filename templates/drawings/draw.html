@@ -257,77 +257,107 @@
     </div>
 </section>
 
-<div id="submit-modal" class="modal modal-overlay hidden" aria-hidden="true">
-    <div class="modal-content">
-        <h2>Отправить работу</h2>
+<div id="submit-modal" class="modal modal-overlay draw-submit-modal hidden" aria-hidden="true">
+    <div class="modal-content draw-submit-content">
+        <div class="draw-submit-header">
+            <div class="draw-submit-preview" aria-hidden="true">
+                <canvas id="submit-preview-canvas" width="96" height="96"></canvas>
+            </div>
+            <div class="draw-submit-heading">
+                <h2>Отправить работу</h2>
+                <p class="draw-submit-subtitle">Заполните данные — рисунок появится в галерее конкурса</p>
+            </div>
+        </div>
+
         <form id="submission-form" data-submit-url="{% url 'submit_drawing' %}">
             {% csrf_token %}
             <input type="hidden" name="category_slug" id="category-slug-input" value="">
-            <div class="form-group">
-                <label>Название работы</label>
-                <input type="text" name="title" required maxlength="120" placeholder=" ">
-            </div>
-            <div class="form-group">
-                <label>Имя автора</label>
-                <input
-                    type="text"
-                    name="author_name"
-                    required
-                    maxlength="80"
-                    {% if user.is_authenticated %}value="{{ user.username }}"{% endif %}
-                    placeholder=" "
-                >
-            </div>
-            <div class="form-group">
-                <label>Возраст</label>
-                <input type="number" name="age" required min="6" max="25" id="age-input" placeholder=" ">
-            </div>
-            <div class="form-group">
-                <label>Город</label>
-                <input type="text" name="city" required maxlength="80" placeholder=" ">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input
-                    type="email"
-                    name="email"
-                    {% if user.is_authenticated %}
-                        value="{{ user.email }}"
-                        readonly
-                    {% else %}
+
+            <div class="draw-submit-fields">
+                <div class="draw-submit-field draw-submit-field-full">
+                    <label for="submit-title">Название работы</label>
+                    <input id="submit-title" type="text" name="title" required maxlength="120" placeholder="Например: Лес у реки">
+                </div>
+
+                <div class="draw-submit-field draw-submit-field-full">
+                    <label for="submit-author">Имя автора</label>
+                    <input
+                        id="submit-author"
+                        type="text"
+                        name="author_name"
                         required
-                    {% endif %}
-                    placeholder=" "
-                >
+                        maxlength="80"
+                        {% if user.is_authenticated %}value="{{ user.username }}"{% endif %}
+                        placeholder="Как подписать работу"
+                    >
+                </div>
+
+                <div class="draw-submit-field-row">
+                    <div class="draw-submit-field">
+                        <label for="age-input">Возраст</label>
+                        <input type="number" name="age" required min="6" max="25" id="age-input" placeholder="12">
+                    </div>
+                    <div class="draw-submit-field">
+                        <label for="submit-city">Город</label>
+                        <input id="submit-city" type="text" name="city" required maxlength="80" placeholder="Ваш город">
+                    </div>
+                </div>
+
+                <div class="draw-submit-field draw-submit-field-full">
+                    <label for="submit-email">Email</label>
+                    <input
+                        id="submit-email"
+                        type="email"
+                        name="email"
+                        {% if user.is_authenticated %}
+                            value="{{ user.email }}"
+                            readonly
+                        {% else %}
+                            required
+                        {% endif %}
+                        placeholder="name@example.com"
+                    >
+                </div>
+
+                <div class="draw-submit-field draw-submit-field-full">
+                    <label for="category-auto">Категория</label>
+                    <select id="category-auto">
+                        <option value="">Определится автоматически</option>
+                        {% for category in categories %}
+                            <option value="{{ category.name }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Категория</label>
-                <select id="category-auto">
-                    <option value="">Определится автоматически</option>
-                    {% for category in categories %}
-                        <option value="{{ category.name }}">{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <label class="consent-row">
+
+            <label class="draw-submit-consent">
                 <input type="checkbox" name="consent" value="on" required>
-                Согласие на обработку персональных данных
+                <span class="draw-submit-consent-mark" aria-hidden="true"></span>
+                <span class="draw-submit-consent-text">Согласие на обработку персональных данных</span>
             </label>
+
             <div id="form-errors" class="form-errors"></div>
-            <div class="form-actions">
-                <button type="button" id="cancel-submit" class="btn-secondary">← Вернуться к редактированию</button>
-                <button type="submit" class="btn-primary">Отправить на конкурс</button>
+
+            <div class="draw-submit-actions">
+                <button type="submit" class="btn draw-submit-primary">Отправить на конкурс</button>
+                <button type="button" id="cancel-submit" class="btn-secondary draw-submit-back">← Вернуться к редактированию</button>
             </div>
         </form>
-        <div id="submit-progress" class="submit-progress hidden">
+
+        <div id="submit-progress" class="submit-progress draw-submit-progress hidden">
+            <div class="draw-submit-progress-icon" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
             <p id="submit-progress-text">Отправка...</p>
             <div class="progress-track">
                 <div id="submit-progress-bar" class="progress-bar"></div>
             </div>
         </div>
-        <div id="submit-success" class="submit-success hidden">
+
+        <div id="submit-success" class="submit-success draw-submit-success hidden">
+            <div class="draw-submit-success-badge" aria-hidden="true">✓</div>
             <p id="submit-success-text"></p>
-            <div class="share-actions">
+            <div class="share-actions draw-submit-share">
                 <button type="button" id="copy-link-btn" class="btn-secondary">Скопировать ссылку</button>
                 <a id="vk-share-link" class="btn-secondary" href="#" target="_blank" rel="noopener">Поделиться в ВК</a>
                 <a id="tg-share-link" class="btn-secondary" href="#" target="_blank" rel="noopener">Telegram</a>
@@ -336,5 +366,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260823-12"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260823-13"></script>
 {% endblock %}

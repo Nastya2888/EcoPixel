@@ -3970,3 +3970,374 @@ html[data-theme="dark"] .draw-v4 .size-field input {
         min-height: 420px;
     }
 }
+
+/* Draw submit modal */
+.draw-submit-modal {
+    z-index: 1200;
+    background: rgba(27, 67, 50, 0.42);
+    backdrop-filter: blur(14px);
+    padding: 24px;
+}
+
+.draw-submit-content {
+    width: min(96vw, 560px);
+    max-width: 560px;
+    max-height: min(92vh, 860px);
+    overflow: auto;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
+    box-shadow: 0 28px 80px rgba(27, 67, 50, 0.22);
+    animation: none;
+    transform: scale(0.96) translateY(14px);
+    opacity: 0;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
+}
+
+.draw-submit-modal.active .draw-submit-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.draw-submit-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px 24px 18px;
+    border-bottom: 1px solid rgba(27, 67, 50, 0.08);
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.12), rgba(0, 184, 148, 0.08));
+}
+
+.draw-submit-preview {
+    flex-shrink: 0;
+    padding: 10px;
+    border-radius: 16px;
+    background:
+        linear-gradient(45deg, #edf1ee 25%, transparent 25%),
+        linear-gradient(-45deg, #edf1ee 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #edf1ee 75%),
+        linear-gradient(-45deg, transparent 75%, #edf1ee 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+    border: 1px solid rgba(27, 67, 50, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.draw-submit-preview canvas {
+    display: block;
+    width: 96px;
+    height: 96px;
+    border-radius: 10px;
+    image-rendering: pixelated;
+    box-shadow: 0 8px 24px rgba(27, 67, 50, 0.12);
+}
+
+.draw-submit-heading h2 {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 2vw, 1.65rem);
+    color: #1b4332;
+    line-height: 1.15;
+}
+
+.draw-submit-subtitle {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: #6f8479;
+}
+
+#submission-form {
+    display: block;
+    padding: 20px 24px 24px;
+}
+
+.draw-submit-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.draw-submit-field-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.draw-submit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.draw-submit-field-full {
+    width: 100%;
+}
+
+.draw-submit-field label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #6f8479;
+}
+
+.draw-submit-field input,
+.draw-submit-field select {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid rgba(27, 67, 50, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #1b4332;
+    font: inherit;
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.draw-submit-field input::placeholder {
+    color: #9eb4a8;
+}
+
+.draw-submit-field input:focus,
+.draw-submit-field select:focus {
+    outline: none;
+    border-color: #2ecc71;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.16);
+}
+
+.draw-submit-field input:read-only {
+    background: #eef5f0;
+    color: #557366;
+    cursor: not-allowed;
+}
+
+.draw-submit-field select {
+    appearance: none;
+    padding-right: 40px;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #6f8479 50%),
+        linear-gradient(135deg, #6f8479 50%, transparent 50%);
+    background-position: calc(100% - 22px) calc(50% - 2px), calc(100% - 16px) calc(50% - 2px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+}
+
+.draw-submit-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(46, 204, 113, 0.08);
+    border: 1px solid rgba(46, 204, 113, 0.16);
+    cursor: pointer;
+    user-select: none;
+}
+
+.draw-submit-consent input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.draw-submit-consent-mark {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    border-radius: 6px;
+    border: 2px solid rgba(27, 67, 50, 0.22);
+    background: #ffffff;
+    position: relative;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.draw-submit-consent input:checked + .draw-submit-consent-mark {
+    background: linear-gradient(135deg, #2ecc71, #00b894);
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.28);
+}
+
+.draw-submit-consent input:checked + .draw-submit-consent-mark::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: 2px solid #ffffff;
+    border-top: 0;
+    border-left: 0;
+    transform: rotate(45deg);
+}
+
+.draw-submit-consent-text {
+    font-size: 13px;
+    line-height: 1.45;
+    color: #466155;
+}
+
+.draw-submit-modal .form-errors {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(231, 76, 60, 0.08);
+    border: 1px solid rgba(231, 76, 60, 0.18);
+    font-size: 14px;
+    min-height: 0;
+}
+
+.draw-submit-modal .form-errors:empty {
+    display: none;
+}
+
+.draw-submit-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.draw-submit-primary {
+    width: 100%;
+    padding: 15px 18px;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0 10px 28px rgba(46, 204, 113, 0.32);
+}
+
+.draw-submit-back {
+    width: 100%;
+    padding: 13px 18px;
+    border-radius: 14px;
+    font-weight: 700;
+}
+
+.draw-submit-progress,
+.draw-submit-success {
+    padding: 28px 24px 32px;
+    text-align: center;
+}
+
+.draw-submit-progress-icon {
+    display: inline-flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.draw-submit-progress-icon span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2ecc71;
+    animation: drawSubmitPulse 1.2s infinite ease-in-out;
+}
+
+.draw-submit-progress-icon span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.draw-submit-progress-icon span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes drawSubmitPulse {
+    0%, 80%, 100% { transform: scale(0.75); opacity: 0.45; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+.draw-submit-success-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2ecc71, #00b894);
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 700;
+    box-shadow: 0 12px 28px rgba(46, 204, 113, 0.28);
+}
+
+.draw-submit-success p {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1b4332;
+}
+
+.draw-submit-share {
+    justify-content: center;
+    margin-top: 16px;
+}
+
+html[data-theme="dark"] .draw-submit-content {
+    background: linear-gradient(180deg, #15211d 0%, #121c19 100%);
+    border-color: rgba(126, 168, 148, 0.18);
+}
+
+html[data-theme="dark"] .draw-submit-header {
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.14), rgba(0, 184, 148, 0.08));
+    border-bottom-color: rgba(126, 168, 148, 0.16);
+}
+
+html[data-theme="dark"] .draw-submit-heading h2,
+html[data-theme="dark"] .draw-submit-success p {
+    color: #e6f4ec;
+}
+
+html[data-theme="dark"] .draw-submit-subtitle,
+html[data-theme="dark"] .draw-submit-field label {
+    color: #9abcaf;
+}
+
+html[data-theme="dark"] .draw-submit-field input,
+html[data-theme="dark"] .draw-submit-field select {
+    background: #1a2723;
+    border-color: rgba(126, 168, 148, 0.24);
+    color: #e6f4ec;
+}
+
+html[data-theme="dark"] .draw-submit-field input:read-only {
+    background: #13201b;
+    color: #9abcaf;
+}
+
+html[data-theme="dark"] .draw-submit-consent {
+    background: rgba(46, 204, 113, 0.1);
+    border-color: rgba(46, 204, 113, 0.18);
+}
+
+html[data-theme="dark"] .draw-submit-consent-text {
+    color: #b2d2c4;
+}
+
+html[data-theme="dark"] .draw-submit-consent-mark {
+    background: #1a2723;
+    border-color: rgba(126, 168, 148, 0.28);
+}
+
+@media (max-width: 560px) {
+    .draw-submit-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .draw-submit-field-row {
+        grid-template-columns: 1fr;
+    }
+
+    #submission-form,
+    .draw-submit-progress,
+    .draw-submit-success {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+}
