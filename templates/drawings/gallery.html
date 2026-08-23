@@ -44,26 +44,30 @@
     <div class="gallery-grid gallery-grid-main">
         {% for work in page_obj %}
             <article class="work-card card animate-on-scroll">
-                <div class="work-image-wrap">
-                    <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
-                    <span class="category-chip">{{ work.category.name }}</span>
-                </div>
-                <div class="work-card__body">
-                    <h3 class="work-card__title"><a href="{% url 'work_detail' work.id %}">{{ work.title }}</a></h3>
-                    <p class="work-card__meta">{{ work.author }}, {{ work.age }} лет, {{ work.city }}</p>
-                    {% if user.is_staff %}
-                        <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
-                    {% endif %}
-                    <div class="likes">
-                        <span class="likes-heart" data-heart>
-                            {% if work.id in voted_ids %}
-                                <svg class="icon-heart-filled" width="20" height="20" viewBox="0 0 24 24" fill="#E74C3C" stroke="#E74C3C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                            {% else %}
-                                <svg class="icon-heart" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                            {% endif %}
-                        </span>
-                        <span class="votes-count">{{ work.votes }}</span>
+                <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="Открыть работу «{{ work.title }}»">
+                    <div class="work-image-wrap">
+                        <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
+                        <span class="category-chip">{{ work.category.name }}</span>
                     </div>
+                    <div class="work-card__body">
+                        <h3 class="work-card__title">{{ work.title }}</h3>
+                        <p class="work-card__meta">{{ work.author }}, {{ work.age }} лет, {{ work.city }}</p>
+                        {% if user.is_staff %}
+                            <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
+                        {% endif %}
+                        <div class="likes">
+                            <span class="likes-heart" data-heart>
+                                {% if work.id in voted_ids %}
+                                    <svg class="icon-heart-filled" width="20" height="20" viewBox="0 0 24 24" fill="#E74C3C" stroke="#E74C3C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                {% else %}
+                                    <svg class="icon-heart" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                {% endif %}
+                            </span>
+                            <span class="votes-count">{{ work.votes }}</span>
+                        </div>
+                    </div>
+                </a>
+                <div class="work-card__actions">
                     <button
                         type="button"
                         class="vote-btn btn-ripple {% if work.id in voted_ids %}voted{% endif %}"
