@@ -55,6 +55,7 @@ class AuthFlowTests(TestCase):
             {
                 "image": png,
                 "title": "Дом у леса",
+                "description": "Рисунок про заботу о лесе и чистый воздух.",
                 "author_name": "Аня",
                 "age": "9",
                 "city": "Алматы",
@@ -65,6 +66,7 @@ class AuthFlowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Drawing.objects.filter(user=self.user).count(), 1)
         drawing = Drawing.objects.get(user=self.user)
+        self.assertEqual(drawing.description, "Рисунок про заботу о лесе и чистый воздух.")
         self.assertTrue(bool(drawing.image_blob))
 
     def test_submit_accepts_new_18_25_category(self):

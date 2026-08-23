@@ -1037,6 +1037,14 @@ html[data-theme="dark"] .floating-card {
 }
 
 .work-info h1 { margin: 10px 0; font-size: 32px; }
+
+.work-description {
+    margin: 0 0 16px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    font-size: 15px;
+}
+
 .work-badge {
     display: inline-flex;
     border-radius: 999px;
@@ -4153,7 +4161,8 @@ html[data-theme="dark"] .draw-v4 .size-field input {
 }
 
 .draw-submit-field input,
-.draw-submit-field select {
+.draw-submit-field select,
+.draw-submit-field textarea {
     width: 100%;
     padding: 13px 14px;
     border: 1.5px solid rgba(27, 67, 50, 0.12);
@@ -4165,12 +4174,25 @@ html[data-theme="dark"] .draw-v4 .size-field input {
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.draw-submit-field input::placeholder {
+.draw-submit-field textarea {
+    min-height: 108px;
+    resize: vertical;
+    line-height: 1.45;
+}
+
+.draw-submit-hint {
+    font-size: 12px;
+    color: #8aaa9a;
+}
+
+.draw-submit-field input::placeholder,
+.draw-submit-field textarea::placeholder {
     color: #9eb4a8;
 }
 
 .draw-submit-field input:focus,
-.draw-submit-field select:focus {
+.draw-submit-field select:focus,
+.draw-submit-field textarea:focus {
     outline: none;
     border-color: #2ecc71;
     background: #ffffff;
@@ -4368,7 +4390,8 @@ html[data-theme="dark"] .draw-submit-field label {
 }
 
 html[data-theme="dark"] .draw-submit-field input,
-html[data-theme="dark"] .draw-submit-field select {
+html[data-theme="dark"] .draw-submit-field select,
+html[data-theme="dark"] .draw-submit-field textarea {
     background: #1a2723;
     border-color: rgba(126, 168, 148, 0.24);
     color: #e6f4ec;

@@ -3,7 +3,7 @@
 
 {% block title %}{{ work.title }} — ЭкоПиксель{% endblock %}
 {% block og_title %}{{ work.title }} — ЭкоПиксель{% endblock %}
-{% block og_description %}Пиксельный рисунок автора {{ work.author_name }}, {{ work.age }} лет{% endblock %}
+{% block og_description %}{% if work.description %}{{ work.description|truncatechars:160 }}{% else %}Пиксельный рисунок автора {{ work.author_name }}, {{ work.age }} лет{% endif %}{% endblock %}
 {% block og_image %}{{ og_image_url }}{% endblock %}
 
 {% block content %}
@@ -19,6 +19,9 @@
     <div class="work-info animate-on-scroll">
         <span class="work-badge">{{ work.category.name }}</span>
         <h1>{{ work.title }}</h1>
+        {% if work.description %}
+            <p class="work-description">{{ work.description|linebreaksbr }}</p>
+        {% endif %}
         <div class="author-row">
             <span class="author-avatar">{{ work.author|first|upper }}</span>
             <div>

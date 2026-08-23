@@ -14,7 +14,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class DrawingAdmin(admin.ModelAdmin):
     list_display = ("title", "author", "user", "age", "city", "category", "votes", "is_approved", "created_at")
     list_filter = ("category", "is_approved", "created_at")
-    search_fields = ("title", "author", "city", "email")
+    search_fields = ("title", "author", "city", "email", "description")
 
     def save_model(self, request, obj, form, change):
         was_approved = False

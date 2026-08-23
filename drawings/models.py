@@ -27,6 +27,7 @@ class Drawing(models.Model):
         verbose_name="Пользователь",
     )
     title = models.CharField("Название", max_length=120, blank=True, default="Без названия")
+    description = models.TextField("Описание", max_length=500, blank=True, default="")
     author = models.CharField("Автор", max_length=80)
     age = models.PositiveSmallIntegerField(
         "Возраст",

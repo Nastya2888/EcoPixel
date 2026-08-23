@@ -266,6 +266,7 @@ def submit_drawing(request):
 
     image = request.FILES.get("image")
     title = request.POST.get("title", "").strip()
+    description = request.POST.get("description", "").strip()
     author_name = request.POST.get("author_name", "").strip()
     age_raw = request.POST.get("age", "").strip()
     city = request.POST.get("city", "").strip()
@@ -282,6 +283,12 @@ def submit_drawing(request):
     image_bytes = image.read()
     if not image_bytes:
         return JsonResponse({"success": False, "error": "Пустой файл изображения."}, status=400)
+
+    if len(description) > 500:
+        return JsonResponse(
+            {"success": False, "error": "Описание не должно быть длиннее 500 символов."},
+            status=400,
+        )
 
     if not all([title, author_name, age_raw, city]):
         return JsonResponse({"success": False, "error": "Заполните все поля формы."}, status=400)
@@ -327,6 +334,7 @@ def submit_drawing(request):
     drawing = Drawing.objects.create(
         user=request.user,
         title=title,
+        description=description,
         author=author_name,
         age=age,
         city=city,
