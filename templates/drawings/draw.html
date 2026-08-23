@@ -97,18 +97,14 @@
                     <canvas id="cursor-canvas" width="32" height="32"></canvas>
                 </div>
             </div>
-            <div class="canvas-meta canvas-info canvas-status">
+            <aside class="canvas-meta canvas-info canvas-status canvas-meta-rail" aria-label="Параметры холста">
                 <span class="meta-badge" id="canvas-size-badge">32×32</span>
-                <span class="meta-dot divider"></span>
                 <span class="meta-badge" id="meta-zoom">100%</span>
-                <span class="meta-dot divider"></span>
                 <span class="meta-color" id="meta-color">Коралл</span>
                 <span class="color-dot" id="current-color-dot"></span>
-                <span class="meta-dot divider"></span>
                 <span class="meta-color" id="meta-thickness">1 px</span>
-                <span class="meta-dot divider"></span>
                 <span class="meta-color" id="meta-layer">Слой 1</span>
-            </div>
+            </aside>
         </main>
 
         <aside class="editor-sidebar right">
@@ -312,5 +308,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260823-09"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260823-10"></script>
 {% endblock %}

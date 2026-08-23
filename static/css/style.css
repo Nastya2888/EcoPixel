@@ -3611,7 +3611,8 @@ main.container:has(.draw-v4) {
 .draw-v4 .editor-canvas-area {
     position: relative;
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
     height: 100%;
     min-height: 0;
     padding: 0;
@@ -3620,6 +3621,7 @@ main.container:has(.draw-v4) {
 }
 
 .draw-v4 .canvas-stage {
+    grid-column: 1;
     grid-row: 1;
     align-self: stretch;
     width: 100%;
@@ -3662,24 +3664,40 @@ body.page-draw .draw-v4 .editor-canvas-area .canvas-wrapper,
     background-position: 0 0, 0 10px, 10px -10px, -10px 0;
 }
 
-.draw-v4 .canvas-meta.canvas-status {
-    grid-row: 2;
+.draw-v4 .canvas-meta.canvas-status,
+.draw-v4 .canvas-meta-rail {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    justify-content: flex-end;
+    gap: 12px;
     margin: 0;
-    padding: 10px 16px;
+    padding: 16px 10px;
     border-radius: 0;
-    border-top: 1px solid rgba(27, 67, 50, 0.1);
+    border-left: 1px solid rgba(27, 67, 50, 0.1);
+    border-top: none;
     background: rgba(255, 255, 255, 0.92);
+    min-width: 72px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.draw-v4 .canvas-meta-rail .meta-badge,
+.draw-v4 .canvas-meta-rail .meta-color {
+    line-height: 1.2;
+}
+
+.draw-v4 .canvas-meta-rail .meta-dot {
+    display: none;
 }
 
 .draw-v4 .canvas-preview-float {
     position: absolute;
     top: 14px;
-    right: 14px;
+    left: 14px;
+    right: auto;
     z-index: 5;
     padding: 6px;
     border-radius: 10px;
@@ -3825,9 +3843,10 @@ html[data-theme="dark"] .draw-v4 .canvas-stage {
     background: #151f1b;
 }
 
-html[data-theme="dark"] .draw-v4 .canvas-meta.canvas-status {
+html[data-theme="dark"] .draw-v4 .canvas-meta.canvas-status,
+html[data-theme="dark"] .draw-v4 .canvas-meta-rail {
     background: rgba(18, 28, 24, 0.94);
-    border-top-color: rgba(126, 168, 148, 0.2);
+    border-left-color: rgba(126, 168, 148, 0.2);
 }
 
 html[data-theme="dark"] .draw-v4 .canvas-preview-float {

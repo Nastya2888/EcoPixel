@@ -192,13 +192,13 @@
         }
 
         const rect = viewport.getBoundingClientRect();
-        const statusBar = viewport.querySelector(".canvas-meta");
-        const statusHeight = statusBar ? statusBar.getBoundingClientRect().height : 0;
+        const metaRail = viewport.querySelector(".canvas-meta");
+        const metaWidth = metaRail ? metaRail.getBoundingClientRect().width : 0;
         const padding = 32;
 
         return {
-            width: Math.max(160, rect.width - padding),
-            height: Math.max(160, rect.height - statusHeight - padding),
+            width: Math.max(160, rect.width - metaWidth - padding),
+            height: Math.max(160, rect.height - padding),
         };
     }
 
