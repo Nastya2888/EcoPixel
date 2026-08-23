@@ -100,14 +100,56 @@
     const MIN_BRUSH_SIZE = 1;
     const MAX_BRUSH_SIZE = 12;
     const MAX_LAYERS = 16;
-    const TEMPLATE_GRID_SIZE = 36;
+    const TEMPLATE_SIZE_32 = 32;
+    const TEMPLATE_SIZE_64 = 64;
     const MIN_TEMPLATE_OPACITY = 15;
     const MAX_TEMPLATE_OPACITY = 80;
     const DEFAULT_TEMPLATE_OPACITY = 45;
+
+    function createScaledTemplateDraw(baseDraw, baseSize, targetSize) {
+        return function drawScaledTemplate(targetCtx) {
+            if (baseSize === targetSize) {
+                baseDraw(targetCtx);
+                return;
+            }
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = baseSize;
+            tempCanvas.height = baseSize;
+            const tempCtx = tempCanvas.getContext("2d");
+            if (!tempCtx) return;
+            tempCtx.imageSmoothingEnabled = false;
+            tempCtx.fillStyle = targetCtx.fillStyle;
+            baseDraw(tempCtx);
+            targetCtx.imageSmoothingEnabled = false;
+            targetCtx.drawImage(tempCanvas, 0, 0, targetSize, targetSize);
+        };
+    }
+
     const TEMPLATE_LIBRARY = [
-        { id: "forest", name: "Лес", width: TEMPLATE_GRID_SIZE, height: TEMPLATE_GRID_SIZE, draw: drawForestTemplate },
-        { id: "house", name: "Домик и деревья", width: TEMPLATE_GRID_SIZE, height: TEMPLATE_GRID_SIZE, draw: drawHouseTemplate },
-        { id: "mountains", name: "Горы и река", width: TEMPLATE_GRID_SIZE, height: TEMPLATE_GRID_SIZE, draw: drawMountainsTemplate },
+        { id: "forest-32", name: "Лес", width: TEMPLATE_SIZE_32, height: TEMPLATE_SIZE_32, draw: drawForestTemplate32 },
+        { id: "house-32", name: "Домик и деревья", width: TEMPLATE_SIZE_32, height: TEMPLATE_SIZE_32, draw: drawHouseTemplate32 },
+        { id: "mountains-32", name: "Горы и река", width: TEMPLATE_SIZE_32, height: TEMPLATE_SIZE_32, draw: drawMountainsTemplate32 },
+        {
+            id: "forest-64",
+            name: "Лес",
+            width: TEMPLATE_SIZE_64,
+            height: TEMPLATE_SIZE_64,
+            draw: createScaledTemplateDraw(drawForestTemplate32, TEMPLATE_SIZE_32, TEMPLATE_SIZE_64),
+        },
+        {
+            id: "house-64",
+            name: "Домик и деревья",
+            width: TEMPLATE_SIZE_64,
+            height: TEMPLATE_SIZE_64,
+            draw: createScaledTemplateDraw(drawHouseTemplate32, TEMPLATE_SIZE_32, TEMPLATE_SIZE_64),
+        },
+        {
+            id: "mountains-64",
+            name: "Горы и река",
+            width: TEMPLATE_SIZE_64,
+            height: TEMPLATE_SIZE_64,
+            draw: createScaledTemplateDraw(drawMountainsTemplate32, TEMPLATE_SIZE_32, TEMPLATE_SIZE_64),
+        },
     ];
 
     let selectedColor = PALETTE[4];
@@ -278,63 +320,63 @@
         drawTemplateRect(targetCtx, centerX - 1, levelTop, 3, trunkHeight);
     }
 
-    function drawForestTemplate(targetCtx) {
-        drawTemplateLine(targetCtx, 1, 31, 34, 31);
-        drawTemplateLine(targetCtx, 1, 32, 34, 32);
-        drawPineGuide(targetCtx, 18, 5, [13, 17, 21], 7);
-        drawPineGuide(targetCtx, 8, 12, [9, 11], 5);
-        drawPineGuide(targetCtx, 28, 11, [9, 11], 6);
-        drawTemplateCircle(targetCtx, 30, 6, 3);
-        drawTemplatePolyline(targetCtx, [{ x: 11, y: 7 }, { x: 12, y: 6 }, { x: 13, y: 7 }]);
-        drawTemplatePolyline(targetCtx, [{ x: 15, y: 6 }, { x: 16, y: 5 }, { x: 17, y: 6 }]);
+    function drawForestTemplate32(targetCtx) {
+        drawTemplateLine(targetCtx, 0, 30, 31, 30);
+        drawTemplateLine(targetCtx, 0, 31, 31, 31);
+        drawPineGuide(targetCtx, 16, 4, [11, 14, 18], 6);
+        drawPineGuide(targetCtx, 7, 10, [7, 9], 4);
+        drawPineGuide(targetCtx, 25, 9, [7, 9], 5);
+        drawTemplateCircle(targetCtx, 26, 5, 2);
+        drawTemplatePolyline(targetCtx, [{ x: 10, y: 6 }, { x: 11, y: 5 }, { x: 12, y: 6 }]);
+        drawTemplatePolyline(targetCtx, [{ x: 14, y: 5 }, { x: 15, y: 4 }, { x: 16, y: 5 }]);
     }
 
-    function drawHouseTemplate(targetCtx) {
-        drawTemplateLine(targetCtx, 1, 31, 34, 31);
-        drawTemplateLine(targetCtx, 1, 32, 34, 32);
-        drawTemplateRect(targetCtx, 10, 15, 16, 13);
+    function drawHouseTemplate32(targetCtx) {
+        drawTemplateLine(targetCtx, 0, 30, 31, 30);
+        drawTemplateLine(targetCtx, 0, 31, 31, 31);
+        drawTemplateRect(targetCtx, 9, 13, 14, 12);
         drawTemplatePolyline(targetCtx, [
-            { x: 18, y: 8 },
-            { x: 9, y: 15 },
-            { x: 27, y: 15 },
+            { x: 16, y: 7 },
+            { x: 8, y: 13 },
+            { x: 24, y: 13 },
         ], true);
-        drawTemplateRect(targetCtx, 16, 21, 4, 7);
-        drawTemplateRect(targetCtx, 12, 18, 3, 3);
-        drawTemplateRect(targetCtx, 21, 18, 3, 3);
-        drawPineGuide(targetCtx, 5, 13, [7, 9], 5);
-        drawPineGuide(targetCtx, 31, 13, [7, 9], 5);
+        drawTemplateRect(targetCtx, 14, 19, 4, 6);
+        drawTemplateRect(targetCtx, 11, 16, 3, 3);
+        drawTemplateRect(targetCtx, 19, 16, 3, 3);
+        drawPineGuide(targetCtx, 4, 12, [6, 8], 4);
+        drawPineGuide(targetCtx, 28, 12, [6, 8], 4);
     }
 
-    function drawMountainsTemplate(targetCtx) {
-        drawTemplateLine(targetCtx, 1, 31, 34, 31);
-        drawTemplateLine(targetCtx, 1, 32, 34, 32);
+    function drawMountainsTemplate32(targetCtx) {
+        drawTemplateLine(targetCtx, 0, 30, 31, 30);
+        drawTemplateLine(targetCtx, 0, 31, 31, 31);
         drawTemplatePolyline(targetCtx, [
-            { x: 2, y: 24 },
-            { x: 10, y: 12 },
-            { x: 18, y: 24 },
+            { x: 2, y: 22 },
+            { x: 9, y: 11 },
+            { x: 16, y: 22 },
         ], true);
         drawTemplatePolyline(targetCtx, [
-            { x: 12, y: 24 },
-            { x: 21, y: 10 },
-            { x: 32, y: 24 },
+            { x: 11, y: 22 },
+            { x: 19, y: 9 },
+            { x: 29, y: 22 },
         ], true);
         drawTemplatePolyline(targetCtx, [
-            { x: 3, y: 27 },
-            { x: 10, y: 29 },
-            { x: 16, y: 29 },
-            { x: 22, y: 31 },
-            { x: 28, y: 32 },
-            { x: 33, y: 34 },
+            { x: 3, y: 25 },
+            { x: 9, y: 27 },
+            { x: 14, y: 27 },
+            { x: 20, y: 29 },
+            { x: 25, y: 30 },
+            { x: 31, y: 31 },
         ]);
         drawTemplatePolyline(targetCtx, [
-            { x: 4, y: 29 },
-            { x: 10, y: 31 },
-            { x: 16, y: 31 },
-            { x: 23, y: 33 },
-            { x: 29, y: 34 },
-            { x: 33, y: 35 },
+            { x: 4, y: 27 },
+            { x: 9, y: 29 },
+            { x: 14, y: 29 },
+            { x: 21, y: 31 },
+            { x: 26, y: 31 },
+            { x: 31, y: 31 },
         ]);
-        drawTemplateCircle(targetCtx, 7, 7, 3);
+        drawTemplateCircle(targetCtx, 6, 6, 2);
     }
 
     function updateTemplateOverlayVisibility() {

@@ -127,16 +127,6 @@
                         <span>Для опытных</span>
                     </div>
                 </label>
-                <label class="size-card">
-                    <input type="radio" name="grid-size" value="36">
-                    <div class="size-visual">
-                        <div class="size-grid grid-36"></div>
-                    </div>
-                    <div class="size-text">
-                        <strong>36×36</strong>
-                        <span>Для шаблонов</span>
-                    </div>
-                </label>
                 <div class="size-custom">
                     <div class="size-custom-title">Свой размер</div>
                     <div class="size-custom-inputs">
@@ -150,9 +140,12 @@
                     <div class="template-picker-title">Шаблоны</div>
                     <select id="template-select" aria-label="Выбор шаблона">
                         <option value="">Без шаблона</option>
-                        <option value="forest">Лес (36×36)</option>
-                        <option value="house">Домик и деревья (36×36)</option>
-                        <option value="mountains">Горы и река (36×36)</option>
+                        <option value="forest-32">Лес (32×32)</option>
+                        <option value="house-32">Домик и деревья (32×32)</option>
+                        <option value="mountains-32">Горы и река (32×32)</option>
+                        <option value="forest-64">Лес (64×64)</option>
+                        <option value="house-64">Домик и деревья (64×64)</option>
+                        <option value="mountains-64">Горы и река (64×64)</option>
                     </select>
                     <label class="template-opacity-label" for="template-opacity-range">
                         Прозрачность шаблона
@@ -280,5 +273,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260822-03"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260823-03"></script>
 {% endblock %}

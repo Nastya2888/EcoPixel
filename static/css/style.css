@@ -2675,10 +2675,6 @@ input:focus, select:focus, textarea:focus {
     background-size: 6px 6px;
 }
 
-.draw-v4 .grid-36 {
-    background-size: 5px 5px;
-}
-
 .draw-v4 .grid-64 {
     background-size: 3px 3px;
 }
