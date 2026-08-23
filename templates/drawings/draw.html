@@ -3,6 +3,8 @@
 
 {% block title %}Рисовать | ЭкоПиксель{% endblock %}
 
+{% block body_attrs %} class="page-draw"{% endblock %}
+
 {% block content %}
 <section class="draw-page draw-v4 card animate-on-scroll" data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
     <div class="editor-workspace">

@@ -3421,6 +3421,32 @@ html[data-theme="dark"] .draw-v4 .palette-color.active {
 }
 
 /* Draw v4 compact no-scroll layout */
+body.page-draw {
+    overflow: hidden;
+}
+
+body.page-draw .site-footer,
+body.page-draw #to-top-btn {
+    display: none !important;
+}
+
+body.page-draw .draw-page {
+    height: 100%;
+    min-height: 0;
+}
+
+body.page-draw .draw-v4 .editor-workspace {
+    height: 100%;
+}
+
+body.page-draw main.container {
+    max-width: none;
+    padding: 0;
+    height: calc(100vh - 72px);
+    min-height: 0;
+    overflow: hidden;
+}
+
 body:has(.draw-v4) {
     overflow: hidden;
 }
