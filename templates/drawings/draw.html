@@ -89,25 +89,25 @@
             <div class="canvas-preview-float" title="Предпросмотр в галерее">
                 <canvas id="preview-canvas" width="96" height="96"></canvas>
             </div>
-            <div class="canvas-frame">
+            <div class="canvas-stage">
                 <div class="canvas-wrapper canvas-container">
                     <canvas id="main-canvas" width="32" height="32"></canvas>
                     <canvas id="template-canvas" width="32" height="32" class="template-overlay"></canvas>
                     <canvas id="grid-canvas" width="32" height="32" class="grid-overlay"></canvas>
                     <canvas id="cursor-canvas" width="32" height="32"></canvas>
                 </div>
-                <div class="canvas-meta canvas-info">
-                    <span class="meta-badge" id="canvas-size-badge">32×32</span>
-                    <span class="meta-dot divider"></span>
-                    <span class="meta-badge" id="meta-zoom">100%</span>
-                    <span class="meta-dot divider"></span>
-                    <span class="meta-color" id="meta-color">Коралл</span>
-                    <span class="color-dot" id="current-color-dot"></span>
-                    <span class="meta-dot divider"></span>
-                    <span class="meta-color" id="meta-thickness">1 px</span>
-                    <span class="meta-dot divider"></span>
-                    <span class="meta-color" id="meta-layer">Слой 1</span>
-                </div>
+            </div>
+            <div class="canvas-meta canvas-info canvas-status">
+                <span class="meta-badge" id="canvas-size-badge">32×32</span>
+                <span class="meta-dot divider"></span>
+                <span class="meta-badge" id="meta-zoom">100%</span>
+                <span class="meta-dot divider"></span>
+                <span class="meta-color" id="meta-color">Коралл</span>
+                <span class="color-dot" id="current-color-dot"></span>
+                <span class="meta-dot divider"></span>
+                <span class="meta-color" id="meta-thickness">1 px</span>
+                <span class="meta-dot divider"></span>
+                <span class="meta-color" id="meta-layer">Слой 1</span>
             </div>
         </main>
 
@@ -312,5 +312,5 @@
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260823-04"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260823-07"></script>
 {% endblock %}

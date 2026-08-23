@@ -15,6 +15,7 @@
     const customColorPicker = document.getElementById("customColorPicker");
     const addCustomColorBtn = document.getElementById("addCustomColor");
     const canvasContainer = document.querySelector(".canvas-container");
+    const canvasStage = document.querySelector(".canvas-stage");
     const canvasViewport = document.getElementById("canvas-viewport");
     const zoomLabel = document.getElementById("meta-zoom");
     const sidebarTabs = document.querySelectorAll(".sidebar-tab");
@@ -184,25 +185,35 @@
     let templateOpacity = DEFAULT_TEMPLATE_OPACITY;
     let canvasZoom = 1;
 
-    function getBaseCanvasDisplaySize() {
-        if (!canvasViewport) return 480;
-        const rect = canvasViewport.getBoundingClientRect();
-        const padding = 56;
-        const maxW = Math.max(160, rect.width - padding);
-        const maxH = Math.max(160, rect.height - padding - 56);
-        return Math.min(maxW, maxH, 560);
+    function getAvailableCanvasBounds() {
+        const stage = canvasStage || canvasViewport;
+        if (!stage) {
+            return { width: 480, height: 480 };
+        }
+        const rect = stage.getBoundingClientRect();
+        return {
+            width: Math.max(120, rect.width - 32),
+            height: Math.max(120, rect.height - 32),
+        };
     }
 
     function applyCanvasZoom() {
         if (!canvasContainer) return;
-        const baseSize = getBaseCanvasDisplaySize();
+        const bounds = getAvailableCanvasBounds();
         const aspect = gridWidth / gridHeight;
-        let width = Math.max(120, Math.round(baseSize * canvasZoom));
-        let height = Math.max(120, Math.round(width / aspect));
-        if (height > Math.round(baseSize * canvasZoom * 1.15)) {
-            height = Math.max(120, Math.round(baseSize * canvasZoom));
-            width = Math.max(120, Math.round(height * aspect));
+        let baseWidth;
+        let baseHeight;
+
+        if (bounds.width / bounds.height > aspect) {
+            baseHeight = bounds.height;
+            baseWidth = baseHeight * aspect;
+        } else {
+            baseWidth = bounds.width;
+            baseHeight = baseWidth / aspect;
         }
+
+        const width = Math.max(120, Math.round(baseWidth * canvasZoom));
+        const height = Math.max(120, Math.round(baseHeight * canvasZoom));
         canvasContainer.style.width = `${width}px`;
         canvasContainer.style.height = `${height}px`;
         syncCanvasDisplaySize();
@@ -1762,6 +1773,11 @@
     syncBrushSize(brushSize);
     syncTemplateOpacity(templateOpacity);
     initCanvas(32, 32);
+    requestAnimationFrame(() => applyCanvasZoom());
+    if (canvasStage && typeof ResizeObserver !== "undefined") {
+        const stageObserver = new ResizeObserver(() => applyCanvasZoom());
+        stageObserver.observe(canvasStage);
+    }
     setPresetSelection(32, 32);
     updateCategoryPreview();
     restoreDraftIfExists();
