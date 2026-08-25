@@ -150,10 +150,10 @@ class AuthFlowTests(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_profile_hides_status_for_regular_user(self):
+    def test_profile_shows_status_for_regular_user(self):
         drawing = Drawing.objects.create(
             user=self.user,
-            title="Профиль без статуса",
+            title="Профиль со статусом",
             author="Аня",
             age=9,
             city="Алматы",
@@ -166,9 +166,10 @@ class AuthFlowTests(TestCase):
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(reverse("profile"))
         self.assertContains(response, drawing.title)
-        self.assertNotContains(response, "Статус:")
+        self.assertContains(response, "В галерее")
+        self.assertContains(response, "Всего работ")
 
-    def test_profile_hides_pending_drawings_for_regular_user(self):
+    def test_profile_shows_pending_drawings_for_owner(self):
         approved = Drawing.objects.create(
             user=self.user,
             title="Опубликованная",
@@ -196,7 +197,49 @@ class AuthFlowTests(TestCase):
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(reverse("profile"))
         self.assertContains(response, approved.title)
-        self.assertNotContains(response, pending.title)
+        self.assertContains(response, pending.title)
+        self.assertContains(response, "На модерации")
+        self.assertEqual(response.context["stats"]["total"], 2)
+        self.assertEqual(response.context["stats"]["published"], 1)
+        self.assertEqual(response.context["stats"]["pending"], 1)
+        self.assertEqual(response.context["stats"]["votes"], 1)
+
+    def test_owner_can_open_own_pending_work_detail(self):
+        pending = Drawing.objects.create(
+            user=self.user,
+            title="Моя на проверке",
+            author="Аня",
+            age=9,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("own-pending.png", self.png, content_type="image/png"),
+            is_approved=False,
+            votes=0,
+        )
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.get(reverse("work_detail", args=[pending.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, pending.title)
+        self.assertContains(response, "Работа на модерации")
+
+    def test_owner_can_open_own_pending_work_image(self):
+        pending = Drawing.objects.create(
+            user=self.user,
+            title="Моя картинка на проверке",
+            author="Аня",
+            age=9,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("own-pending-img.png", self.png, content_type="image/png"),
+            is_approved=False,
+            votes=0,
+        )
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.get(reverse("drawing_image", args=[pending.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "image/png")
 
 
 class HomePageTests(TestCase):

@@ -18,6 +18,9 @@
     </div>
     <div class="work-info animate-on-scroll">
         <span class="work-badge">{{ work.category.name }}</span>
+        {% if not work.is_approved %}
+            <p class="work-moderation-notice">Работа на модерации — пока видна только вам и не участвует в голосовании.</p>
+        {% endif %}
         <h1>{{ work.title }}</h1>
         {% if work.description %}
             <p class="work-description">{{ work.description|linebreaksbr }}</p>

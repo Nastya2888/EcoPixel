@@ -30,6 +30,14 @@ def _is_own_drawing(drawing, user) -> bool:
     return bool(user.is_authenticated and drawing.user_id == user.id)
 
 
+def _can_view_drawing(request, drawing) -> bool:
+    if drawing.is_approved:
+        return True
+    if _can_view_moderation_content(request):
+        return True
+    return _is_own_drawing(drawing, request.user)
+
+
 def _build_stored_image_name(original_name: str) -> str:
     safe_name = Path(original_name or "drawing.png").name
     ext = Path(safe_name).suffix.lower() or ".png"
@@ -172,7 +180,7 @@ def gallery(request):
 @require_GET
 def work_detail(request, pk):
     work = get_object_or_404(Drawing, pk=pk)
-    if not work.is_approved and not _can_view_moderation_content(request):
+    if not _can_view_drawing(request, work):
         raise Http404("Работа недоступна.")
     has_voted = False
     is_own_work = False
@@ -195,7 +203,7 @@ def work_detail(request, pk):
 @require_GET
 def drawing_image(request, pk):
     drawing = get_object_or_404(Drawing, pk=pk)
-    if not drawing.is_approved and not _can_view_moderation_content(request):
+    if not _can_view_drawing(request, drawing):
         raise Http404("Изображение недоступно.")
 
     if drawing.image and drawing.image.name and default_storage.exists(drawing.image.name):
@@ -474,10 +482,11 @@ def user_logout(request):
 
 @login_required
 def profile(request):
-    drawings_qs = Drawing.objects.filter(user=request.user)
-    if not _can_view_moderation_content(request):
-        drawings_qs = drawings_qs.filter(is_approved=True)
-    drawings = list(drawings_qs.order_by("-created_at"))
+    drawings = list(
+        Drawing.objects.filter(user=request.user)
+        .select_related("category")
+        .order_by("-created_at")
+    )
     missing_image_ids = set()
     for drawing in drawings:
         has_file = bool(
@@ -487,6 +496,10 @@ def profile(request):
         if not has_file and not has_blob:
             missing_image_ids.add(drawing.id)
 
+    published_count = sum(1 for drawing in drawings if drawing.is_approved)
+    pending_count = len(drawings) - published_count
+    votes_total = sum(drawing.votes for drawing in drawings)
+
     return render(
         request,
         "drawings/profile.html",
@@ -494,6 +507,12 @@ def profile(request):
             "drawings": drawings,
             "missing_image_ids": missing_image_ids,
             "restore_status": request.GET.get("restore", ""),
+            "stats": {
+                "total": len(drawings),
+                "published": published_count,
+                "pending": pending_count,
+                "votes": votes_total,
+            },
         },
     )
 
