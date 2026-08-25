@@ -1,4 +1,12 @@
 (() => {
+    function t(message) {
+        const map = window.ECOPIXEL_DRAW_I18N || {};
+        if (Object.prototype.hasOwnProperty.call(map, message)) {
+            return map[message];
+        }
+        return message;
+    }
+
     const canvas = document.getElementById("main-canvas");
     const templateCanvas = document.getElementById("template-canvas");
     const gridCanvas = document.getElementById("grid-canvas");
@@ -496,9 +504,9 @@
     function confirmResizeForTemplate(template) {
         if (!template) return true;
         if (gridWidth === template.width && gridHeight === template.height) return true;
-        const warning = isDrawingChanged ? "\nТекущий рисунок будет очищен." : "";
+        const warning = isDrawingChanged ? `\n${t("Текущий рисунок будет очищен.")}` : "";
         const confirmed = window.confirm(
-            `Шаблон "${template.name}" рассчитан на ${template.width}×${template.height}. Переключить размер холста?${warning}`
+            `${t("Шаблон")} "${t(template.name)}" ${t("рассчитан на")} ${template.width}×${template.height}. ${t("Переключить размер холста?")}${warning}`
         );
         if (!confirmed) return false;
         initCanvas(template.width, template.height);
@@ -519,7 +527,7 @@
         const id = options.id || `layer-${layerIdCounter++}`;
         return {
             id,
-            name: options.name || `Слой ${layers.length + 1}`,
+            name: options.name || `${t("Слой")} ${layers.length + 1}`,
             visible: options.visible !== false,
             canvas: layerCanvas,
             ctx: layerCtx,
@@ -535,7 +543,7 @@
     }
 
     function getActiveLayerName() {
-        return getActiveLayer()?.name || "Слой";
+        return getActiveLayer()?.name || t("Слой");
     }
 
     function renderComposite() {
@@ -577,7 +585,7 @@
 
     function removeLayer(layerId) {
         if (layers.length <= 1) {
-            submitResultEl.textContent = "Нельзя удалить последний слой.";
+            submitResultEl.textContent = t("Нельзя удалить последний слой.");
             return;
         }
         const index = layers.findIndex((layer) => layer.id === layerId);
@@ -605,7 +613,7 @@
             const selectButton = document.createElement("button");
             selectButton.type = "button";
             selectButton.className = "layer-select-btn";
-            selectButton.innerHTML = `<span class="layer-name">${layer.name}</span><span class="layer-subtitle">${layer.visible ? "Виден" : "Скрыт"}</span>`;
+            selectButton.innerHTML = `<span class="layer-name">${layer.name}</span><span class="layer-subtitle">${layer.visible ? t("Виден") : t("Скрыт")}</span>`;
             selectButton.addEventListener("click", () => setActiveLayer(layer.id));
             item.appendChild(selectButton);
 
@@ -613,7 +621,7 @@
             visibilityButton.type = "button";
             visibilityButton.className = `layer-action-btn layer-visibility-btn${layer.visible ? "" : " off"}`;
             visibilityButton.textContent = layer.visible ? "ON" : "OFF";
-            visibilityButton.title = layer.visible ? "Скрыть слой" : "Показать слой";
+            visibilityButton.title = layer.visible ? t("Скрыть слой") : t("Показать слой");
             visibilityButton.addEventListener("click", () => toggleLayerVisibility(layer.id));
             item.appendChild(visibilityButton);
 
@@ -621,7 +629,7 @@
             removeButton.type = "button";
             removeButton.className = "layer-action-btn layer-remove-btn";
             removeButton.textContent = "X";
-            removeButton.title = "Удалить слой";
+            removeButton.title = t("Удалить слой");
             removeButton.disabled = layers.length <= 1;
             removeButton.addEventListener("click", () => removeLayer(layer.id));
             item.appendChild(removeButton);
@@ -632,11 +640,11 @@
 
     function addLayer() {
         if (layers.length >= MAX_LAYERS) {
-            submitResultEl.textContent = `Максимум слоёв: ${MAX_LAYERS}.`;
+            submitResultEl.textContent = `${t("Максимум слоёв:")} ${MAX_LAYERS}.`;
             return;
         }
         const layer = createLayer(gridWidth, gridHeight, {
-            name: `Слой ${layers.length + 1}`,
+            name: `${t("Слой")} ${layers.length + 1}`,
         });
         if (!layer) return;
         layers.push(layer);
@@ -793,7 +801,7 @@
         const baseImageData = layerCtx.getImageData(0, 0, gridWidth, gridHeight);
         const region = captureConnectedRegion(baseImageData, startPoint.x, startPoint.y);
         if (!region) {
-            submitResultEl.textContent = "Выбери нарисованный объект для перемещения.";
+            submitResultEl.textContent = t("Выбери нарисованный объект для перемещения.");
             return false;
         }
         saveState();
@@ -964,7 +972,7 @@
 
     function confirmResizeIfNeeded() {
         if (!isDrawingChanged) return true;
-        return window.confirm("Текущий рисунок будет очищен. Продолжить?");
+        return window.confirm(t("Текущий рисунок будет очищен. Продолжить?"));
     }
 
     function setPresetSelection(width, height) {
@@ -1035,7 +1043,7 @@
         layers = [];
         activeLayerId = null;
         layerIdCounter = 1;
-        const baseLayer = createLayer(gridWidth, gridHeight, { name: "Слой 1" });
+        const baseLayer = createLayer(gridWidth, gridHeight, { name: t("Слой 1") });
         if (baseLayer) {
             layers.push(baseLayer);
             activeLayerId = baseLayer.id;
@@ -1259,7 +1267,7 @@
 
     function updateStatusBar() {
         if (currentSizeLabel) currentSizeLabel.textContent = `${gridWidth} × ${gridHeight}`;
-        if (currentColorLabel) currentColorLabel.textContent = COLOR_NAMES[selectedColor] || selectedColor;
+        if (currentColorLabel) currentColorLabel.textContent = t(COLOR_NAMES[selectedColor] || selectedColor);
         if (currentColorDot) currentColorDot.style.backgroundColor = selectedColor;
         if (currentThicknessLabel) currentThicknessLabel.textContent = `${brushSize} px`;
         if (currentLayerLabel) currentLayerLabel.textContent = getActiveLayerName();
@@ -1406,10 +1414,10 @@
     }
 
     function getAutoCategoryByAge(age) {
-        if (age >= 6 && age <= 9) return { name: "6–9 лет", slug: "age-6-9" };
-        if (age >= 10 && age <= 13) return { name: "10–13 лет", slug: "age-10-13" };
-        if (age >= 14 && age <= 17) return { name: "14–17 лет", slug: "age-14-17" };
-        if (age >= 18 && age <= 25) return { name: "18–25 лет", slug: "age-18-25" };
+        if (age >= 6 && age <= 9) return { name: t("6–9 лет"), slug: "age-6-9" };
+        if (age >= 10 && age <= 13) return { name: t("10–13 лет"), slug: "age-10-13" };
+        if (age >= 14 && age <= 17) return { name: t("14–17 лет"), slug: "age-14-17" };
+        if (age >= 18 && age <= 25) return { name: t("18–25 лет"), slug: "age-18-25" };
         return { name: "", slug: "" };
     }
 
@@ -1456,7 +1464,7 @@
     function openModal() {
         const isAuthenticated = drawPage?.dataset.authenticated === "true";
         if (!isAuthenticated) {
-            authRequiredMessage.innerHTML = 'Войди или зарегистрируйся, чтобы отправить работу. <a href="/login/?next=/draw/">Войти</a>';
+            authRequiredMessage.innerHTML = `${t("Войди или зарегистрируйся, чтобы отправить работу.")} <a href="/login/?next=/draw/">${t("Войти")}</a>`;
             return;
         }
         authRequiredMessage.textContent = "";
@@ -1482,7 +1490,7 @@
         submitSuccess.classList.add("hidden");
         submitProgress.classList.remove("hidden");
         submitProgressBar.style.width = "0%";
-        submitProgressText.textContent = "Отправка...";
+        submitProgressText.textContent = t("Отправка...");
         let percent = 0;
         progressTimer = setInterval(() => {
             percent = Math.min(percent + 8, 92);
@@ -1507,7 +1515,7 @@
     function restoreDraftIfExists() {
         const draft = localStorage.getItem(DRAFT_KEY);
         if (!draft) return;
-        if (!window.confirm("У вас есть несохраненный рисунок. Восстановить?")) return;
+        if (!window.confirm(t("У вас есть несохраненный рисунок. Восстановить?"))) return;
         const image = new Image();
         image.onload = () => {
             const layerCtx = getActiveLayerCtx();
@@ -1573,14 +1581,14 @@
         syncTemplateOpacity(event.target.value);
     });
     downloadButton?.addEventListener("click", async () => {
-        const defaultLabel = "Скачать PNG";
+        const defaultLabel = t("Скачать PNG");
         downloadButton.disabled = true;
-        downloadButton.textContent = "Готовим PNG...";
+        downloadButton.textContent = t("Готовим PNG...");
 
         try {
             const blob = await createUploadBlob();
             if (!blob) {
-                submitResultEl.textContent = "Не удалось подготовить файл для скачивания.";
+                submitResultEl.textContent = t("Не удалось подготовить файл для скачивания.");
                 return;
             }
 
@@ -1593,14 +1601,14 @@
             anchor.remove();
             URL.revokeObjectURL(url);
 
-            submitResultEl.textContent = "PNG скачан.";
+            submitResultEl.textContent = t("PNG скачан.");
             window.setTimeout(() => {
-                if (submitResultEl.textContent === "PNG скачан.") {
+                if (submitResultEl.textContent === t("PNG скачан.")) {
                     submitResultEl.textContent = "";
                 }
             }, 2200);
         } catch (error) {
-            submitResultEl.textContent = "Ошибка при скачивании PNG.";
+            submitResultEl.textContent = t("Ошибка при скачивании PNG.");
         } finally {
             downloadButton.disabled = false;
             downloadButton.textContent = defaultLabel;
@@ -1667,7 +1675,7 @@
         const blob = await createUploadBlob();
         if (!blob) {
             finishUploadProgress(false);
-            errorsEl.textContent = "Не удалось подготовить изображение.";
+            errorsEl.textContent = t("Не удалось подготовить изображение.");
             return;
         }
 
@@ -1688,9 +1696,9 @@
             const data = await response.json();
             if (!response.ok || !data.success) {
                 finishUploadProgress(false);
-                errorsEl.textContent = data.error || "Не удалось отправить работу.";
+                errorsEl.textContent = data.error || t("Не удалось отправить работу.");
                 if (response.status === 403) {
-                    errorsEl.innerHTML = `${data.error || "Требуется авторизация."} <a href="/login/?next=/draw/">Войти</a>`;
+                    errorsEl.innerHTML = `${data.error || t("Требуется авторизация.")} <a href="/login/?next=/draw/">${t("Войти")}</a>`;
                 }
                 return;
             }
@@ -1701,15 +1709,15 @@
             lastSubmittedUrl = `${window.location.origin}/work/${data.id}/`;
             submitProgress.classList.add("hidden");
             submitSuccess.classList.remove("hidden");
-            submitSuccessText.textContent = `Готово! Номер работы: #${data.id}`;
+            submitSuccessText.textContent = `${t("Готово! Номер работы:")} #${data.id}`;
             vkShareLink.href = `https://vk.com/share.php?url=${encodeURIComponent(lastSubmittedUrl)}`;
-            tgShareLink.href = `https://t.me/share/url?url=${encodeURIComponent(lastSubmittedUrl)}&text=${encodeURIComponent("Мой рисунок на конкурсе ЭкоПиксель!")}`;
-            submitResultEl.innerHTML = `Рисунок принят! Номер работы: #${data.id}. <a href="/work/${data.id}/">Открыть работу</a>`;
+            tgShareLink.href = `https://t.me/share/url?url=${encodeURIComponent(lastSubmittedUrl)}&text=${encodeURIComponent(t("Мой рисунок на конкурсе ЭкоПиксель!"))}`;
+            submitResultEl.innerHTML = `${t("Рисунок принят! Номер работы:")} #${data.id}. <a href="/work/${data.id}/">${t("Открыть работу")}</a>`;
             form.reset();
             updateCategoryPreview();
         } catch (error) {
             finishUploadProgress(false);
-            errorsEl.textContent = "Ошибка сети при отправке формы.";
+            errorsEl.textContent = t("Ошибка сети при отправке формы.");
         }
     });
 
@@ -1717,12 +1725,12 @@
         if (!lastSubmittedUrl) return;
         try {
             await navigator.clipboard.writeText(lastSubmittedUrl);
-            copyLinkBtn.textContent = "Ссылка скопирована";
+            copyLinkBtn.textContent = t("Ссылка скопирована");
             setTimeout(() => {
-                copyLinkBtn.textContent = "Скопировать ссылку";
+                copyLinkBtn.textContent = t("Скопировать ссылку");
             }, 1500);
         } catch (error) {
-            copyLinkBtn.textContent = "Не удалось скопировать";
+            copyLinkBtn.textContent = t("Не удалось скопировать");
         }
     });
 

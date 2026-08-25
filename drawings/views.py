@@ -2,6 +2,7 @@ from pathlib import Path
 from uuid import uuid4
 from html import escape
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+import json
 
 from django.http import Http404, HttpResponse, JsonResponse
 from django.db import transaction
@@ -20,7 +21,7 @@ from django.shortcuts import get_list_or_404, get_object_or_404, redirect, rende
 from django.views.decorators.http import require_GET, require_POST
 
 from .models import Category, Drawing, Vote
-from .translations import translate
+from .translations import EN, current_language_code, translate
 from .utils import send_notification
 
 
@@ -284,14 +285,25 @@ def certificate(request, pk):
 @require_GET
 def draw(request):
     categories = AGE_CATEGORY_FILTERS
-    return render(request, "drawings/draw.html", {"categories": categories})
+    draw_i18n = EN if current_language_code() == "en" else {}
+    return render(
+        request,
+        "drawings/draw.html",
+        {
+            "categories": categories,
+            "draw_i18n_json": json.dumps(draw_i18n, ensure_ascii=False),
+        },
+    )
 
 
 @require_POST
 def submit_drawing(request):
     if not request.user.is_authenticated:
         return JsonResponse(
-            {"success": False, "error": "Войдите или зарегистрируйтесь, чтобы отправить работу."},
+            {
+                "success": False,
+                "error": translate("Войдите или зарегистрируйтесь, чтобы отправить работу."),
+            },
             status=403,
         )
 
@@ -306,49 +318,73 @@ def submit_drawing(request):
     category_slug_from_form = request.POST.get("category_slug", "").strip()
 
     if image is None:
-        return JsonResponse({"success": False, "error": "Файл изображения не передан."}, status=400)
+        return JsonResponse(
+            {"success": False, "error": translate("Файл изображения не передан.")},
+            status=400,
+        )
 
     if image.content_type != "image/png":
-        return JsonResponse({"success": False, "error": "Допускаются только PNG изображения."}, status=400)
+        return JsonResponse(
+            {"success": False, "error": translate("Допускаются только PNG изображения.")},
+            status=400,
+        )
 
     image_bytes = image.read()
     if not image_bytes:
-        return JsonResponse({"success": False, "error": "Пустой файл изображения."}, status=400)
+        return JsonResponse(
+            {"success": False, "error": translate("Пустой файл изображения.")},
+            status=400,
+        )
 
     if len(description) > 500:
         return JsonResponse(
-            {"success": False, "error": "Описание не должно быть длиннее 500 символов."},
+            {"success": False, "error": translate("Описание не должно быть длиннее 500 символов.")},
             status=400,
         )
 
     if not all([title, author_name, age_raw, city]):
-        return JsonResponse({"success": False, "error": "Заполните все поля формы."}, status=400)
+        return JsonResponse(
+            {"success": False, "error": translate("Заполните все поля формы.")},
+            status=400,
+        )
 
     if consent not in {"on", "true", "1"}:
         return JsonResponse(
-            {"success": False, "error": "Требуется согласие на обработку персональных данных."},
+            {
+                "success": False,
+                "error": translate("Требуется согласие на обработку персональных данных."),
+            },
             status=400,
         )
 
     try:
         age = int(age_raw)
     except (TypeError, ValueError):
-        return JsonResponse({"success": False, "error": "Возраст указан неверно."}, status=400)
+        return JsonResponse(
+            {"success": False, "error": translate("Возраст указан неверно.")},
+            status=400,
+        )
 
     if age < 6 or age > 25:
-        return JsonResponse({"success": False, "error": "Возраст должен быть от 6 до 25 лет."}, status=400)
+        return JsonResponse(
+            {"success": False, "error": translate("Возраст должен быть от 6 до 25 лет.")},
+            status=400,
+        )
 
     if request.user.is_authenticated:
         email = request.user.email or email
     try:
         validate_email(email)
     except ValidationError:
-        return JsonResponse({"success": False, "error": "Укажите корректный email."}, status=400)
+        return JsonResponse(
+            {"success": False, "error": translate("Укажите корректный email.")},
+            status=400,
+        )
 
     category_name, category_slug = _get_category_for_age(age)
     if category_slug_from_form and category_slug_from_form != category_slug:
         return JsonResponse(
-            {"success": False, "error": "Возраст не соответствует выбранной категории."},
+            {"success": False, "error": translate("Возраст не соответствует выбранной категории.")},
             status=400,
         )
 

@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
+{% load ui_i18n %}
 
-{% block title %}Рисовать | ЭкоПиксель{% endblock %}
+{% block title %}{% t "Рисовать" %} | ЭкоПиксель{% endblock %}
 
 {% block body_attrs %} class="page-draw"{% endblock %}
 
@@ -10,75 +11,75 @@
     <div class="editor-workspace">
         <aside class="editor-sidebar left">
             <div class="panel tools-panel" id="tools">
-                <div class="panel-title">Инструменты</div>
+                <div class="panel-title">{% t "Инструменты" %}</div>
                 <div class="tools-list tools-grid">
-                    <button class="tool tool-btn active" data-tool="pencil" title="Карандаш (B)" type="button">
+                    <button class="tool tool-btn active" data-tool="pencil" title="{% t 'Карандаш (B)' %}" type="button">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-                        <span>Карандаш</span>
+                        <span>{% t "Карандаш" %}</span>
                         <kbd>B</kbd>
                     </button>
-                    <button class="tool tool-btn" data-tool="eraser" title="Ластик (E)" type="button">
+                    <button class="tool tool-btn" data-tool="eraser" title="{% t 'Ластик (E)' %}" type="button">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16C2 15 2 13 3 12L13 2L22 11L20 20Z"></path><path d="M17 17L7 7"></path></svg>
-                        <span>Ластик</span>
+                        <span>{% t "Ластик" %}</span>
                         <kbd>E</kbd>
                     </button>
-                    <button class="tool tool-btn" data-tool="fill" title="Заливка (F)" type="button">
+                    <button class="tool tool-btn" data-tool="fill" title="{% t 'Заливка (F)' %}" type="button">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11l-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11z"></path><path d="M5 21h14"></path></svg>
-                        <span>Заливка</span>
+                        <span>{% t "Заливка" %}</span>
                         <kbd>F</kbd>
                     </button>
-                    <button class="tool tool-btn" data-tool="line" title="Прямая линия (L)" type="button">
+                    <button class="tool tool-btn" data-tool="line" title="{% t 'Прямая линия (L)' %}" type="button">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20L20 4"></path><circle cx="5" cy="19" r="1.7"></circle><circle cx="19" cy="5" r="1.7"></circle></svg>
-                        <span>Прямая</span>
+                        <span>{% t "Прямая" %}</span>
                         <kbd>L</kbd>
                     </button>
-                    <button class="tool tool-btn" data-tool="rectangle" title="Прямоугольник (R)" type="button">
+                    <button class="tool tool-btn" data-tool="rectangle" title="{% t 'Прямоугольник (R)' %}" type="button">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="16" height="12" rx="1.5"></rect></svg>
-                        <span>Прямоугольник</span>
+                        <span>{% t "Прямоугольник" %}</span>
                         <kbd>R</kbd>
                     </button>
-                    <button class="tool tool-btn" data-tool="circle" title="Круг (C)" type="button">
+                    <button class="tool tool-btn" data-tool="circle" title="{% t 'Круг (C)' %}" type="button">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"></circle></svg>
-                        <span>Круг</span>
+                        <span>{% t "Круг" %}</span>
                         <kbd>C</kbd>
                     </button>
-                    <button class="tool tool-btn" data-tool="eyedropper" title="Пипетка (I)" type="button">
+                    <button class="tool tool-btn" data-tool="eyedropper" title="{% t 'Пипетка (I)' %}" type="button">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21a3 3 0 0 1 0-4.2l6.6-6.6a2 2 0 0 0 0-2.8l-1-1 2.8-2.8 1 1a2 2 0 0 0 2.8 0l1.8 1.8-2.8 2.8-1-1a2 2 0 0 0-2.8 0L8.8 18A3 3 0 0 1 7 21z"></path></svg>
-                        <span>Пипетка</span>
+                        <span>{% t "Пипетка" %}</span>
                         <kbd>I</kbd>
                     </button>
-                    <button class="tool tool-btn" data-tool="hand" title="Рука (H)" type="button">
+                    <button class="tool tool-btn" data-tool="hand" title="{% t 'Рука (H)' %}" type="button">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 11V5a1 1 0 0 1 2 0v5"></path><path d="M10 11V4a1 1 0 0 1 2 0v7"></path><path d="M13 11V6a1 1 0 0 1 2 0v6"></path><path d="M16 12V8a1 1 0 0 1 2 0v7a5 5 0 0 1-5 5h-1a7 7 0 0 1-7-7v-2a2 2 0 0 1 4 0v2"></path></svg>
-                        <span>Рука</span>
+                        <span>{% t "Рука" %}</span>
                         <kbd>H</kbd>
                     </button>
                     <div class="tool-divider"></div>
-                    <button class="tool tool-btn" id="undo-button" data-action="undo" type="button" title="Отмена (Ctrl+Z)">
+                    <button class="tool tool-btn" id="undo-button" data-action="undo" type="button" title="{% t 'Отмена (Ctrl+Z)' %}">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
-                        <span>Отмена</span>
+                        <span>{% t "Отмена" %}</span>
                         <kbd>Ctrl+Z</kbd>
                     </button>
-                    <button class="tool tool-btn" id="redo-button" data-action="redo" type="button" title="Вернуть (Ctrl+Shift+Z)">
+                    <button class="tool tool-btn" id="redo-button" data-action="redo" type="button" title="{% t 'Вернуть (Ctrl+Shift+Z)' %}">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"></path></svg>
-                        <span>Вернуть</span>
+                        <span>{% t "Вернуть" %}</span>
                         <kbd>Ctrl+Shift+Z</kbd>
                     </button>
-                    <button class="tool tool-btn" id="clear-button" data-action="clear" type="button" title="Очистить холст">
+                    <button class="tool tool-btn" id="clear-button" data-action="clear" type="button" title="{% t 'Очистить холст' %}">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                        <span>Очистить</span>
+                        <span>{% t "Очистить" %}</span>
                     </button>
                 </div>
                 <div class="tool-thickness">
-                    <label class="tool-thickness-label" for="tool-size-range">Толщина</label>
+                    <label class="tool-thickness-label" for="tool-size-range">{% t "Толщина" %}</label>
                     <input id="tool-size-range" type="range" min="1" max="12" value="1">
                     <span class="tool-thickness-value" id="tool-size-value">1 px</span>
                 </div>
             </div>
 
             <div class="panel palette-panel">
-                <div class="panel-title">Палитра</div>
+                <div class="panel-title">{% t "Палитра" %}</div>
                 <div class="palette" id="palette"></div>
-                <button class="add-color-btn" id="addCustomColor" title="Свой цвет" type="button">
+                <button class="add-color-btn" id="addCustomColor" title="{% t 'Свой цвет' %}" type="button">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
                 <input type="color" id="customColorPicker" class="hidden-color-picker">
@@ -101,7 +102,7 @@
             <div class="sidebar-panel-stack">
                 <section class="sidebar-panel is-active" data-panel="size">
                     <div class="panel settings-panel">
-                        <div class="panel-title">Размер холста</div>
+                        <div class="panel-title">{% t "Размер холста" %}</div>
                         <div class="size-presets">
                             <label class="size-card size-card-compact">
                                 <input type="radio" name="grid-size" value="32" checked>
@@ -110,7 +111,7 @@
                                 </div>
                                 <div class="size-text">
                                     <strong>32×32</strong>
-                                    <span>Начинающим</span>
+                                    <span>{% t "Начинающим" %}</span>
                                 </div>
                             </label>
                             <label class="size-card size-card-compact">
@@ -120,54 +121,54 @@
                                 </div>
                                 <div class="size-text">
                                     <strong>64×64</strong>
-                                    <span>Опытным</span>
+                                    <span>{% t "Опытным" %}</span>
                                 </div>
                             </label>
                         </div>
                         <div class="size-custom size-custom-compact">
-                            <div class="size-custom-title">Свой размер</div>
+                            <div class="size-custom-title">{% t "Свой размер" %}</div>
                             <div class="size-custom-fields">
                                 <label class="size-field" for="custom-width-input">
-                                    <span>Ширина</span>
+                                    <span>{% t "Ширина" %}</span>
                                     <input id="custom-width-input" type="number" min="8" max="128" value="32">
                                 </label>
                                 <label class="size-field" for="custom-height-input">
-                                    <span>Высота</span>
+                                    <span>{% t "Высота" %}</span>
                                     <input id="custom-height-input" type="number" min="8" max="128" value="32">
                                 </label>
                             </div>
-                            <button id="apply-custom-size" class="btn-secondary btn-compact" type="button">Применить</button>
+                            <button id="apply-custom-size" class="btn-secondary btn-compact" type="button">{% t "Применить" %}</button>
                         </div>
                     </div>
                 </section>
 
                 <section class="sidebar-panel" data-panel="templates">
                     <div class="panel template-picker">
-                        <div class="panel-title">Шаблоны</div>
-                        <select id="template-select" aria-label="Выбор шаблона">
-                            <option value="">Без шаблона</option>
-                            <option value="forest-32">Лес (32×32)</option>
-                            <option value="house-32">Домик и деревья (32×32)</option>
-                            <option value="mountains-32">Горы и река (32×32)</option>
-                            <option value="forest-64">Лес (64×64)</option>
-                            <option value="house-64">Домик и деревья (64×64)</option>
-                            <option value="mountains-64">Горы и река (64×64)</option>
+                        <div class="panel-title">{% t "Шаблоны" %}</div>
+                        <select id="template-select" aria-label="{% t 'Выбор шаблона' %}">
+                            <option value="">{% t "Без шаблона" %}</option>
+                            <option value="forest-32">{% t "Лес (32×32)" %}</option>
+                            <option value="house-32">{% t "Домик и деревья (32×32)" %}</option>
+                            <option value="mountains-32">{% t "Горы и река (32×32)" %}</option>
+                            <option value="forest-64">{% t "Лес (64×64)" %}</option>
+                            <option value="house-64">{% t "Домик и деревья (64×64)" %}</option>
+                            <option value="mountains-64">{% t "Горы и река (64×64)" %}</option>
                         </select>
                         <label class="template-opacity-label" for="template-opacity-range">
-                            Прозрачность
+                            {% t "Прозрачность" %}
                             <span id="template-opacity-value">45%</span>
                         </label>
                         <input id="template-opacity-range" type="range" min="15" max="80" value="45">
-                        <button id="clear-template-btn" class="btn-secondary btn-compact" type="button">Убрать шаблон</button>
-                        <p class="template-picker-hint">Шаблон не попадёт в итоговый PNG.</p>
+                        <button id="clear-template-btn" class="btn-secondary btn-compact" type="button">{% t "Убрать шаблон" %}</button>
+                        <p class="template-picker-hint">{% t "Шаблон не попадёт в итоговый PNG." %}</p>
                     </div>
                 </section>
 
                 <section class="sidebar-panel" data-panel="layers">
                     <div class="panel layers-panel">
                         <div class="layers-head">
-                            <div class="panel-title">Слои</div>
-                            <button id="add-layer-btn" class="layer-add-btn" type="button" title="Добавить слой">+</button>
+                            <div class="panel-title">{% t "Слои" %}</div>
+                            <button id="add-layer-btn" class="layer-add-btn" type="button" title="{% t 'Добавить слой' %}">+</button>
                         </div>
                         <div id="layers-list" class="layers-list"></div>
                     </div>
@@ -175,19 +176,19 @@
 
                 <section class="sidebar-panel" data-panel="file">
                     <div class="panel file-panel">
-                        <div class="panel-title">Файл</div>
-                        <button class="btn-secondary download-btn btn-compact" id="download-btn" type="button">Скачать PNG</button>
+                        <div class="panel-title">{% t "Файл" %}</div>
+                        <button class="btn-secondary download-btn btn-compact" id="download-btn" type="button">{% t "Скачать PNG" %}</button>
                         {% if user.is_authenticated %}
                             <button class="submit-btn btn-compact" id="submit-btn" type="button">
-                                <span>Готово — отправить</span>
+                                <span>{% t "Готово — отправить" %}</span>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                             </button>
                         {% else %}
                             <div class="auth-submit-box auth-submit-box-compact">
-                                <p>Войдите, чтобы отправить работу</p>
+                                <p>{% t "Войдите, чтобы отправить работу" %}</p>
                                 <div class="auth-submit-actions">
-                                    <a class="btn-secondary btn-compact" href="{% url 'login' %}?next=/draw/">Войти</a>
-                                    <a class="btn btn-compact" href="{% url 'register' %}">Регистрация</a>
+                                    <a class="btn-secondary btn-compact" href="{% url 'login' %}?next=/draw/">{% t "Войти" %}</a>
+                                    <a class="btn btn-compact" href="{% url 'register' %}">{% t "Регистрация" %}</a>
                                 </div>
                             </div>
                         {% endif %}
@@ -197,60 +198,60 @@
                 </section>
             </div>
 
-            <div class="panel canvas-sidebar-preview preview-panel" title="Предпросмотр в галерее">
-                <div class="panel-title">Предпросмотр</div>
+            <div class="panel canvas-sidebar-preview preview-panel" title="{% t 'Предпросмотр в галерее' %}">
+                <div class="panel-title">{% t "Предпросмотр" %}</div>
                 <div class="canvas-sidebar-preview-frame">
                     <canvas id="preview-canvas" width="96" height="96"></canvas>
                 </div>
-                <p class="preview-caption">Как будет в галерее</p>
+                <p class="preview-caption">{% t "Как будет в галерее" %}</p>
             </div>
 
-            <div class="panel canvas-sidebar-meta" aria-label="Параметры холста">
-                <div class="panel-title">Холст</div>
+            <div class="panel canvas-sidebar-meta" aria-label="{% t 'Параметры холста' %}">
+                <div class="panel-title">{% t "Холст" %}</div>
                 <div class="canvas-sidebar-meta-list">
                     <div class="meta-row">
-                        <span class="meta-label">Размер</span>
+                        <span class="meta-label">{% t "Размер" %}</span>
                         <span class="meta-badge" id="canvas-size-badge">32×32</span>
                     </div>
                     <div class="meta-row">
-                        <span class="meta-label">Масштаб</span>
+                        <span class="meta-label">{% t "Масштаб" %}</span>
                         <span class="meta-badge" id="meta-zoom">100%</span>
                     </div>
                     <div class="meta-row">
-                        <span class="meta-label">Цвет</span>
+                        <span class="meta-label">{% t "Цвет" %}</span>
                         <span class="meta-row-value">
-                            <span class="meta-color" id="meta-color">Коралл</span>
+                            <span class="meta-color" id="meta-color">{% t "Коралл" %}</span>
                             <span class="color-dot" id="current-color-dot"></span>
                         </span>
                     </div>
                     <div class="meta-row">
-                        <span class="meta-label">Толщина</span>
+                        <span class="meta-label">{% t "Толщина" %}</span>
                         <span class="meta-color" id="meta-thickness">1 px</span>
                     </div>
                     <div class="meta-row">
-                        <span class="meta-label">Слой</span>
-                        <span class="meta-color" id="meta-layer">Слой 1</span>
+                        <span class="meta-label">{% t "Слой" %}</span>
+                        <span class="meta-color" id="meta-layer">{% t "Слой 1" %}</span>
                     </div>
                 </div>
             </div>
             </div>
 
-            <nav class="sidebar-tab-rail" aria-label="Панели редактора">
-                <button type="button" class="sidebar-tab is-active" data-tab="size" title="Размер">
+            <nav class="sidebar-tab-rail" aria-label="{% t 'Панели редактора' %}">
+                <button type="button" class="sidebar-tab is-active" data-tab="size" title="{% t 'Размер' %}">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 3v18"></path></svg>
-                    <span>Размер</span>
+                    <span>{% t "Размер" %}</span>
                 </button>
-                <button type="button" class="sidebar-tab" data-tab="templates" title="Шаблоны">
+                <button type="button" class="sidebar-tab" data-tab="templates" title="{% t 'Шаблоны' %}">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                    <span>Шаблоны</span>
+                    <span>{% t "Шаблоны" %}</span>
                 </button>
-                <button type="button" class="sidebar-tab" data-tab="layers" title="Слои">
+                <button type="button" class="sidebar-tab" data-tab="layers" title="{% t 'Слои' %}">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                    <span>Слои</span>
+                    <span>{% t "Слои" %}</span>
                 </button>
-                <button type="button" class="sidebar-tab" data-tab="file" title="Файл">
+                <button type="button" class="sidebar-tab" data-tab="file" title="{% t 'Файл' %}">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    <span>Файл</span>
+                    <span>{% t "Файл" %}</span>
                 </button>
             </nav>
         </aside>
@@ -264,8 +265,8 @@
                 <canvas id="submit-preview-canvas" width="96" height="96"></canvas>
             </div>
             <div class="draw-submit-heading">
-                <h2>Отправить работу</h2>
-                <p class="draw-submit-subtitle">Заполните данные — рисунок появится в галерее конкурса</p>
+                <h2>{% t "Отправить работу" %}</h2>
+                <p class="draw-submit-subtitle">{% t "Заполните данные — рисунок появится в галерее конкурса" %}</p>
             </div>
         </div>
 
@@ -275,18 +276,18 @@
 
             <div class="draw-submit-fields">
                 <div class="draw-submit-field draw-submit-field-full">
-                    <label for="submit-title">Название работы</label>
-                    <input id="submit-title" type="text" name="title" required maxlength="120" placeholder="Например: Лес у реки">
+                    <label for="submit-title">{% t "Название работы" %}</label>
+                    <input id="submit-title" type="text" name="title" required maxlength="120" placeholder="{% t 'Например: Лес у реки' %}">
                 </div>
 
                 <div class="draw-submit-field draw-submit-field-full">
-                    <label for="submit-description">Описание</label>
-                    <textarea id="submit-description" name="description" maxlength="500" rows="4" placeholder="Расскажите, что изображено на рисунке и какая идея стоит за работой"></textarea>
-                    <span class="draw-submit-hint">Необязательно, до 500 символов</span>
+                    <label for="submit-description">{% t "Описание" %}</label>
+                    <textarea id="submit-description" name="description" maxlength="500" rows="4" placeholder="{% t 'Расскажите, что изображено на рисунке и какая идея стоит за работой' %}"></textarea>
+                    <span class="draw-submit-hint">{% t "Необязательно, до 500 символов" %}</span>
                 </div>
 
                 <div class="draw-submit-field draw-submit-field-full">
-                    <label for="submit-author">Имя автора</label>
+                    <label for="submit-author">{% t "Имя автора" %}</label>
                     <input
                         id="submit-author"
                         type="text"
@@ -294,18 +295,18 @@
                         required
                         maxlength="80"
                         {% if user.is_authenticated %}value="{{ user.username }}"{% endif %}
-                        placeholder="Как подписать работу"
+                        placeholder="{% t 'Как подписать работу' %}"
                     >
                 </div>
 
                 <div class="draw-submit-field-row">
                     <div class="draw-submit-field">
-                        <label for="age-input">Возраст</label>
+                        <label for="age-input">{% t "Возраст" %}</label>
                         <input type="number" name="age" required min="6" max="25" id="age-input" placeholder="12">
                     </div>
                     <div class="draw-submit-field">
-                        <label for="submit-city">Город</label>
-                        <input id="submit-city" type="text" name="city" required maxlength="80" placeholder="Ваш город">
+                        <label for="submit-city">{% t "Город" %}</label>
+                        <input id="submit-city" type="text" name="city" required maxlength="80" placeholder="{% t 'Ваш город' %}">
                     </div>
                 </div>
 
@@ -326,9 +327,9 @@
                 </div>
 
                 <div class="draw-submit-field draw-submit-field-full">
-                    <label for="category-auto">Категория</label>
+                    <label for="category-auto">{% t "Категория" %}</label>
                     <select id="category-auto">
-                        <option value="">Определится автоматически</option>
+                        <option value="">{% t "Определится автоматически" %}</option>
                         {% for category in categories %}
                             <option value="{{ category.name }}">{{ category.name }}</option>
                         {% endfor %}
@@ -339,16 +340,16 @@
             <label class="draw-submit-consent">
                 <input type="checkbox" name="consent" value="on" required>
                 <span class="draw-submit-consent-mark" aria-hidden="true"></span>
-                <span class="draw-submit-consent-text">Согласие на обработку персональных данных</span>
+                <span class="draw-submit-consent-text">{% t "Согласие на обработку персональных данных" %}</span>
             </label>
 
             <div id="form-errors" class="form-errors"></div>
 
             <div class="draw-submit-actions">
-                <button type="submit" class="btn draw-submit-primary">Отправить на конкурс</button>
+                <button type="submit" class="btn draw-submit-primary">{% t "Отправить на конкурс" %}</button>
                 <button type="button" id="cancel-submit" class="btn-secondary draw-submit-back">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    <span>Вернуться к редактированию</span>
+                    <span>{% t "Вернуться к редактированию" %}</span>
                 </button>
             </div>
         </form>
@@ -357,7 +358,7 @@
             <div class="draw-submit-progress-icon" aria-hidden="true">
                 <span></span><span></span><span></span>
             </div>
-            <p id="submit-progress-text">Отправка...</p>
+            <p id="submit-progress-text">{% t "Отправка..." %}</p>
             <div class="progress-track">
                 <div id="submit-progress-bar" class="progress-bar"></div>
             </div>
@@ -369,13 +370,16 @@
             </div>
             <p id="submit-success-text"></p>
             <div class="share-actions draw-submit-share">
-                <button type="button" id="copy-link-btn" class="btn-secondary">Скопировать ссылку</button>
-                <a id="vk-share-link" class="btn-secondary" href="#" target="_blank" rel="noopener">Поделиться в ВК</a>
+                <button type="button" id="copy-link-btn" class="btn-secondary">{% t "Скопировать ссылку" %}</button>
+                <a id="vk-share-link" class="btn-secondary" href="#" target="_blank" rel="noopener">{% t "Поделиться в ВК" %}</a>
                 <a id="tg-share-link" class="btn-secondary" href="#" target="_blank" rel="noopener">Telegram</a>
             </div>
         </div>
     </div>
 </div>
 
-<script src="{% static 'drawings/js/draw.js' %}?v=20260823-13"></script>
+<script>
+window.ECOPIXEL_DRAW_I18N = {{ draw_i18n_json|safe }};
+</script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260825-04"></script>
 {% endblock %}
