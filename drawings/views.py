@@ -20,6 +20,7 @@ from django.shortcuts import get_list_or_404, get_object_or_404, redirect, rende
 from django.views.decorators.http import require_GET, require_POST
 
 from .models import Category, Drawing, Vote
+from .translations import translate
 from .utils import send_notification
 
 
@@ -452,16 +453,16 @@ def register(request):
         password2 = request.POST.get("password2", "")
 
         if not email or not password or not password2:
-            return render(request, "drawings/register.html", {"error": "Заполните все поля."})
+            return render(request, "drawings/register.html", {"error": translate("Заполните все поля.")})
 
         if password != password2:
-            return render(request, "drawings/register.html", {"error": "Пароли не совпадают."})
+            return render(request, "drawings/register.html", {"error": translate("Пароли не совпадают.")})
 
         if User.objects.filter(username=email).exists():
             return render(
                 request,
                 "drawings/register.html",
-                {"error": "Email уже зарегистрирован."},
+                {"error": translate("Email уже зарегистрирован.")},
             )
 
         user = User.objects.create_user(username=email, email=email, password=password)
@@ -492,7 +493,7 @@ def user_login(request):
         return render(
             request,
             "drawings/login.html",
-            {"error": "Неверный email или пароль."},
+            {"error": translate("Неверный email или пароль.")},
         )
     return render(request, "drawings/login.html")
 

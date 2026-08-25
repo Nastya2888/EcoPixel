@@ -284,6 +284,51 @@ button:active, .btn:active, .btn-secondary:active {
     position: relative;
 }
 
+.header-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.lang-switch {
+    margin: 0;
+}
+
+.lang-switch__group {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    gap: 2px;
+}
+
+.lang-switch__btn {
+    min-width: 36px;
+    height: 32px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.lang-switch__btn:hover {
+    color: var(--color-text);
+}
+
+.lang-switch__btn.is-active {
+    background: var(--color-primary);
+    color: #fff;
+}
+
 .theme-toggle {
     width: 42px;
     height: 42px;
@@ -2750,7 +2795,7 @@ input:focus, select:focus, textarea:focus {
     }
 
     .main-nav.open { transform: translateX(0); }
-    .theme-toggle { order: 2; }
+    .header-controls { order: 2; }
     .burger-btn { order: 3; }
 
     .hero {

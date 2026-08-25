@@ -6,6 +6,11 @@
     const EMPTY_HEART = `<svg class="icon-heart" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${HEART_PATH}"/></svg>`;
     const INLINE_HEART = `<svg class="icon-heart-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${HEART_PATH}"/></svg>`;
 
+    const I18N = window.ECOPIXEL_I18N || {};
+    const LABEL_VOTE = I18N.vote || "Голосовать";
+    const LABEL_VOTE_DETAIL = I18N.voteDetail || "Проголосовать";
+    const LABEL_REMOVE = I18N.removeVote || "Убрать голос";
+
     function getCsrfToken() {
         const input = document.querySelector("input[name='csrfmiddlewaretoken']");
         return input ? input.value : "";
@@ -23,20 +28,21 @@
         return (
             button.dataset.voted === "true" ||
             button.classList.contains("voted") ||
+            button.textContent.includes(LABEL_REMOVE) ||
             button.textContent.includes("Убрать голос") ||
             button.textContent.toLowerCase().includes("проголосовали")
         );
     }
 
     function unlockVoteButton(button) {
-        if (!button.disabled || button.textContent.includes("Войти")) {
+        if (!button.disabled || button.textContent.includes("Войти") || button.textContent.includes("Log in")) {
             return;
         }
         if (isVotedButton(button)) {
             button.disabled = false;
             button.dataset.voted = "true";
             button.classList.add("voted");
-            setVoteButtonLabel(button, "Убрать голос");
+            setVoteButtonLabel(button, LABEL_REMOVE);
         }
     }
 
@@ -84,7 +90,7 @@
 
         button.dataset.voted = voted ? "true" : "false";
         button.classList.toggle("voted", voted);
-        setVoteButtonLabel(button, voted ? "Убрать голос" : "Голосовать", !voted);
+        setVoteButtonLabel(button, voted ? LABEL_REMOVE : LABEL_VOTE, !voted);
     }
 
     document.querySelectorAll(".vote-btn").forEach((button) => {
@@ -92,7 +98,7 @@
         unlockVoteButton(button);
 
         if (button.disabled) {
-            if (button.textContent.includes("Войти")) {
+            if (button.textContent.includes("Войти") || button.textContent.includes("Log in")) {
                 button.disabled = false;
                 button.addEventListener("click", () => {
                     window.location.href = `/login/?next=${encodeURIComponent(window.location.pathname)}`;
@@ -144,7 +150,7 @@
     voteButton.type = "button";
     unlockVoteButton(voteButton);
 
-    if (voteButton.disabled && voteButton.textContent.includes("Войти")) {
+    if (voteButton.disabled && (voteButton.textContent.includes("Войти") || voteButton.textContent.includes("Log in"))) {
         voteButton.disabled = false;
         voteButton.addEventListener("click", () => {
             window.location.href = `/login/?next=${encodeURIComponent(window.location.pathname)}`;
@@ -164,7 +170,7 @@
         const currentlyVoted = voteButton.dataset.voted === "true";
         voteButton.dataset.voting = "true";
         voteButton.disabled = true;
-        voteMessage.textContent = currentlyVoted ? "Убираем голос..." : "Отправляем голос...";
+        voteMessage.textContent = currentlyVoted ? "..." : "...";
 
         try {
             const { response, data } = await postVote(voteButton.dataset.id);
@@ -182,8 +188,8 @@
                 const voted = resolveVotedState(voteButton, data);
                 voteButton.dataset.voted = voted ? "true" : "false";
                 voteButton.classList.toggle("voted", voted);
-                setVoteButtonLabel(voteButton, voted ? "Убрать голос" : "Проголосовать", !voted);
-                voteMessage.textContent = voted ? "Спасибо! Голос учтен." : "Голос убран.";
+                setVoteButtonLabel(voteButton, voted ? LABEL_REMOVE : LABEL_VOTE_DETAIL, !voted);
+                voteMessage.textContent = "";
                 voteButton.animate(
                     [{ transform: "scale(1)" }, { transform: "scale(1.3)" }, { transform: "scale(1)" }],
                     { duration: 230 }
@@ -192,10 +198,10 @@
             }
 
             alert(data.error || "Ошибка, попробуйте позже");
-            voteMessage.textContent = data.error || "Не удалось изменить голос.";
+            voteMessage.textContent = data.error || "";
         } catch (error) {
             alert("Ошибка, попробуйте позже");
-            voteMessage.textContent = "Ошибка сети.";
+            voteMessage.textContent = "";
         } finally {
             voteButton.dataset.voting = "false";
             voteButton.disabled = false;

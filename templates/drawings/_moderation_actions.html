@@ -1,18 +1,19 @@
+{% load ui_i18n %}
 {% if work.is_approved %}
     <form class="moderation-actions" method="post" action="{% url 'moderate_drawing' work.id %}">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ moderation_next }}">
         <button type="submit" name="action" value="unpublish" class="btn-secondary moderation-btn moderation-btn--unpublish">
-            Снять с публикации
+            {% t "Снять с публикации" %}
         </button>
         <button
             type="submit"
             name="action"
             value="delete"
             class="btn-secondary moderation-btn moderation-btn--delete"
-            onclick="return confirm('Удалить работу «{{ work.title|escapejs }}» безвозвратно?');"
+            onclick="return confirm('{% t 'Удалить' %} «{{ work.title|escapejs }}»?');"
         >
-            Удалить
+            {% t "Удалить" %}
         </button>
     </form>
 {% else %}
@@ -20,16 +21,16 @@
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ moderation_next }}">
         <button type="submit" name="action" value="approve" class="btn moderation-btn moderation-btn--approve">
-            Опубликовать
+            {% t "Опубликовать" %}
         </button>
         <button
             type="submit"
             name="action"
             value="delete"
             class="btn-secondary moderation-btn moderation-btn--delete"
-            onclick="return confirm('Удалить работу «{{ work.title|escapejs }}» безвозвратно?');"
+            onclick="return confirm('{% t 'Удалить' %} «{{ work.title|escapejs }}»?');"
         >
-            Удалить
+            {% t "Удалить" %}
         </button>
     </form>
 {% endif %}

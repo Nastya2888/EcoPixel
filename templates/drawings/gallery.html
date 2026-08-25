@@ -1,23 +1,24 @@
 {% extends "base.html" %}
 {% load static %}
+{% load ui_i18n %}
 
-{% block title %}Галерея | ЭкоПиксель{% endblock %}
+{% block title %}{% t "Галерея" %} | ЭкоПиксель{% endblock %}
 
 {% block content %}
 <section>
     <div class="filter-head animate-on-scroll">
-        <h1 class="section-title">Галерея работ</h1>
+        <h1 class="section-title">{% t "Галерея работ" %}</h1>
     </div>
     {% csrf_token %}
 
     <div class="filter-row animate-on-scroll">
-        <a class="filter-btn {% if not selected_age_category %}active{% endif %}" href="?sort={{ sort_mode }}">Все</a>
+        <a class="filter-btn {% if not selected_age_category %}active{% endif %}" href="?sort={{ sort_mode }}">{% t "Все" %}</a>
         {% for category in age_categories %}
             <a
                 class="filter-btn {% if selected_age_category and selected_age_category.slug == category.slug %}active{% endif %}"
                 href="?category={{ category.slug }}&sort={{ sort_mode }}"
             >
-                {{ category.name }}
+                {{ category.name|t }}
             </a>
         {% endfor %}
     </div>
@@ -27,33 +28,33 @@
             class="filter-btn {% if sort_mode == 'popular' %}active{% endif %}"
             href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort=popular"
         >
-            По популярности
+            {% t "По популярности" %}
         </a>
         <a
             class="filter-btn {% if sort_mode == 'new' %}active{% endif %}"
             href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort=new"
         >
-            Сначала новые
+            {% t "Сначала новые" %}
         </a>
     </div>
 
     {% if selected_age_category %}
-        <p class="gallery-current-category">Текущая категория: {{ selected_age_category.name }}</p>
+        <p class="gallery-current-category">{% t "Текущая категория:" %} {{ selected_age_category.name|t }}</p>
     {% endif %}
 
     <div class="gallery-grid gallery-grid-main">
         {% for work in page_obj %}
             <article class="work-card card animate-on-scroll">
-                <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="Открыть работу «{{ work.title }}»">
+                <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="{% t 'Открыть работу' %} «{{ work.title }}»">
                     <div class="work-image-wrap">
                         <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
-                        <span class="category-chip">{{ work.category.name }}</span>
+                        <span class="category-chip">{{ work.category.name|t }}</span>
                     </div>
                     <div class="work-card__body">
                         <h3 class="work-card__title">{{ work.title }}</h3>
-                        <p class="work-card__meta">{{ work.author }}, {{ work.age }} лет, {{ work.city }}</p>
+                        <p class="work-card__meta">{{ work.author }}, {{ work.age }} {% t "лет" %}, {{ work.city }}</p>
                         {% if user.is_staff %}
-                            <p class="work-card__meta">Статус: {% if work.is_approved %}Опубликована{% else %}На модерации{% endif %}</p>
+                            <p class="work-card__meta">{% t "Статус:" %} {% if work.is_approved %}{% t "Опубликована" %}{% else %}{% t "На модерации" %}{% endif %}</p>
                         {% endif %}
                         <div class="likes">
                             <span class="likes-heart" data-heart>
@@ -76,34 +77,34 @@
                         {% if not work.is_approved or not user.is_authenticated or work.user_id == user.id %}disabled{% endif %}
                     >
                         {% if not work.is_approved %}
-                            На модерации
+                            {% t "На модерации" %}
                         {% elif not user.is_authenticated %}
-                            <span class="vote-btn-label"><svg class="icon-heart-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Войти, чтобы голосовать</span></span>
+                            <span class="vote-btn-label"><svg class="icon-heart-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>{% t "Войти, чтобы голосовать" %}</span></span>
                         {% elif work.user_id == user.id %}
-                            Это ваша работа
+                            {% t "Это ваша работа" %}
                         {% elif work.id in voted_ids %}
-                            Убрать голос
+                            {% t "Убрать голос" %}
                         {% else %}
-                            <span class="vote-btn-label"><svg class="icon-heart-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Голосовать</span></span>
+                            <span class="vote-btn-label"><svg class="icon-heart-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>{% t "Голосовать" %}</span></span>
                         {% endif %}
                     </button>
                 </div>
             </article>
         {% empty %}
-            <p>Работы не найдены.</p>
+            <p>{% t "Работы не найдены." %}</p>
         {% endfor %}
     </div>
 
     <div class="pagination">
         {% if page_obj.has_previous %}
-            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.previous_page_number }}">Назад</a>
+            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.previous_page_number }}">{% t "Назад" %}</a>
         {% endif %}
         <span class="active-page">{{ page_obj.number }}</span>
         {% if page_obj.has_next %}
-            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.next_page_number }}">Вперёд</a>
+            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.next_page_number }}">{% t "Вперёд" %}</a>
         {% endif %}
     </div>
 </section>
 
-<script src="{% static 'js/votes.js' %}?v=20260823-14"></script>
+<script src="{% static 'js/votes.js' %}?v=20260825-03"></script>
 {% endblock %}

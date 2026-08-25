@@ -1,11 +1,15 @@
 {% extends "base.html" %}
+{% load ui_i18n %}
 
-{% block title %}Правила | ЭкоПиксель{% endblock %}
+{% block title %}{% t "Правила" %} | ЭкоПиксель{% endblock %}
 
 {% block content %}
 <section class="rules-card card animate-on-scroll">
     <div class="rules-content">
-        <h1>Правила конкурса</h1>
+        <h1>{% t "Правила конкурса" %}</h1>
+        {% if LANGUAGE_CODE == "en" %}
+            <p class="section-subtitle">The official contest rules are published in Russian below. An English summary of the key points: create original pixel art on eco themes, submit within your age category, vote for works in the gallery, and winners are determined by votes in each age group.</p>
+        {% endif %}
 
         <section class="rules-section">
             <h2>1. Общие положения</h2>

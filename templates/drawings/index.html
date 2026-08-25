@@ -1,22 +1,23 @@
 {% extends "base.html" %}
 {% load static %}
+{% load ui_i18n %}
 
-{% block title %}Главная | ЭкоПиксель{% endblock %}
+{% block title %}{% t "Главная" %} | ЭкоПиксель{% endblock %}
 
 {% block content %}
 <section class="hero card animate-on-scroll">
     <div>
-        <h1>Создай пиксельное <span class="gradient-word">будущее</span> планеты</h1>
-        <p>ЭкоПиксель — пространство, где детские идеи про природу и устойчивый мир превращаются в яркое цифровое искусство.</p>
+        <h1>{% t "Создай пиксельное" %} <span class="gradient-word">{% t "будущее" %}</span> {% t "планеты" %}</h1>
+        <p>{% t "ЭкоПиксель — пространство, где детские идеи про природу и устойчивый мир превращаются в яркое цифровое искусство." %}</p>
         <div class="hero-actions">
-            <a class="btn" href="{% url 'draw' %}">Начать рисовать</a>
-            <a class="btn-secondary" href="{% url 'gallery' %}">Смотреть работы</a>
+            <a class="btn" href="{% url 'draw' %}">{% t "Начать рисовать" %}</a>
+            <a class="btn-secondary" href="{% url 'gallery' %}">{% t "Смотреть работы" %}</a>
         </div>
         <div class="countdown">
-            <div class="timer-card"><strong id="cd-days">00</strong><span>дней</span></div>
-            <div class="timer-card"><strong id="cd-hours">00</strong><span>часов</span></div>
-            <div class="timer-card"><strong id="cd-minutes">00</strong><span>минут</span></div>
-            <div class="timer-card"><strong id="cd-seconds">00</strong><span>секунд</span></div>
+            <div class="timer-card"><strong id="cd-days">00</strong><span>{% t "дней" %}</span></div>
+            <div class="timer-card"><strong id="cd-hours">00</strong><span>{% t "часов" %}</span></div>
+            <div class="timer-card"><strong id="cd-minutes">00</strong><span>{% t "минут" %}</span></div>
+            <div class="timer-card"><strong id="cd-seconds">00</strong><span>{% t "секунд" %}</span></div>
         </div>
     </div>
     <div class="hero-preview floating-card">
@@ -25,8 +26,8 @@
 </section>
 
 <section>
-    <h2 class="section-title animate-on-scroll">Выбери свою тему</h2>
-    <p class="section-subtitle animate-on-scroll">Четыре направления, чтобы каждый участник нашёл историю, которую хочется рассказать пикселями.</p>
+    <h2 class="section-title animate-on-scroll">{% t "Выбери свою тему" %}</h2>
+    <p class="section-subtitle animate-on-scroll">{% t "Четыре направления, чтобы каждый участник нашёл историю, которую хочется рассказать пикселями." %}</p>
     <div class="categories-grid">
         {% for category in home_categories %}
             <article class="category-card card animate-on-scroll">
@@ -78,61 +79,61 @@
                         </svg>
                     {% endif %}
                 </div>
-                <h3 class="category-name">{{ category.name }}</h3>
-                <p class="category-theme">Тема: {{ category.theme }}</p>
-                <p class="category-desc">Возраст: {{ category.min_age }}–{{ category.max_age }} лет</p>
-                <p class="category-desc">{{ category.description }}</p>
+                <h3 class="category-name">{{ category.name|t }}</h3>
+                <p class="category-theme">{% t "Тема:" %} {{ category.theme|t }}</p>
+                <p class="category-desc">{% t "Возраст:" %} {{ category.min_age }}–{{ category.max_age }} {% t "лет" %}</p>
+                <p class="category-desc">{{ category.description|t }}</p>
             </article>
         {% endfor %}
     </div>
 </section>
 
 <section>
-    <h2 class="section-title animate-on-scroll">Как участвовать</h2>
+    <h2 class="section-title animate-on-scroll">{% t "Как участвовать" %}</h2>
     <div class="steps-grid">
         <article class="step-card card animate-on-scroll">
             <span class="step-number">01</span>
-            <h3>Создай рисунок</h3>
-            <p>Открой редактор и собери пиксельный сюжет про экологичное будущее.</p>
+            <h3>{% t "Создай рисунок" %}</h3>
+            <p>{% t "Открой редактор и собери пиксельный сюжет про экологичное будущее." %}</p>
         </article>
         <article class="step-card card animate-on-scroll">
             <span class="step-number">02</span>
-            <h3>Отправь на конкурс</h3>
-            <p>Заполни короткую форму и отправь работу за пару кликов.</p>
+            <h3>{% t "Отправь на конкурс" %}</h3>
+            <p>{% t "Заполни короткую форму и отправь работу за пару кликов." %}</p>
         </article>
         <article class="step-card card animate-on-scroll">
             <span class="step-number">03</span>
-            <h3>Собирай голоса</h3>
-            <p>Поделись ссылкой с друзьями и следи за ростом поддержки.</p>
+            <h3>{% t "Собирай голоса" %}</h3>
+            <p>{% t "Поделись ссылкой с друзьями и следи за ростом поддержки." %}</p>
         </article>
     </div>
 
-    <h2 class="section-title animate-on-scroll">Счётчики конкурса</h2>
+    <h2 class="section-title animate-on-scroll">{% t "Счётчики конкурса" %}</h2>
     <div class="stats-grid">
         <div class="stat-card card animate-on-scroll">
             <strong data-count="{{ stats.participants_total }}">0</strong>
-            <span>Всего участников</span>
+            <span>{% t "Всего участников" %}</span>
         </div>
         <div class="stat-card card animate-on-scroll">
             <strong data-count="{{ stats.approved_total }}">0</strong>
-            <span>Одобренных работ</span>
+            <span>{% t "Одобренных работ" %}</span>
         </div>
         <div class="stat-card card animate-on-scroll">
             <strong data-count="{{ stats.votes_total }}">0</strong>
-            <span>Всего голосов</span>
+            <span>{% t "Всего голосов" %}</span>
         </div>
     </div>
 </section>
 
 <section>
-    <h2 class="section-title animate-on-scroll">Последние работы</h2>
+    <h2 class="section-title animate-on-scroll">{% t "Последние работы" %}</h2>
     <div class="works-grid">
         {% for work in latest_drawings %}
             <article class="work-card card animate-on-scroll">
-                <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="Открыть работу «{{ work.title }}»">
+                <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="{% t 'Открыть работу' %} «{{ work.title }}»">
                     <div class="work-image-wrap">
                         <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
-                        <span class="category-chip">{{ work.category.name }}</span>
+                        <span class="category-chip">{{ work.category.name|t }}</span>
                     </div>
                     <div class="work-card__body">
                         <h3 class="work-card__title">{{ work.title }}</h3>
@@ -147,7 +148,7 @@
                 </a>
             </article>
         {% empty %}
-            <p>Пока нет одобренных работ.</p>
+            <p>{% t "Пока нет одобренных работ." %}</p>
         {% endfor %}
     </div>
 </section>

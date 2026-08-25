@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
+{% load ui_i18n %}
 
-{% block title %}{% if is_moderator %}Модерация{% else %}Личный кабинет{% endif %} | ЭкоПиксель{% endblock %}
+{% block title %}{% if is_moderator %}{% t "Модерация" %}{% else %}{% t "Личный кабинет" %}{% endif %} | ЭкоПиксель{% endblock %}
 
 {% block content %}
 <section class="profile-hero card animate-on-scroll">
@@ -9,22 +10,22 @@
         <span class="profile-avatar" aria-hidden="true">{{ request.user.email|first|upper }}</span>
         <div>
             <h1 class="section-title profile-hero__title">
-                {% if is_moderator %}Кабинет модератора{% else %}Личный кабинет{% endif %}
+                {% if is_moderator %}{% t "Кабинет модератора" %}{% else %}{% t "Личный кабинет" %}{% endif %}
             </h1>
             <p class="section-subtitle profile-hero__email">{{ request.user.email }}</p>
             {% if is_moderator %}
-                <span class="profile-role-badge">Модератор</span>
+                <span class="profile-role-badge">{% t "Модератор" %}</span>
             {% endif %}
         </div>
     </div>
     <div class="profile-hero__actions">
         {% if is_moderator %}
-            <a class="btn" href="{% url 'profile' %}?mod=pending">Очередь модерации</a>
+            <a class="btn" href="{% url 'profile' %}?mod=pending">{% t "Очередь модерации" %}</a>
         {% else %}
-            <a class="btn" href="{% url 'draw' %}">Нарисовать</a>
+            <a class="btn" href="{% url 'draw' %}">{% t "Нарисовать" %}</a>
         {% endif %}
-        <a class="btn-secondary" href="{% url 'gallery' %}">Галерея</a>
-        <a class="btn-secondary" href="{% url 'logout' %}">Выйти</a>
+        <a class="btn-secondary" href="{% url 'gallery' %}">{% t "Галерея" %}</a>
+        <a class="btn-secondary" href="{% url 'logout' %}">{% t "Выйти" %}</a>
     </div>
 </section>
 
@@ -32,52 +33,52 @@
     <section class="profile-stats animate-on-scroll" aria-label="Статистика модерации">
         <div class="profile-stat card">
             <strong>{{ moderation_stats.pending }}</strong>
-            <span>Ждут проверки</span>
+            <span>{% t "Ждут проверки" %}</span>
         </div>
         <div class="profile-stat card">
             <strong>{{ moderation_stats.published }}</strong>
-            <span>Опубликовано</span>
+            <span>{% t "Опубликовано" %}</span>
         </div>
         <div class="profile-stat card">
             <strong>{{ moderation_stats.total }}</strong>
-            <span>Всего на сайте</span>
+            <span>{% t "Всего на сайте" %}</span>
         </div>
         <div class="profile-stat card">
             <strong>{{ stats.total }}</strong>
-            <span>Мои работы</span>
+            <span>{% t "Мои работы" %}</span>
         </div>
     </section>
 {% else %}
     <section class="profile-stats animate-on-scroll" aria-label="Статистика работ">
         <div class="profile-stat card">
             <strong>{{ stats.total }}</strong>
-            <span>Всего работ</span>
+            <span>{% t "Всего работ" %}</span>
         </div>
         <div class="profile-stat card">
             <strong>{{ stats.published }}</strong>
-            <span>В галерее</span>
+            <span>{% t "В галерее" %}</span>
         </div>
         <div class="profile-stat card">
             <strong>{{ stats.pending }}</strong>
-            <span>На модерации</span>
+            <span>{% t "На модерации" %}</span>
         </div>
         <div class="profile-stat card">
             <strong>{{ stats.votes }}</strong>
-            <span>Голосов</span>
+            <span>{% t "Голосов" %}</span>
         </div>
     </section>
 {% endif %}
 
 {% if moderation_status == "approved" %}
-    <p class="restore-image-notice success">Работа опубликована в галерее.</p>
+    <p class="restore-image-notice success">{% t "Работа опубликована в галерее." %}</p>
 {% elif moderation_status == "unpublished" %}
-    <p class="restore-image-notice">Работа снята с публикации.</p>
+    <p class="restore-image-notice">{% t "Работа снята с публикации." %}</p>
 {% elif moderation_status == "deleted" %}
-    <p class="restore-image-notice">Работа удалена.</p>
+    <p class="restore-image-notice">{% t "Работа удалена." %}</p>
 {% endif %}
 
 {% if restore_status == "ok" %}
-    <p class="restore-image-notice success">Изображение восстановлено и снова видно в галерее.</p>
+    <p class="restore-image-notice success">{% t "Изображение восстановлено и снова видно в галерее." %}</p>
 {% elif restore_status == "missing_file" %}
     <p class="restore-image-notice">Выберите PNG-файл для восстановления изображения.</p>
 {% elif restore_status == "invalid_type" %}
@@ -89,33 +90,33 @@
 {% if is_moderator %}
 <section class="profile-works moderation-panel">
     <div class="profile-works__head animate-on-scroll">
-        <h2 class="section-title">Модерация работ</h2>
-        <p class="section-subtitle">Публикуйте подходящие работы или удаляйте нарушения.</p>
+        <h2 class="section-title">{% t "Модерация работ" %}</h2>
+        <p class="section-subtitle">{% t "Публикуйте подходящие работы или удаляйте нарушения." %}</p>
     </div>
 
     <div class="filter-row animate-on-scroll">
         <a class="filter-btn {% if moderation_filter == 'pending' %}active{% endif %}" href="{% url 'profile' %}?mod=pending">
-            На модерации ({{ moderation_stats.pending }})
+            {% t "На модерации" %} ({{ moderation_stats.pending }})
         </a>
         <a class="filter-btn {% if moderation_filter == 'published' %}active{% endif %}" href="{% url 'profile' %}?mod=published">
-            В галерее ({{ moderation_stats.published }})
+            {% t "В галерее" %} ({{ moderation_stats.published }})
         </a>
         <a class="filter-btn {% if moderation_filter == 'all' %}active{% endif %}" href="{% url 'profile' %}?mod=all">
-            Все ({{ moderation_stats.total }})
+            {% t "Все" %} ({{ moderation_stats.total }})
         </a>
     </div>
 
     <div class="gallery-grid profile-grid">
         {% for work in moderation_page %}
             <article class="work-card card animate-on-scroll profile-work-card">
-                <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="Открыть работу «{{ work.title }}»">
+                <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="{% t 'Открыть работу' %} «{{ work.title }}»">
                     <div class="work-image-wrap">
                         <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
-                        <span class="category-chip">{{ work.category.name }}</span>
+                        <span class="category-chip">{{ work.category.name|t }}</span>
                         {% if work.is_approved %}
-                            <span class="profile-status profile-status--published">В галерее</span>
+                            <span class="profile-status profile-status--published">{% t "В галерее" %}</span>
                         {% else %}
-                            <span class="profile-status profile-status--pending">На модерации</span>
+                            <span class="profile-status profile-status--pending">{% t "На модерации" %}</span>
                         {% endif %}
                     </div>
                     <div class="work-card__body">
@@ -123,7 +124,7 @@
                         {% if work.description %}
                             <p class="profile-work-desc">{{ work.description|truncatechars:90 }}</p>
                         {% endif %}
-                        <p class="work-card__meta">{{ work.author }}, {{ work.age }} лет · {{ work.city }}</p>
+                        <p class="work-card__meta">{{ work.author }}, {{ work.age }} {% t "лет" %} · {{ work.city }}</p>
                         <p class="work-card__meta">{{ work.email }}</p>
                         <div class="profile-work-meta">
                             <span class="profile-work-votes">
@@ -135,7 +136,7 @@
                     </div>
                 </a>
                 <div class="profile-work-actions moderation-work-actions">
-                    <a class="btn-secondary" href="{% url 'work_detail' work.id %}">Открыть</a>
+                    <a class="btn-secondary" href="{% url 'work_detail' work.id %}">{% t "Открыть" %}</a>
                     {% with moderation_next=request.get_full_path %}
                         {% include "drawings/_moderation_actions.html" %}
                     {% endwith %}
@@ -145,16 +146,16 @@
             <div class="profile-empty card animate-on-scroll">
                 <h3>
                     {% if moderation_filter == "pending" %}
-                        Очередь пуста
+                        {% t "Очередь пуста" %}
                     {% else %}
-                        Работ не найдено
+                        {% t "Работ не найдено" %}
                     {% endif %}
                 </h3>
                 <p>
                     {% if moderation_filter == "pending" %}
-                        Новых работ на проверку пока нет.
+                        {% t "Новых работ на проверку пока нет." %}
                     {% else %}
-                        В этом фильтре пока ничего нет.
+                        {% t "В этом фильтре пока ничего нет." %}
                     {% endif %}
                 </p>
             </div>
@@ -164,11 +165,11 @@
     {% if moderation_page and moderation_page.paginator.num_pages > 1 %}
         <div class="pagination">
             {% if moderation_page.has_previous %}
-                <a href="?mod={{ moderation_filter }}&page={{ moderation_page.previous_page_number }}">Назад</a>
+                <a href="?mod={{ moderation_filter }}&page={{ moderation_page.previous_page_number }}">{% t "Назад" %}</a>
             {% endif %}
             <span class="active-page">{{ moderation_page.number }}</span>
             {% if moderation_page.has_next %}
-                <a href="?mod={{ moderation_filter }}&page={{ moderation_page.next_page_number }}">Вперёд</a>
+                <a href="?mod={{ moderation_filter }}&page={{ moderation_page.next_page_number }}">{% t "Вперёд" %}</a>
             {% endif %}
         </div>
     {% endif %}
@@ -177,12 +178,12 @@
 
 <section class="profile-works">
     <div class="profile-works__head animate-on-scroll">
-        <h2 class="section-title">Мои работы</h2>
+        <h2 class="section-title">{% t "Мои работы" %}</h2>
         <p class="section-subtitle">
             {% if is_moderator %}
-                Ваши собственные отправленные рисунки.
+                {% t "Ваши собственные отправленные рисунки." %}
             {% else %}
-                Следите за статусом модерации и голосами за ваши рисунки.
+                {% t "Следите за статусом модерации и голосами за ваши рисунки." %}
             {% endif %}
         </p>
     </div>
@@ -190,14 +191,14 @@
     <div class="gallery-grid profile-grid">
         {% for work in drawings %}
             <article class="work-card card animate-on-scroll profile-work-card">
-                <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="Открыть работу «{{ work.title }}»">
+                <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="{% t 'Открыть работу' %} «{{ work.title }}»">
                     <div class="work-image-wrap">
                         <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
-                        <span class="category-chip">{{ work.category.name }}</span>
+                        <span class="category-chip">{{ work.category.name|t }}</span>
                         {% if work.is_approved %}
-                            <span class="profile-status profile-status--published">В галерее</span>
+                            <span class="profile-status profile-status--published">{% t "В галерее" %}</span>
                         {% else %}
-                            <span class="profile-status profile-status--pending">На модерации</span>
+                            <span class="profile-status profile-status--pending">{% t "На модерации" %}</span>
                         {% endif %}
                     </div>
                     <div class="work-card__body">
@@ -205,7 +206,7 @@
                         {% if work.description %}
                             <p class="profile-work-desc">{{ work.description|truncatechars:90 }}</p>
                         {% endif %}
-                        <p class="work-card__meta">{{ work.author }}, {{ work.age }} лет · {{ work.city }}</p>
+                        <p class="work-card__meta">{{ work.author }}, {{ work.age }} {% t "лет" %} · {{ work.city }}</p>
                         <div class="profile-work-meta">
                             <span class="profile-work-votes">
                                 <svg class="icon-heart" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -216,17 +217,17 @@
                     </div>
                 </a>
                 <div class="profile-work-actions">
-                    <a class="btn-secondary" href="{% url 'work_detail' work.id %}">Открыть</a>
+                    <a class="btn-secondary" href="{% url 'work_detail' work.id %}">{% t "Открыть" %}</a>
                     {% if work.is_approved %}
                         <button
                             type="button"
                             class="btn-secondary profile-copy-link"
                             data-url="{% url 'work_detail' work.id %}"
                         >
-                            Скопировать ссылку
+                            {% t "Скопировать ссылку" %}
                         </button>
                     {% else %}
-                        <span class="profile-pending-hint">Ждёт проверки модератора</span>
+                        <span class="profile-pending-hint">{% t "Ждёт проверки модератора" %}</span>
                     {% endif %}
                 </div>
                 {% if work.id in missing_image_ids %}
@@ -247,9 +248,9 @@
             </article>
         {% empty %}
             <div class="profile-empty card animate-on-scroll">
-                <h3>Пока нет отправленных работ</h3>
-                <p>Создайте первый пиксельный рисунок и отправьте его на конкурс.</p>
-                <a class="btn" href="{% url 'draw' %}">Начать рисовать</a>
+                <h3>{% t "Пока нет отправленных работ" %}</h3>
+                <p>{% t "Создайте первый пиксельный рисунок и отправьте его на конкурс." %}</p>
+                <a class="btn" href="{% url 'draw' %}">{% t "Начать рисовать" %}</a>
             </div>
         {% endfor %}
     </div>

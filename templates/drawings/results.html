@@ -1,24 +1,25 @@
 {% extends "base.html" %}
+{% load ui_i18n %}
 
-{% block title %}Результаты | ЭкоПиксель{% endblock %}
+{% block title %}{% t "Результаты" %} | ЭкоПиксель{% endblock %}
 
 {% block content %}
 <section>
-    <h1 class="section-title animate-on-scroll">Результаты конкурса</h1>
+    <h1 class="section-title animate-on-scroll">{% t "Результаты конкурса" %}</h1>
     <div class="results-grid">
         {% for item in winners %}
             <article class="winner-card card animate-on-scroll">
-                <h2>{{ item.category.name }}</h2>
+                <h2>{{ item.category.name|t }}</h2>
                 {% if item.winner %}
-                    <p class="winner-place">🥇 ПОБЕДИТЕЛЬ</p>
+                    <p class="winner-place">🥇 {% t "ПОБЕДИТЕЛЬ" %}</p>
                     <img src="{% url 'drawing_image' item.winner.id %}" alt="{{ item.winner.title }}" loading="lazy">
                     <p class="winner-name">{{ item.winner.title }}</p>
-                    <p>{{ item.winner.author }}, {{ item.winner.age }} лет</p>
+                    <p>{{ item.winner.author }}, {{ item.winner.age }} {% t "лет" %}</p>
                     <p class="winner-votes">{{ item.winner.votes }}</p>
-                    <p class="work-card__meta">голосов</p>
-                    <p><a class="btn" href="{% url 'certificate' item.winner.id %}">Скачать сертификат</a></p>
+                    <p class="work-card__meta">{% t "голосов" %}</p>
+                    <p><a class="btn" href="{% url 'certificate' item.winner.id %}">{% t "Скачать сертификат" %}</a></p>
                 {% else %}
-                    <p>Пока нет участников</p>
+                    <p>{% t "Пока нет участников" %}</p>
                 {% endif %}
             </article>
         {% endfor %}
