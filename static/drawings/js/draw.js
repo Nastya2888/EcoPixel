@@ -46,6 +46,11 @@
     const downloadButton = document.getElementById("download-btn");
     const submitButton = document.getElementById("submit-btn");
     const drawPage = document.querySelector(".draw-page");
+    const confirmModal = document.getElementById("draw-confirm-modal");
+    const confirmTitleEl = document.getElementById("draw-confirm-title");
+    const confirmMessageEl = document.getElementById("draw-confirm-message");
+    const confirmOkBtn = document.getElementById("draw-confirm-ok");
+    const confirmCancelBtn = document.getElementById("draw-confirm-cancel");
     const authRequiredMessage = document.getElementById("auth-required-message");
     const toolButtons = document.querySelectorAll(".tool-btn[data-tool]");
     const currentSizeLabel = document.getElementById("canvas-size-badge");
@@ -501,13 +506,51 @@
         templateCanvas.style.opacity = String(templateOpacity / 100);
     }
 
-    function confirmResizeForTemplate(template) {
+    let confirmResolver = null;
+
+    function closeConfirmModal(result) {
+        if (!confirmModal) return;
+        confirmModal.classList.remove("active");
+        confirmModal.setAttribute("aria-hidden", "true");
+        window.setTimeout(() => confirmModal.classList.add("hidden"), 180);
+        if (confirmResolver) {
+            const resolve = confirmResolver;
+            confirmResolver = null;
+            resolve(result);
+        }
+    }
+
+    function showConfirm({ title, message, confirmLabel, cancelLabel }) {
+        if (!confirmModal || !confirmTitleEl || !confirmMessageEl || !confirmOkBtn || !confirmCancelBtn) {
+            return Promise.resolve(window.confirm(message));
+        }
+
+        confirmTitleEl.textContent = title || "";
+        confirmMessageEl.textContent = message || "";
+        confirmOkBtn.textContent = confirmLabel || t("OK");
+        confirmCancelBtn.textContent = cancelLabel || t("Отменить");
+
+        return new Promise((resolve) => {
+            confirmResolver = resolve;
+            confirmModal.classList.remove("hidden");
+            requestAnimationFrame(() => {
+                confirmModal.classList.add("active");
+                confirmModal.setAttribute("aria-hidden", "false");
+                confirmOkBtn.focus();
+            });
+        });
+    }
+
+    async function confirmResizeForTemplate(template) {
         if (!template) return true;
         if (gridWidth === template.width && gridHeight === template.height) return true;
         const warning = isDrawingChanged ? `\n${t("Текущий рисунок будет очищен.")}` : "";
-        const confirmed = window.confirm(
-            `${t("Шаблон")} "${t(template.name)}" ${t("рассчитан на")} ${template.width}×${template.height}. ${t("Переключить размер холста?")}${warning}`
-        );
+        const confirmed = await showConfirm({
+            title: t("Смена шаблона"),
+            message: `${t("Шаблон")} «${t(template.name)}» ${t("рассчитан на")} ${template.width}×${template.height}. ${t("Переключить размер холста?")}${warning}`,
+            confirmLabel: t("Переключить"),
+            cancelLabel: t("Отменить"),
+        });
         if (!confirmed) return false;
         initCanvas(template.width, template.height);
         setPresetSelection(template.width, template.height);
@@ -970,9 +1013,14 @@
         if (customHeightInput) customHeightInput.value = String(height);
     }
 
-    function confirmResizeIfNeeded() {
+    async function confirmResizeIfNeeded() {
         if (!isDrawingChanged) return true;
-        return window.confirm(t("Текущий рисунок будет очищен. Продолжить?"));
+        return showConfirm({
+            title: t("Смена размера холста"),
+            message: t("Текущий рисунок будет очищен. Продолжить?"),
+            confirmLabel: t("Продолжить"),
+            cancelLabel: t("Отменить"),
+        });
     }
 
     function setPresetSelection(width, height) {
@@ -984,14 +1032,14 @@
         });
     }
 
-    function applyTemplateSelection(nextTemplateId, options = {}) {
+    async function applyTemplateSelection(nextTemplateId, options = {}) {
         const shouldPromptResize = options.shouldPromptResize !== false;
         const normalizedId = getTemplateById(nextTemplateId)?.id || "";
         const previousTemplateId = selectedTemplateId;
         selectedTemplateId = normalizedId;
 
         const template = getTemplateById(selectedTemplateId);
-        if (template && shouldPromptResize && !confirmResizeForTemplate(template)) {
+        if (template && shouldPromptResize && !(await confirmResizeForTemplate(template))) {
             selectedTemplateId = previousTemplateId;
             if (templateSelect) templateSelect.value = previousTemplateId;
             updateTemplateOverlayVisibility();
@@ -1512,10 +1560,16 @@
         }
     }
 
-    function restoreDraftIfExists() {
+    async function restoreDraftIfExists() {
         const draft = localStorage.getItem(DRAFT_KEY);
         if (!draft) return;
-        if (!window.confirm(t("У вас есть несохраненный рисунок. Восстановить?"))) return;
+        const confirmed = await showConfirm({
+            title: t("Несохранённый рисунок"),
+            message: t("У вас есть несохраненный рисунок. Восстановить?"),
+            confirmLabel: t("Восстановить"),
+            cancelLabel: t("Отменить"),
+        });
+        if (!confirmed) return;
         const image = new Image();
         image.onload = () => {
             const layerCtx = getActiveLayerCtx();
@@ -1577,6 +1631,19 @@
     clearTemplateButton?.addEventListener("click", () => {
         applyTemplateSelection("", { shouldPromptResize: false });
     });
+
+    confirmOkBtn?.addEventListener("click", () => closeConfirmModal(true));
+    confirmCancelBtn?.addEventListener("click", () => closeConfirmModal(false));
+    confirmModal?.addEventListener("click", (event) => {
+        if (event.target === confirmModal) closeConfirmModal(false);
+    });
+    document.addEventListener("keydown", (event) => {
+        if (!confirmModal || confirmModal.classList.contains("hidden")) return;
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeConfirmModal(false);
+        }
+    });
     templateOpacityRange?.addEventListener("input", (event) => {
         syncTemplateOpacity(event.target.value);
     });
@@ -1616,9 +1683,9 @@
     });
 
     gridSizeInputs.forEach((input) => {
-        input.addEventListener("change", () => {
+        input.addEventListener("change", async () => {
             if (!input.checked) return;
-            if (!confirmResizeIfNeeded()) {
+            if (!(await confirmResizeIfNeeded())) {
                 setPresetSelection(gridWidth, gridHeight);
                 return;
             }
@@ -1628,12 +1695,12 @@
         });
     });
 
-    applyCustomSizeBtn?.addEventListener("click", () => {
+    applyCustomSizeBtn?.addEventListener("click", async () => {
         const nextWidth = clampGridValue(customWidthInput?.value, gridWidth);
         const nextHeight = clampGridValue(customHeightInput?.value, gridHeight);
         syncCustomInputs(nextWidth, nextHeight);
         if (nextWidth === gridWidth && nextHeight === gridHeight) return;
-        if (!confirmResizeIfNeeded()) return;
+        if (!(await confirmResizeIfNeeded())) return;
         initCanvas(nextWidth, nextHeight);
         setPresetSelection(nextWidth, nextHeight);
     });

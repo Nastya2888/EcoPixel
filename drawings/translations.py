@@ -326,6 +326,14 @@ EN = {
     "Переключить размер холста?": "Switch canvas size?",
     "Шаблон": "Template",
     "рассчитан на": "is designed for",
+    "Восстановить": "Restore",
+    "Продолжить": "Continue",
+    "Переключить": "Switch",
+    "Отменить": "Cancel",
+    "Несохранённый рисунок": "Unsaved drawing",
+    "Смена размера холста": "Canvas resize",
+    "Смена шаблона": "Template change",
+    "OK": "OK",
 }
 
 

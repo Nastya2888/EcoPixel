@@ -378,8 +378,26 @@
     </div>
 </div>
 
+<div id="draw-confirm-modal" class="modal modal-overlay draw-confirm-modal hidden" aria-hidden="true">
+    <div class="modal-content draw-confirm-content" role="dialog" aria-modal="true" aria-labelledby="draw-confirm-title">
+        <div class="draw-confirm-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 9v4"></path>
+                <path d="M12 17h.01"></path>
+                <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path>
+            </svg>
+        </div>
+        <h2 id="draw-confirm-title" class="draw-confirm-title"></h2>
+        <p id="draw-confirm-message" class="draw-confirm-message"></p>
+        <div class="draw-confirm-actions">
+            <button type="button" id="draw-confirm-cancel" class="btn-secondary">{% t "Отменить" %}</button>
+            <button type="button" id="draw-confirm-ok" class="btn">{% t "OK" %}</button>
+        </div>
+    </div>
+</div>
+
 <script>
 window.ECOPIXEL_DRAW_I18N = {{ draw_i18n_json|safe }};
 </script>
-<script src="{% static 'drawings/js/draw.js' %}?v=20260825-04"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260825-06"></script>
 {% endblock %}

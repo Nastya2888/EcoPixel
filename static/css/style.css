@@ -4692,6 +4692,90 @@ html[data-theme="dark"] .draw-v4 .size-field input {
     display: none;
 }
 
+/* Custom confirm dialog for draw page */
+.draw-confirm-modal {
+    z-index: 1300;
+    background: rgba(27, 67, 50, 0.48);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.draw-confirm-modal.hidden {
+    display: none;
+}
+
+.draw-confirm-content {
+    width: min(92vw, 420px);
+    padding: 28px 26px 22px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: linear-gradient(180deg, #ffffff 0%, #f4faf6 100%);
+    box-shadow: 0 28px 70px rgba(27, 67, 50, 0.28);
+    text-align: center;
+    transform: scale(0.94) translateY(12px);
+    opacity: 0;
+    transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.24s ease;
+}
+
+.draw-confirm-modal.active .draw-confirm-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.draw-confirm-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #1b7a45;
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.22), rgba(0, 184, 148, 0.12));
+    border: 1px solid rgba(46, 204, 113, 0.28);
+}
+
+.draw-confirm-title {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-size: 22px;
+    line-height: 1.25;
+    color: var(--color-text);
+}
+
+.draw-confirm-message {
+    margin: 0 0 22px;
+    color: var(--color-text-muted);
+    font-size: 15px;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.draw-confirm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.draw-confirm-actions .btn,
+.draw-confirm-actions .btn-secondary {
+    min-width: 120px;
+}
+
+html[data-theme="dark"] .draw-confirm-content {
+    background: linear-gradient(180deg, #1a2723 0%, #13201c 100%);
+    border-color: rgba(126, 168, 148, 0.28);
+}
+
+html[data-theme="dark"] .draw-confirm-icon {
+    color: #9be7b8;
+}
+
 .draw-submit-actions {
     display: flex;
     flex-direction: column;
