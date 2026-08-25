@@ -1,0 +1,35 @@
+{% if work.is_approved %}
+    <form class="moderation-actions" method="post" action="{% url 'moderate_drawing' work.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ moderation_next }}">
+        <button type="submit" name="action" value="unpublish" class="btn-secondary moderation-btn moderation-btn--unpublish">
+            Снять с публикации
+        </button>
+        <button
+            type="submit"
+            name="action"
+            value="delete"
+            class="btn-secondary moderation-btn moderation-btn--delete"
+            onclick="return confirm('Удалить работу «{{ work.title|escapejs }}» безвозвратно?');"
+        >
+            Удалить
+        </button>
+    </form>
+{% else %}
+    <form class="moderation-actions" method="post" action="{% url 'moderate_drawing' work.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ moderation_next }}">
+        <button type="submit" name="action" value="approve" class="btn moderation-btn moderation-btn--approve">
+            Опубликовать
+        </button>
+        <button
+            type="submit"
+            name="action"
+            value="delete"
+            class="btn-secondary moderation-btn moderation-btn--delete"
+            onclick="return confirm('Удалить работу «{{ work.title|escapejs }}» безвозвратно?');"
+        >
+            Удалить
+        </button>
+    </form>
+{% endif %}

@@ -1047,6 +1047,87 @@ html[data-theme="dark"] .work-moderation-notice {
     }
 }
 
+.profile-role-badge {
+    display: inline-flex;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(46, 204, 113, 0.16);
+    color: #1b7a45;
+    border: 1px solid rgba(46, 204, 113, 0.28);
+}
+
+.moderation-panel {
+    margin-bottom: 40px;
+}
+
+.moderation-work-actions {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.moderation-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+
+.moderation-btn {
+    flex: 1 1 auto;
+    min-width: 120px;
+    text-align: center;
+}
+
+.moderation-btn--approve {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+}
+
+.moderation-btn--approve:hover {
+    filter: brightness(1.05);
+}
+
+.moderation-btn--unpublish {
+    border-color: rgba(241, 196, 15, 0.45);
+    color: #8a6d00;
+}
+
+.moderation-btn--delete {
+    border-color: rgba(231, 76, 60, 0.35);
+    color: #c0392b;
+}
+
+.work-moderation-panel {
+    margin: 0 0 16px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.work-moderation-panel__title {
+    margin: 0 0 10px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+html[data-theme="dark"] .profile-role-badge {
+    background: rgba(46, 204, 113, 0.18);
+    color: #9be7b8;
+}
+
+html[data-theme="dark"] .moderation-btn--unpublish {
+    color: #f0d36a;
+}
+
+html[data-theme="dark"] .moderation-btn--delete {
+    color: #ff8f84;
+}
+
 .work-card__title {
     margin: 0 0 6px;
     font-size: 18px;

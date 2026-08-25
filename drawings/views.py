@@ -1,6 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 from html import escape
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from django.http import Http404, HttpResponse, JsonResponse
 from django.db import transaction
@@ -11,8 +12,8 @@ from django.core.validators import validate_email
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, render
@@ -36,6 +37,26 @@ def _can_view_drawing(request, drawing) -> bool:
     if _can_view_moderation_content(request):
         return True
     return _is_own_drawing(drawing, request.user)
+
+
+def _safe_redirect_url(request, fallback_name="profile"):
+    candidate = (request.POST.get("next") or request.GET.get("next") or "").strip()
+    if candidate and url_has_allowed_host_and_scheme(
+        candidate,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return candidate
+    return reverse(fallback_name)
+
+
+def _redirect_with_status(url, moderation_status):
+    parts = urlsplit(url)
+    query = dict(parse_qsl(parts.query, keep_blank_values=True))
+    query["moderation"] = moderation_status
+    return redirect(
+        urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
+    )
 
 
 def _build_stored_image_name(original_name: str) -> str:
@@ -195,6 +216,7 @@ def work_detail(request, pk):
             "work": work,
             "has_voted": has_voted,
             "is_own_work": is_own_work,
+            "is_moderator": _can_view_moderation_content(request),
             "og_image_url": og_image_url,
         },
     )
@@ -500,6 +522,26 @@ def profile(request):
     pending_count = len(drawings) - published_count
     votes_total = sum(drawing.votes for drawing in drawings)
 
+    is_moderator = _can_view_moderation_content(request)
+    moderation_filter = request.GET.get("mod", "pending").strip()
+    if moderation_filter not in {"pending", "published", "all"}:
+        moderation_filter = "pending"
+
+    moderation_stats = None
+    moderation_page = None
+    if is_moderator:
+        moderation_qs = Drawing.objects.select_related("category", "user").order_by("-created_at")
+        moderation_stats = {
+            "pending": Drawing.objects.filter(is_approved=False).count(),
+            "published": Drawing.objects.filter(is_approved=True).count(),
+            "total": Drawing.objects.count(),
+        }
+        if moderation_filter == "pending":
+            moderation_qs = moderation_qs.filter(is_approved=False)
+        elif moderation_filter == "published":
+            moderation_qs = moderation_qs.filter(is_approved=True)
+        moderation_page = Paginator(moderation_qs, 12).get_page(request.GET.get("page"))
+
     return render(
         request,
         "drawings/profile.html",
@@ -507,6 +549,11 @@ def profile(request):
             "drawings": drawings,
             "missing_image_ids": missing_image_ids,
             "restore_status": request.GET.get("restore", ""),
+            "moderation_status": request.GET.get("moderation", ""),
+            "is_moderator": is_moderator,
+            "moderation_filter": moderation_filter,
+            "moderation_stats": moderation_stats,
+            "moderation_page": moderation_page,
             "stats": {
                 "total": len(drawings),
                 "published": published_count,
@@ -515,6 +562,40 @@ def profile(request):
             },
         },
     )
+
+
+@login_required
+@require_POST
+def moderate_drawing(request, pk):
+    if not _can_view_moderation_content(request):
+        raise Http404("Модерация недоступна.")
+
+    drawing = get_object_or_404(Drawing.objects.select_related("category"), pk=pk)
+    action = request.POST.get("action", "").strip()
+    next_url = _safe_redirect_url(request)
+
+    if action == "approve":
+        was_approved = drawing.is_approved
+        if not was_approved:
+            drawing.is_approved = True
+            drawing.save(update_fields=["is_approved"])
+            send_notification(drawing, "approved", request=request)
+        return _redirect_with_status(next_url, "approved")
+
+    if action == "unpublish":
+        if drawing.is_approved:
+            drawing.is_approved = False
+            drawing.save(update_fields=["is_approved"])
+        return _redirect_with_status(next_url, "unpublished")
+
+    if action == "delete":
+        drawing.delete()
+        # After delete, don't return to the work page.
+        if f"/work/{pk}/" in next_url:
+            next_url = reverse("profile") + "?mod=pending"
+        return _redirect_with_status(next_url, "deleted")
+
+    return redirect(next_url)
 
 
 def _get_category_for_age(age):

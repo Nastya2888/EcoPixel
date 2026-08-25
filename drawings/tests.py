@@ -532,3 +532,105 @@ class DrawingImageFallbackTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "image/svg+xml")
         self.assertIn("Изображение недоступно", response.content.decode("utf-8"))
+
+
+class ModeratorPanelTests(TestCase):
+    def setUp(self):
+        self.password = "StrongPass123!"
+        self.user = User.objects.create_user(
+            username="author@example.com",
+            email="author@example.com",
+            password=self.password,
+        )
+        self.moderator = User.objects.create_user(
+            username="mod@example.com",
+            email="mod@example.com",
+            password=self.password,
+            is_staff=True,
+        )
+        self.category = Category.objects.create(name="6–9 лет", slug="age-6-9", theme="6–9 лет")
+        self.png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+            b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
+            b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
+            b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        self.pending = Drawing.objects.create(
+            user=self.user,
+            title="Ждёт проверки",
+            author="Автор",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("pending-mod.png", self.png, content_type="image/png"),
+            is_approved=False,
+            votes=0,
+        )
+        self.published = Drawing.objects.create(
+            user=self.user,
+            title="Уже в галерее",
+            author="Автор",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("published-mod.png", self.png, content_type="image/png"),
+            is_approved=True,
+            votes=2,
+        )
+
+    def test_regular_user_cannot_moderate(self):
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.post(
+            reverse("moderate_drawing", args=[self.pending.id]),
+            {"action": "approve", "next": reverse("profile")},
+        )
+        self.assertEqual(response.status_code, 404)
+        self.pending.refresh_from_db()
+        self.assertFalse(self.pending.is_approved)
+
+    def test_moderator_profile_shows_pending_queue(self):
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.get(reverse("profile"), {"mod": "pending"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Кабинет модератора")
+        self.assertContains(response, self.pending.title)
+        self.assertNotContains(response, self.published.title)
+        self.assertEqual(response.context["moderation_stats"]["pending"], 1)
+
+    def test_moderator_can_approve_drawing(self):
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.post(
+            reverse("moderate_drawing", args=[self.pending.id]),
+            {"action": "approve", "next": reverse("profile") + "?mod=pending"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.pending.refresh_from_db()
+        self.assertTrue(self.pending.is_approved)
+
+    def test_moderator_can_unpublish_drawing(self):
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.post(
+            reverse("moderate_drawing", args=[self.published.id]),
+            {"action": "unpublish", "next": reverse("profile") + "?mod=published"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.published.refresh_from_db()
+        self.assertFalse(self.published.is_approved)
+
+    def test_moderator_can_delete_drawing(self):
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.post(
+            reverse("moderate_drawing", args=[self.pending.id]),
+            {"action": "delete", "next": reverse("profile") + "?mod=pending"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Drawing.objects.filter(pk=self.pending.id).exists())
+
+    def test_work_detail_shows_moderation_controls_for_staff(self):
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.get(reverse("work_detail", args=[self.pending.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Опубликовать")
+        self.assertContains(response, "Удалить")

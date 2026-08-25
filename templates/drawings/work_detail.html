@@ -21,6 +21,11 @@
         {% if not work.is_approved %}
             <p class="work-moderation-notice">Работа на модерации — пока видна только вам и не участвует в голосовании.</p>
         {% endif %}
+        {% if request.GET.moderation == "approved" %}
+            <p class="restore-image-notice success">Работа опубликована в галерее.</p>
+        {% elif request.GET.moderation == "unpublished" %}
+            <p class="restore-image-notice">Работа снята с публикации.</p>
+        {% endif %}
         <h1>{{ work.title }}</h1>
         {% if work.description %}
             <p class="work-description">{{ work.description|linebreaksbr }}</p>
@@ -38,6 +43,14 @@
             <span>Дата: {{ work.created_at|date:"d.m.Y" }}</span>
         </div>
         <div class="votes-big"><span id="votes-count">{{ work.votes }}</span> голосов</div>
+        {% if is_moderator %}
+            <div class="work-moderation-panel">
+                <p class="work-moderation-panel__title">Модерация</p>
+                {% with moderation_next=request.path %}
+                    {% include "drawings/_moderation_actions.html" %}
+                {% endwith %}
+            </div>
+        {% endif %}
         <div class="vote-btn-wrap">
             <button
                 type="button"
