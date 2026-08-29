@@ -17,13 +17,13 @@
         {% endif %}
         <input type="hidden" name="sort" value="{{ sort_mode }}">
         <label class="gallery-search__field">
-            <span class="visually-hidden">{% t "Автор или город" %}</span>
+            <span class="visually-hidden">{% t "Название, автор или город" %}</span>
             <input
                 type="search"
                 name="q"
                 value="{{ search_query }}"
                 maxlength="80"
-                placeholder="{% t 'Автор или город' %}"
+                placeholder="{% t 'Название, автор или город' %}"
                 autocomplete="off"
             >
         </label>

@@ -68,6 +68,7 @@ EN = {
     "Сначала новые": "Newest first",
     "Текущая категория:": "Current category:",
     "Автор или город": "Author or city",
+    "Название, автор или город": "Title, author, or city",
     "Найти": "Search",
     "Сбросить": "Clear",
     "По запросу:": "Search:",

@@ -38,7 +38,9 @@ def _apply_author_city_search(queryset, search_query: str):
     if not search_query:
         return queryset
     return queryset.filter(
-        Q(author__icontains=search_query) | Q(city__icontains=search_query)
+        Q(title__icontains=search_query)
+        | Q(author__icontains=search_query)
+        | Q(city__icontains=search_query)
     )
 
 

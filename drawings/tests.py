@@ -486,6 +486,13 @@ class GalleryTests(TestCase):
         self.assertNotContains(response, self.young_work.title)
         self.assertContains(response, "По запросу:")
 
+    def test_gallery_searches_by_title(self):
+        response = self.client.get(reverse("gallery"), {"q": "Молодежная"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.adult_work.title)
+        self.assertNotContains(response, self.young_work.title)
+        self.assertNotContains(response, self.teen_work.title)
+
     def test_gallery_searches_by_city(self):
         other = Drawing.objects.create(
             user=self.user,
