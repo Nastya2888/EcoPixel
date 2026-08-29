@@ -127,6 +127,7 @@ EN = {
     "Отклонить": "Reject",
     "Отклонено": "Rejected",
     "Отклонённые": "Rejected",
+    "Отклонить работу": "Reject work",
     "Причина отклонения": "Rejection reason",
     "Заметка для штаба": "Staff note",
     "не видна автору": "hidden from author",

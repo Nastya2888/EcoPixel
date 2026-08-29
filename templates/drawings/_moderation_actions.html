@@ -35,23 +35,14 @@
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ moderation_next }}">
         {% if not work.is_rejected %}
-            <button type="submit" name="action" value="approve" class="btn moderation-btn moderation-btn--approve">
+            <button type="submit" name="action" value="approve" class="btn moderation-btn moderation-btn--approve" formnovalidate>
                 {% t "Опубликовать" %}
             </button>
         {% else %}
-            <button type="submit" name="action" value="approve" class="btn moderation-btn moderation-btn--approve">
+            <button type="submit" name="action" value="approve" class="btn moderation-btn moderation-btn--approve" formnovalidate>
                 {% t "Опубликовать всё же" %}
             </button>
         {% endif %}
-        <label class="moderation-reject-field">
-            <span>{% t "Причина отклонения" %}</span>
-            <textarea
-                name="rejection_reason"
-                rows="3"
-                maxlength="500"
-                placeholder="{% t 'Например: рисунок не по теме категории' %}"
-            >{% if work.is_rejected %}{{ work.rejection_reason }}{% endif %}</textarea>
-        </label>
         <label class="moderation-reject-field moderation-staff-note">
             <span>{% t "Заметка для штаба" %} <em>({% t "не видна автору" %})</em></span>
             <textarea
@@ -62,10 +53,14 @@
             >{{ work.moderator_note }}</textarea>
         </label>
         <div class="moderation-actions__secondary">
-            <button type="submit" name="action" value="save_note" class="btn-secondary moderation-btn">
+            <button type="submit" name="action" value="save_note" class="btn-secondary moderation-btn" formnovalidate>
                 {% t "Сохранить заметку" %}
             </button>
-            <button type="submit" name="action" value="reject" class="btn-secondary moderation-btn moderation-btn--reject">
+            <button
+                type="button"
+                class="btn-secondary moderation-btn moderation-btn--reject"
+                onclick="const d=this.closest('form').querySelector('.reject-reason-dialog');d.showModal();const t=d.querySelector('textarea');if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length);}"
+            >
                 {% t "Отклонить" %}
             </button>
         </div>
@@ -74,9 +69,42 @@
             name="action"
             value="delete"
             class="btn-secondary moderation-btn moderation-btn--delete"
+            formnovalidate
             onclick="return confirm('{% t 'Удалить' %} «{{ work.title|escapejs }}»?');"
         >
             {% t "Удалить" %}
         </button>
+
+        <dialog
+            class="reject-reason-dialog"
+            onclick="if (event.target === this) this.close()"
+        >
+            <div class="reject-reason-dialog__panel">
+                <h3 class="reject-reason-dialog__title">{% t "Отклонить работу" %}</h3>
+                <p class="reject-reason-dialog__hint">«{{ work.title }}»</p>
+                <label class="moderation-reject-field">
+                    <span>{% t "Причина отклонения" %}</span>
+                    <textarea
+                        name="rejection_reason"
+                        rows="4"
+                        maxlength="500"
+                        required
+                        placeholder="{% t 'Например: рисунок не по теме категории' %}"
+                    >{% if work.is_rejected %}{{ work.rejection_reason }}{% endif %}</textarea>
+                </label>
+                <div class="reject-reason-dialog__actions">
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        onclick="this.closest('dialog').close()"
+                    >
+                        {% t "Отменить" %}
+                    </button>
+                    <button type="submit" name="action" value="reject" class="btn moderation-btn--reject-confirm">
+                        {% t "Отклонить" %}
+                    </button>
+                </div>
+            </div>
+        </dialog>
     </form>
 {% endif %}
