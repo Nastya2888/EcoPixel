@@ -10,6 +10,7 @@ urlpatterns = [
     path("logout/", views.user_logout, name="logout"),
     path("profile/", views.profile, name="profile"),
     path("profile/restore-image/<int:pk>/", views.restore_drawing_image, name="restore_drawing_image"),
+    path("organizer/stats/", views.organizer_stats, name="organizer_stats"),
     path("moderate/<int:pk>/", views.moderate_drawing, name="moderate_drawing"),
     path("gallery/", views.gallery, name="gallery"),
     path("drawing-image/<int:pk>/", views.drawing_image, name="drawing_image"),

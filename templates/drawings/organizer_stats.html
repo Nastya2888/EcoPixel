@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+{% load ui_i18n %}
+
+{% block title %}{% t "Статистика конкурса" %} | ЭкоПиксель{% endblock %}
+
+{% block content %}
+<section class="org-stats-hero card animate-on-scroll">
+    <div>
+        <h1 class="section-title">{% t "Статистика конкурса" %}</h1>
+        <p class="section-subtitle">{% t "Обзор работ, голосов и активности для организатора." %}</p>
+    </div>
+    <div class="org-stats-hero__actions">
+        <a class="btn-secondary" href="{% url 'profile' %}?mod=pending">{% t "К модерации" %}</a>
+        <a class="btn-secondary" href="{% url 'gallery' %}">{% t "Галерея" %}</a>
+    </div>
+</section>
+
+<section class="profile-stats org-overview animate-on-scroll" aria-label="{% t 'Общие показатели' %}">
+    <div class="profile-stat card">
+        <strong>{{ organizer.overview.total }}</strong>
+        <span>{% t "Всего работ" %}</span>
+    </div>
+    <div class="profile-stat card">
+        <strong>{{ organizer.overview.published }}</strong>
+        <span>{% t "В галерее" %}</span>
+    </div>
+    <div class="profile-stat card">
+        <strong>{{ organizer.overview.pending }}</strong>
+        <span>{% t "На модерации" %}</span>
+    </div>
+    <div class="profile-stat card">
+        <strong>{{ organizer.overview.votes_total }}</strong>
+        <span>{% t "Всего голосов" %}</span>
+    </div>
+    <div class="profile-stat card">
+        <strong>{{ organizer.overview.participants }}</strong>
+        <span>{% t "Участников" %}</span>
+    </div>
+    <div class="profile-stat card">
+        <strong>{{ organizer.overview.authors }}</strong>
+        <span>{% t "Авторов" %}</span>
+    </div>
+</section>
+
+<section class="org-section animate-on-scroll">
+    <div class="org-section__head">
+        <h2 class="section-title">{% t "Работы по категориям" %}</h2>
+        <p class="section-subtitle">{% t "Сколько рисунков и голосов в каждой возрастной группе." %}</p>
+    </div>
+    <div class="org-category-grid">
+        {% for row in organizer.by_category %}
+            <article class="org-category-card card">
+                <h3>{{ row.name|t }}</h3>
+                <p class="org-category-theme">{{ row.theme|t }}</p>
+                <div class="org-metric">
+                    <div class="org-metric__label">
+                        <span>{% t "Работы" %}</span>
+                        <strong>{{ row.total }}</strong>
+                    </div>
+                    <div class="org-bar" aria-hidden="true">
+                        <span class="org-bar__fill org-bar__fill--works" style="width: {{ row.total_pct }}%"></span>
+                    </div>
+                    <p class="org-metric__meta">{{ row.published }} {% t "в галерее" %}, {{ row.pending }} {% t "на проверке" %}</p>
+                </div>
+                <div class="org-metric">
+                    <div class="org-metric__label">
+                        <span>{% t "Голоса" %}</span>
+                        <strong>{{ row.votes }}</strong>
+                    </div>
+                    <div class="org-bar" aria-hidden="true">
+                        <span class="org-bar__fill org-bar__fill--votes" style="width: {{ row.votes_pct }}%"></span>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="org-section animate-on-scroll">
+    <div class="org-section__head org-section__head--row">
+        <div>
+            <h2 class="section-title">{% t "Активность по дням" %}</h2>
+            <p class="section-subtitle">
+                {% t "Новые работы и голоса за период" %}
+                {% if organizer.window_start and organizer.window_end %}
+                    {{ organizer.window_start|date:"d.m" }}–{{ organizer.window_end|date:"d.m.Y" }}
+                {% endif %}
+            </p>
+        </div>
+        <div class="filter-row org-days-filter">
+            <a class="filter-btn {% if organizer.days == 7 %}active{% endif %}" href="?days=7">7 {% t "дн." %}</a>
+            <a class="filter-btn {% if organizer.days == 14 %}active{% endif %}" href="?days=14">14 {% t "дн." %}</a>
+            <a class="filter-btn {% if organizer.days == 30 %}active{% endif %}" href="?days=30">30 {% t "дн." %}</a>
+        </div>
+    </div>
+
+    <div class="org-legend">
+        <span><i class="org-dot org-dot--works"></i> {% t "Работы" %}</span>
+        <span><i class="org-dot org-dot--votes"></i> {% t "Голоса" %}</span>
+    </div>
+
+    <div class="org-activity card">
+        <div class="org-activity__chart" role="img" aria-label="{% t 'График активности по дням' %}">
+            {% for day in organizer.activity %}
+                <div class="org-day">
+                    <div class="org-day__bars">
+                        <span
+                            class="org-day__bar org-day__bar--works"
+                            style="height: {% if day.submissions_pct %}{{ day.submissions_pct }}{% else %}2{% endif %}%"
+                            title="{{ day.label }}: {{ day.submissions }} {% t 'работ' %}"
+                        ></span>
+                        <span
+                            class="org-day__bar org-day__bar--votes"
+                            style="height: {% if day.votes_pct %}{{ day.votes_pct }}{% else %}2{% endif %}%"
+                            title="{{ day.label }}: {{ day.votes }} {% t 'голосов' %}"
+                        ></span>
+                    </div>
+                    <span class="org-day__label">{{ day.label }}</span>
+                    <span class="org-day__counts">{{ day.submissions }}/{{ day.votes }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% if organizer.top_works %}
+<section class="org-section animate-on-scroll">
+    <div class="org-section__head">
+        <h2 class="section-title">{% t "Топ работ по голосам" %}</h2>
+        <p class="section-subtitle">{% t "Пять лидеров среди опубликованных рисунков." %}</p>
+    </div>
+    <div class="org-top-list">
+        {% for work in organizer.top_works %}
+            <a class="org-top-item card" href="{% url 'work_detail' work.id %}">
+                <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy" width="64" height="64">
+                <div>
+                    <strong>{{ work.title }}</strong>
+                    <span>{{ work.author }} · {{ work.category.name|t }}</span>
+                </div>
+                <em>{{ work.votes }}</em>
+            </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

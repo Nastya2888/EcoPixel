@@ -370,6 +370,29 @@ EN = {
     "Голосование откроется после окончания приёма работ.": "Voting opens after submissions close.",
     "Голосование открыто до": "Voting open until",
     "дн.": "d.",
+    "Статистика конкурса": "Contest stats",
+    "Обзор работ, голосов и активности для организатора.": (
+        "Overview of works, votes, and activity for organizers."
+    ),
+    "К модерации": "Back to moderation",
+    "Общие показатели": "Overview",
+    "Участников": "Participants",
+    "Авторов": "Authors",
+    "Статистика": "Stats",
+    "Работы по категориям": "Works by category",
+    "Сколько рисунков и голосов в каждой возрастной группе.": (
+        "How many drawings and votes are in each age group."
+    ),
+    "Работы": "Works",
+    "в галерее": "in gallery",
+    "на проверке": "pending review",
+    "Голоса": "Votes",
+    "Активность по дням": "Daily activity",
+    "Новые работы и голоса за период": "New works and votes for",
+    "График активности по дням": "Daily activity chart",
+    "работ": "works",
+    "Топ работ по голосам": "Top works by votes",
+    "Пять лидеров среди опубликованных рисунков.": "Top five published drawings.",
 }
 
 

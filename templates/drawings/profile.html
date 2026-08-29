@@ -21,6 +21,7 @@
     <div class="profile-hero__actions">
         {% if is_moderator %}
             <a class="btn" href="{% url 'profile' %}?mod=pending">{% t "Очередь модерации" %}</a>
+            <a class="btn-secondary" href="{% url 'organizer_stats' %}">{% t "Статистика" %}</a>
         {% else %}
             <a class="btn" href="{% url 'draw' %}">{% t "Нарисовать" %}</a>
         {% endif %}

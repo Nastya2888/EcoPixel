@@ -571,6 +571,30 @@ def user_logout(request):
 
 
 @login_required
+def organizer_stats(request):
+    if not _can_view_moderation_content(request):
+        raise Http404("Статистика доступна только организаторам.")
+
+    days_raw = request.GET.get("days", "14").strip()
+    try:
+        days = int(days_raw)
+    except (TypeError, ValueError):
+        days = 14
+
+    from .organizer_stats import build_organizer_stats
+
+    stats = build_organizer_stats(days=days)
+    return render(
+        request,
+        "drawings/organizer_stats.html",
+        {
+            "is_moderator": True,
+            "organizer": stats,
+        },
+    )
+
+
+@login_required
 def profile(request):
     drawings = list(
         Drawing.objects.filter(user=request.user)

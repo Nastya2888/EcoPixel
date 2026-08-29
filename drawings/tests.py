@@ -655,6 +655,41 @@ class ModeratorPanelTests(TestCase):
         self.assertContains(response, "Опубликовать")
         self.assertContains(response, "Удалить")
 
+    def test_organizer_stats_requires_staff(self):
+        user = User.objects.create_user(
+            username="kid-stats@example.com",
+            email="kid-stats@example.com",
+            password=self.password,
+        )
+        self.client.login(username=user.email, password=self.password)
+        response = self.client.get(reverse("organizer_stats"))
+        self.assertEqual(response.status_code, 404)
+
+    def test_organizer_stats_page_for_moderator(self):
+        voter = User.objects.create_user(
+            username="voter-stats@example.com",
+            email="voter-stats@example.com",
+            password=self.password,
+        )
+        Vote.objects.create(drawing=self.published, user=voter)
+
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.get(reverse("organizer_stats"), {"days": "14"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Статистика конкурса")
+        self.assertContains(response, "Работы по категориям")
+        self.assertContains(response, "Активность по дням")
+        organizer = response.context["organizer"]
+        self.assertEqual(organizer["overview"]["total"], 2)
+        self.assertEqual(organizer["overview"]["published"], 1)
+        self.assertEqual(organizer["overview"]["pending"], 1)
+        self.assertEqual(organizer["overview"]["votes_total"], 2)
+        self.assertEqual(len(organizer["by_category"]), 4)
+        self.assertEqual(len(organizer["activity"]), 14)
+        young = next(row for row in organizer["by_category"] if row["slug"] == "age-6-9")
+        self.assertEqual(young["total"], 2)
+        self.assertEqual(young["votes"], 2)
+
 
 @override_settings(**CONTEST_SUBMISSION_OPEN)
 class ContestPhaseTests(TestCase):
