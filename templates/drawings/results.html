@@ -6,23 +6,66 @@
 {% block content %}
 <section>
     <h1 class="section-title animate-on-scroll">{% t "Результаты конкурса" %}</h1>
-    <div class="results-grid">
-        {% for item in winners %}
-            <article class="winner-card card animate-on-scroll">
-                <h2>{{ item.category.name|t }}</h2>
-                {% if item.winner %}
-                    <p class="winner-place">🥇 {% t "ПОБЕДИТЕЛЬ" %}</p>
-                    <img src="{% url 'drawing_image' item.winner.id %}" alt="{{ item.winner.title }}" loading="lazy">
-                    <p class="winner-name">{{ item.winner.title }}</p>
-                    <p>{{ item.winner.author }}, {{ item.winner.age }} {% t "лет" %}</p>
-                    <p class="winner-votes">{{ item.winner.votes }}</p>
-                    <p class="work-card__meta">{% t "голосов" %}</p>
-                    <p><a class="btn" href="{% url 'certificate' item.winner.id %}">{% t "Скачать сертификат" %}</a></p>
+
+    {% if not results_published %}
+        <div class="contest-pending card animate-on-scroll">
+            <div class="contest-pending-icon" aria-hidden="true">🏆</div>
+            <h2>{% t "Итоги будут объявлены 15 сентября" %}</h2>
+            <p>{% t "Сейчас идёт этап конкурса:" %}
+                {% if contest.phase == 'submission' %}
+                    {% t "приём работ" %}
                 {% else %}
-                    <p>{% t "Пока нет участников" %}</p>
+                    {% t "голосование" %}
                 {% endif %}
-            </article>
-        {% endfor %}
-    </div>
+            </p>
+            {% if contest.countdown_target_iso %}
+                <p class="contest-pending-countdown">
+                    {% t "До объявления победителей:" %}
+                    <strong data-countdown-target="{{ contest.results_start|date:'c' }}"></strong>
+                </p>
+            {% endif %}
+            <a class="btn" href="{% url 'gallery' %}">{% t "Смотреть работы в галерее" %}</a>
+        </div>
+    {% else %}
+        <p class="section-subtitle animate-on-scroll">{% t "Поздравляем победителей в каждой возрастной категории!" %}</p>
+        <div class="results-grid">
+            {% for item in winners %}
+                <article class="winner-card card animate-on-scroll">
+                    <h2>{{ item.category.name|t }}</h2>
+                    {% if item.winner %}
+                        <p class="winner-place">🥇 {% t "ПОБЕДИТЕЛЬ" %}</p>
+                        <img src="{% url 'drawing_image' item.winner.id %}" alt="{{ item.winner.title }}" loading="lazy">
+                        <p class="winner-name">{{ item.winner.title }}</p>
+                        <p>{{ item.winner.author }}, {{ item.winner.age }} {% t "лет" %}</p>
+                        <p class="winner-votes">{{ item.winner.votes }}</p>
+                        <p class="work-card__meta">{% t "голосов" %}</p>
+                        <p><a class="btn" href="{% url 'certificate' item.winner.id %}">{% t "Скачать сертификат" %}</a></p>
+                    {% else %}
+                        <p>{% t "Пока нет участников" %}</p>
+                    {% endif %}
+                </article>
+            {% empty %}
+                <p>{% t "Пока нет участников" %}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
 </section>
+{% if not results_published and contest.countdown_target_iso %}
+<script>
+(() => {
+    const targetEl = document.querySelector("[data-countdown-target]");
+    if (!targetEl) return;
+    const endDate = new Date("{{ contest.results_start|date:'c' }}");
+    function tick() {
+        const diff = Math.max(endDate.getTime() - Date.now(), 0);
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        targetEl.textContent = `${days} {% t "дн." %} ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    }
+    tick();
+    setInterval(tick, 60000);
+})();
+</script>
+{% endif %}
 {% endblock %}

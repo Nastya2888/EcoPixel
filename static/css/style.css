@@ -579,9 +579,23 @@ html[data-theme="dark"] .floating-card {
 }
 
 .countdown {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.countdown-timer {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
+}
+
+.countdown-label {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-align: center;
 }
 
 .timer-card {
@@ -4774,6 +4788,122 @@ html[data-theme="dark"] .draw-confirm-content {
 
 html[data-theme="dark"] .draw-confirm-icon {
     color: #9be7b8;
+}
+
+/* Contest phase banner and notices */
+.contest-banner {
+    border-bottom: 1px solid rgba(46, 204, 113, 0.22);
+    font-size: 14px;
+}
+
+.contest-banner__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 16px;
+    text-align: center;
+}
+
+.contest-banner--submission {
+    background: linear-gradient(90deg, rgba(46, 204, 113, 0.14), rgba(0, 184, 148, 0.1));
+    color: var(--color-text);
+}
+
+.contest-banner--voting {
+    background: linear-gradient(90deg, rgba(241, 196, 15, 0.16), rgba(243, 156, 18, 0.1));
+    color: var(--color-text);
+}
+
+.contest-banner--results {
+    background: linear-gradient(90deg, rgba(155, 231, 184, 0.2), rgba(46, 204, 113, 0.12));
+    color: var(--color-text);
+}
+
+.contest-banner--results a {
+    color: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.contest-banner__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+html[data-theme="dark"] .contest-banner__badge {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.countdown-finished {
+    margin: 12px 0 0;
+    font-weight: 600;
+    text-align: center;
+}
+
+.countdown-finished a {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.contest-phase-notice,
+.work-vote-notice,
+.draw-contest-notice {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(46, 204, 113, 0.08);
+    border: 1px solid rgba(46, 204, 113, 0.18);
+    color: var(--color-text-muted);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.contest-phase-notice--active,
+.work-vote-notice--active {
+    background: rgba(241, 196, 15, 0.1);
+    border-color: rgba(241, 196, 15, 0.28);
+    color: var(--color-text);
+}
+
+.contest-pending {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 36px 28px;
+    text-align: center;
+}
+
+.contest-pending-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.contest-pending h2 {
+    margin: 0 0 10px;
+    font-family: var(--font-display);
+}
+
+.contest-pending p {
+    margin: 0 0 14px;
+    color: var(--color-text-muted);
+}
+
+.contest-pending-countdown {
+    font-size: 16px;
+}
+
+.draw-contest-notice {
+    margin-top: 10px;
+    font-size: 13px;
 }
 
 .draw-submit-actions {

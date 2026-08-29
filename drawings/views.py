@@ -17,10 +17,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.shortcuts import get_list_or_404, get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 
 from .models import Category, Drawing, Vote
+from .contest import are_results_published, is_submission_open, is_voting_open
 from .translations import EN, current_language_code, translate
 from .utils import send_notification
 
@@ -130,6 +131,19 @@ AGE_CATEGORY_FILTERS = (
 )
 
 
+def _get_category_winners():
+    categories = Category.objects.all()
+    winners = []
+    for category in categories:
+        winner = (
+            Drawing.objects.filter(category=category, is_approved=True)
+            .order_by("-votes", "-created_at")
+            .first()
+        )
+        winners.append({"category": category, "winner": winner})
+    return winners
+
+
 @require_GET
 def index(request):
     home_categories = []
@@ -196,6 +210,8 @@ def gallery(request):
             "sort_mode": sort_mode,
             "page_obj": page_obj,
             "voted_ids": voted_ids,
+            "voting_open": is_voting_open(),
+            "results_published": are_results_published(),
         },
     )
 
@@ -220,6 +236,8 @@ def work_detail(request, pk):
             "is_own_work": is_own_work,
             "is_moderator": _can_view_moderation_content(request),
             "og_image_url": og_image_url,
+            "voting_open": is_voting_open(),
+            "results_published": are_results_published(),
         },
     )
 
@@ -256,20 +274,23 @@ def rules(request):
 
 @require_GET
 def results(request):
-    categories = get_list_or_404(Category)
-    winners = []
-    for category in categories:
-        winner = (
-            Drawing.objects.filter(category=category, is_approved=True)
-            .order_by("-votes", "-created_at")
-            .first()
-        )
-        winners.append({"category": category, "winner": winner})
-    return render(request, "drawings/results.html", {"winners": winners})
+    results_published = are_results_published()
+    winners = _get_category_winners() if results_published else []
+    return render(
+        request,
+        "drawings/results.html",
+        {
+            "winners": winners,
+            "results_published": results_published,
+        },
+    )
 
 
 @require_GET
 def certificate(request, pk):
+    if not are_results_published():
+        raise Http404("Сертификаты будут доступны после объявления итогов.")
+
     drawing = get_object_or_404(Drawing, pk=pk)
     winner = (
         Drawing.objects.filter(category=drawing.category, is_approved=True)
@@ -292,6 +313,7 @@ def draw(request):
         {
             "categories": categories,
             "draw_i18n_json": json.dumps(draw_i18n, ensure_ascii=False),
+            "contest_submission_open": is_submission_open(),
         },
     )
 
@@ -303,6 +325,15 @@ def submit_drawing(request):
             {
                 "success": False,
                 "error": translate("Войдите или зарегистрируйтесь, чтобы отправить работу."),
+            },
+            status=403,
+        )
+
+    if not is_submission_open():
+        return JsonResponse(
+            {
+                "success": False,
+                "error": translate("Приём работ завершён. Голосование начнётся после окончания приёма."),
             },
             status=403,
         )
@@ -453,15 +484,22 @@ def restore_drawing_image(request, pk):
 def vote(request, pk):
     if not request.user.is_authenticated:
         return JsonResponse(
-            {"success": False, "error": "Войдите, чтобы голосовать."},
+            {"success": False, "error": translate("Войдите, чтобы голосовать.")},
             status=401,
         )
+
+    if not is_voting_open():
+        if are_results_published():
+            message = translate("Голосование завершено. Итоги уже объявлены.")
+        else:
+            message = translate("Голосование ещё не началось. Сначала завершится приём работ.")
+        return JsonResponse({"success": False, "error": message}, status=403)
 
     drawing = get_object_or_404(Drawing, pk=pk, is_approved=True)
 
     if _is_own_drawing(drawing, request.user):
         return JsonResponse(
-            {"success": False, "error": "Нельзя голосовать за свою работу."},
+            {"success": False, "error": translate("Нельзя голосовать за свою работу.")},
             status=403,
         )
 

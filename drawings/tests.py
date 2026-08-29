@@ -1,11 +1,29 @@
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from .contest import PHASE_RESULTS, PHASE_SUBMISSION, PHASE_VOTING, get_contest_phase
 from .models import Category, Drawing, Vote
 
 
+CONTEST_SUBMISSION_OPEN = {
+    "CONTEST_SUBMISSION_END": "2099-12-31",
+    "CONTEST_RESULTS_START": "2099-12-31",
+}
+
+CONTEST_VOTING_OPEN = {
+    "CONTEST_SUBMISSION_END": "2020-01-01",
+    "CONTEST_RESULTS_START": "2099-12-31",
+}
+
+CONTEST_RESULTS_PUBLISHED = {
+    "CONTEST_SUBMISSION_END": "2020-01-01",
+    "CONTEST_RESULTS_START": "2020-01-01",
+}
+
+
+@override_settings(**CONTEST_SUBMISSION_OPEN)
 class AuthFlowTests(TestCase):
     def setUp(self):
         self.password = "StrongPass123!"
@@ -262,6 +280,7 @@ class HomePageTests(TestCase):
         self.assertNotContains(response, "?category=age-18-25")
 
 
+@override_settings(**CONTEST_VOTING_OPEN)
 class VotingTests(TestCase):
     def setUp(self):
         self.password = "StrongPass123!"
@@ -329,6 +348,7 @@ class VotingTests(TestCase):
         self.assertEqual(self.drawing.votes, 0)
 
 
+@override_settings(**CONTEST_VOTING_OPEN)
 class GalleryTests(TestCase):
     def setUp(self):
         self.password = "StrongPass123!"
@@ -634,3 +654,106 @@ class ModeratorPanelTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Опубликовать")
         self.assertContains(response, "Удалить")
+
+
+@override_settings(**CONTEST_SUBMISSION_OPEN)
+class ContestPhaseTests(TestCase):
+    def setUp(self):
+        self.password = "StrongPass123!"
+        self.user = User.objects.create_user(
+            username="phase@example.com",
+            email="phase@example.com",
+            password=self.password,
+        )
+        self.category = Category.objects.create(name="6–9 лет", slug="age-6-9", theme="6–9 лет")
+        self.png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+            b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
+            b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
+            b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+
+    def test_default_settings_use_submission_phase_before_september(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+
+        august = datetime(2026, 8, 29, 12, 0, 0, tzinfo=ZoneInfo("Europe/Moscow"))
+        with override_settings(
+            CONTEST_SUBMISSION_END="2026-09-07",
+            CONTEST_RESULTS_START="2026-09-15",
+        ):
+            self.assertEqual(get_contest_phase(august), PHASE_SUBMISSION)
+            september_voting = datetime(2026, 9, 10, 12, 0, 0, tzinfo=ZoneInfo("Europe/Moscow"))
+            self.assertEqual(get_contest_phase(september_voting), PHASE_VOTING)
+            september_results = datetime(2026, 9, 15, 12, 0, 0, tzinfo=ZoneInfo("Europe/Moscow"))
+            self.assertEqual(get_contest_phase(september_results), PHASE_RESULTS)
+
+    def test_vote_blocked_before_voting_phase(self):
+        drawing = Drawing.objects.create(
+            user=self.user,
+            title="Тест",
+            author="Тест",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("phase.png", self.png, content_type="image/png"),
+            is_approved=True,
+            votes=0,
+        )
+        voter = User.objects.create_user(
+            username="phase-voter@example.com",
+            email="phase-voter@example.com",
+            password=self.password,
+        )
+        with override_settings(**CONTEST_SUBMISSION_OPEN):
+            self.client.login(username=voter.email, password=self.password)
+            response = self.client.post(reverse("vote", args=[drawing.id]))
+            self.assertEqual(response.status_code, 403)
+            self.assertIn("ещё не началось", response.json()["error"])
+
+    @override_settings(**CONTEST_VOTING_OPEN)
+    def test_results_hidden_before_publication_date(self):
+        response = self.client.get(reverse("results"))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["results_published"])
+        self.assertContains(response, "15 сентября")
+
+    @override_settings(**CONTEST_RESULTS_PUBLISHED)
+    def test_results_show_winners_after_publication(self):
+        winner = Drawing.objects.create(
+            user=self.user,
+            title="Победитель",
+            author="Аня",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("winner.png", self.png, content_type="image/png"),
+            is_approved=True,
+            votes=5,
+        )
+        response = self.client.get(reverse("results"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["results_published"])
+        self.assertContains(response, winner.title)
+
+    @override_settings(**CONTEST_SUBMISSION_OPEN)
+    def test_submit_blocked_after_submission_phase(self):
+        with override_settings(**CONTEST_VOTING_OPEN):
+            self.client.login(username=self.user.email, password=self.password)
+            response = self.client.post(
+                reverse("submit_drawing"),
+                {
+                    "image": SimpleUploadedFile("late.png", self.png, content_type="image/png"),
+                    "title": "Поздняя работа",
+                    "author_name": "Аня",
+                    "age": "8",
+                    "city": "Алматы",
+                    "email": self.user.email,
+                    "consent": "on",
+                },
+            )
+            self.assertEqual(response.status_code, 403)
+            self.assertIn("завершён", response.json()["error"])
+            self.assertEqual(Drawing.objects.filter(user=self.user).count(), 0)

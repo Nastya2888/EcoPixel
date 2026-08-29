@@ -156,6 +156,7 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "drawings.context_processors.contest_status",
             ],
         },
     },
@@ -237,3 +238,8 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Contest phases (Europe/Moscow): submission → voting → results on CONTEST_RESULTS_START
+CONTEST_TIMEZONE = os.getenv("CONTEST_TIMEZONE", "Europe/Moscow")
+CONTEST_SUBMISSION_END = os.getenv("CONTEST_SUBMISSION_END", "2026-09-07")
+CONTEST_RESULTS_START = os.getenv("CONTEST_RESULTS_START", "2026-09-15")

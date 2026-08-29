@@ -1510,6 +1510,11 @@
     }
 
     function openModal() {
+        const contest = window.ECOPIXEL_CONTEST || {};
+        if (contest.submissionOpen === false) {
+            authRequiredMessage.textContent = t("Приём работ завершён. Голосование начнётся после окончания приёма.");
+            return;
+        }
         const isAuthenticated = drawPage?.dataset.authenticated === "true";
         if (!isAuthenticated) {
             authRequiredMessage.innerHTML = `${t("Войди или зарегистрируйся, чтобы отправить работу.")} <a href="/login/?next=/draw/">${t("Войти")}</a>`;

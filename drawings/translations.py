@@ -334,6 +334,42 @@ EN = {
     "Смена размера холста": "Canvas resize",
     "Смена шаблона": "Template change",
     "OK": "OK",
+    # Contest phases
+    "До окончания приёма работ": "Until submissions close",
+    "До объявления победителей": "Until winners are announced",
+    "Победители объявлены!": "Winners announced!",
+    "Смотреть итоги": "View results",
+    "Приём работ": "Submissions",
+    "Отправляйте рисунки до": "Submit drawings until",
+    "Голосование": "Voting",
+    "Итоги и победители —": "Results and winners on",
+    "Итоги": "Results",
+    "Победители объявлены — смотреть результаты": "Winners announced — view results",
+    "Приём работ завершён": "Submissions closed",
+    "Голосование откроется после окончания приёма работ.": "Voting opens after submissions close.",
+    "Приём работ завершён. Голосование начнётся после окончания приёма.": (
+        "Submissions are closed. Voting will start after the submission period ends."
+    ),
+    "Голосование ещё не началось. Сначала завершится приём работ.": (
+        "Voting has not started yet. Submissions must close first."
+    ),
+    "Голосование завершено. Итоги уже объявлены.": "Voting is over. Results have been published.",
+    "Итоги будут объявлены 15 сентября": "Results will be announced on September 15",
+    "Сейчас идёт этап конкурса:": "Current contest stage:",
+    "приём работ": "submissions",
+    "голосование": "voting",
+    "Смотреть работы в галерее": "Browse works in the gallery",
+    "Поздравляем победителей в каждой возрастной категории!": (
+        "Congratulations to the winners in each age category!"
+    ),
+    "Сейчас идёт приём работ. Голосование откроется после": "Submissions are open. Voting opens after",
+    "Голосование открыто! Итоги будут объявлены": "Voting is open! Results will be announced on",
+    "Конкурс завершён.": "The contest is over.",
+    "Голосование скоро": "Voting soon",
+    "Голосование завершено": "Voting closed",
+    "Голосование откроется после окончания приёма работ.": "Voting opens after submissions close.",
+    "Голосование открыто до": "Voting open until",
+    "дн.": "d.",
 }
 
 
