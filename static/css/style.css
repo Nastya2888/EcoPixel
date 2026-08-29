@@ -1876,6 +1876,14 @@ html[data-theme="dark"] .bulk-moderation__check {
 .moderation-actions--reject {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
+}
+
+.moderation-actions__secondary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
 }
 
 .moderation-reject-field {
@@ -1903,11 +1911,6 @@ html[data-theme="dark"] .bulk-moderation__check {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(46, 125, 90, 0.18);
-}
-
-.work-moderation-panel--page .moderation-reject-field textarea {
-    border-color: rgba(90, 110, 100, 0.45);
-    background: var(--color-surface-solid, #fff);
 }
 
 .moderation-btn--reject {
@@ -2252,18 +2255,21 @@ html[data-theme="dark"] .moderation-reject-field textarea:focus {
 }
 
 .work-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    display: block;
     padding: 28px;
     overflow: visible;
 }
 
 .work-layout__main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 40px;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 32px;
     align-items: start;
+}
+
+.work-layout--moderator .work-layout__main {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+    gap: 28px;
 }
 
 .work-image-card {
@@ -2276,20 +2282,48 @@ html[data-theme="dark"] .moderation-reject-field textarea:focus {
     justify-content: center;
     aspect-ratio: 1 / 1;
     width: 100%;
+    max-width: 560px;
     align-self: start;
 }
 
 .work-info {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
 }
 
-.work-moderation-panel--page {
+.work-layout--moderator .votes-big {
+    font-size: 34px;
+    margin: 10px 0 12px;
+}
+
+.work-layout--moderator .work-moderation-panel {
+    margin: 4px 0 14px;
+    padding: 14px;
+    background: var(--color-surface-solid);
+    border: 1.5px solid rgba(90, 110, 100, 0.28);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+}
+
+.work-layout--moderator .work-moderation-panel__title {
+    margin: 0 0 12px;
+    font-size: 15px;
+}
+
+.work-layout--moderator .moderation-actions--reject {
+    display: grid;
+    gap: 10px;
+}
+
+.work-layout--moderator .moderation-btn {
+    flex: none;
     width: 100%;
-    margin: 0;
+    min-width: 0;
 }
 
-.work-moderation-panel--page .moderation-actions {
-    max-width: 640px;
+.work-layout--moderator .share-row {
+    margin-top: 4px;
 }
 
 .work-image-card img {

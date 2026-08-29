@@ -33,22 +33,24 @@
             <span>{% t "Причина отклонения" %}</span>
             <textarea
                 name="rejection_reason"
-                rows="2"
+                rows="3"
                 maxlength="500"
                 placeholder="{% t 'Например: рисунок не по теме категории' %}"
             >{% if work.is_rejected %}{{ work.rejection_reason }}{% endif %}</textarea>
         </label>
-        <button type="submit" name="action" value="reject" class="btn-secondary moderation-btn moderation-btn--reject">
-            {% t "Отклонить" %}
-        </button>
-        <button
-            type="submit"
-            name="action"
-            value="delete"
-            class="btn-secondary moderation-btn moderation-btn--delete"
-            onclick="return confirm('{% t 'Удалить' %} «{{ work.title|escapejs }}»?');"
-        >
-            {% t "Удалить" %}
-        </button>
+        <div class="moderation-actions__secondary">
+            <button type="submit" name="action" value="reject" class="btn-secondary moderation-btn moderation-btn--reject">
+                {% t "Отклонить" %}
+            </button>
+            <button
+                type="submit"
+                name="action"
+                value="delete"
+                class="btn-secondary moderation-btn moderation-btn--delete"
+                onclick="return confirm('{% t 'Удалить' %} «{{ work.title|escapejs }}»?');"
+            >
+                {% t "Удалить" %}
+            </button>
+        </div>
     </form>
 {% endif %}
