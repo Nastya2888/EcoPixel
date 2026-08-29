@@ -380,12 +380,10 @@ EN = {
     "Авторов": "Authors",
     "Статистика": "Stats",
     "Работы по категориям": "Works by category",
-    "Сколько рисунков и голосов в каждой возрастной группе.": (
-        "How many drawings and votes are in each age group."
+    "Количество рисунков и голосов в каждой возрастной группе.": (
+        "Drawing and vote counts in each age group."
     ),
     "Работы": "Works",
-    "в галерее": "in gallery",
-    "на проверке": "pending review",
     "Голоса": "Votes",
     "Активность по дням": "Daily activity",
     "Новые работы и голоса за период": "New works and votes for",

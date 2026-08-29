@@ -46,30 +46,29 @@
 <section class="org-section animate-on-scroll">
     <div class="org-section__head">
         <h2 class="section-title">{% t "Работы по категориям" %}</h2>
-        <p class="section-subtitle">{% t "Сколько рисунков и голосов в каждой возрастной группе." %}</p>
+        <p class="section-subtitle">{% t "Количество рисунков и голосов в каждой возрастной группе." %}</p>
     </div>
     <div class="org-category-grid">
         {% for row in organizer.by_category %}
             <article class="org-category-card card">
                 <h3>{{ row.name|t }}</h3>
                 <p class="org-category-theme">{{ row.theme|t }}</p>
-                <div class="org-metric">
-                    <div class="org-metric__label">
-                        <span>{% t "Работы" %}</span>
+                <div class="org-category-numbers">
+                    <div class="org-number">
                         <strong>{{ row.total }}</strong>
+                        <span>{% t "Работы" %}</span>
                     </div>
-                    <div class="org-bar" aria-hidden="true">
-                        <span class="org-bar__fill org-bar__fill--works" style="width: {{ row.total_pct }}%"></span>
+                    <div class="org-number">
+                        <strong>{{ row.published }}</strong>
+                        <span>{% t "В галерее" %}</span>
                     </div>
-                    <p class="org-metric__meta">{{ row.published }} {% t "в галерее" %}, {{ row.pending }} {% t "на проверке" %}</p>
-                </div>
-                <div class="org-metric">
-                    <div class="org-metric__label">
-                        <span>{% t "Голоса" %}</span>
+                    <div class="org-number">
+                        <strong>{{ row.pending }}</strong>
+                        <span>{% t "На модерации" %}</span>
+                    </div>
+                    <div class="org-number">
                         <strong>{{ row.votes }}</strong>
-                    </div>
-                    <div class="org-bar" aria-hidden="true">
-                        <span class="org-bar__fill org-bar__fill--votes" style="width: {{ row.votes_pct }}%"></span>
+                        <span>{% t "Голоса" %}</span>
                     </div>
                 </div>
             </article>

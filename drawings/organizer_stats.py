@@ -35,13 +35,11 @@ def build_organizer_stats(days: int = 14) -> dict:
     authors = Drawing.objects.values("author", "email").distinct().count()
 
     by_category = []
-    max_category_total = 1
     for item in AGE_CATEGORY_FILTERS:
         qs = Drawing.objects.filter(age__gte=item["min_age"], age__lte=item["max_age"])
         cat_total = qs.count()
         cat_published = qs.filter(is_approved=True).count()
         cat_votes = qs.aggregate(total=Sum("votes"))["total"] or 0
-        max_category_total = max(max_category_total, cat_total, cat_votes)
         by_category.append(
             {
                 "slug": item["slug"],
@@ -53,10 +51,6 @@ def build_organizer_stats(days: int = 14) -> dict:
                 "votes": cat_votes,
             }
         )
-
-    for row in by_category:
-        row["total_pct"] = round(100 * row["total"] / max_category_total) if max_category_total else 0
-        row["votes_pct"] = round(100 * row["votes"] / max_category_total) if max_category_total else 0
 
     day_keys = _day_list(days)
     submissions_map = {

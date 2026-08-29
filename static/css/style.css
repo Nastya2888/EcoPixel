@@ -1186,44 +1186,32 @@ html[data-theme="dark"] .work-moderation-notice {
     font-size: 14px;
 }
 
-.org-metric + .org-metric {
-    margin-top: 14px;
-}
-
-.org-metric__label {
-    display: flex;
-    justify-content: space-between;
+.org-category-numbers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-    margin-bottom: 6px;
-    font-size: 14px;
 }
 
-.org-metric__meta {
-    margin: 6px 0 0;
-    font-size: 13px;
-    color: var(--color-text-muted);
+.org-number {
+    padding: 12px 10px;
+    border-radius: 12px;
+    background: rgba(46, 204, 113, 0.08);
+    text-align: center;
 }
 
-.org-bar {
-    height: 10px;
-    border-radius: 999px;
-    background: rgba(27, 67, 50, 0.08);
-    overflow: hidden;
-}
-
-.org-bar__fill {
+.org-number strong {
     display: block;
-    height: 100%;
-    border-radius: inherit;
-    min-width: 0;
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height: 1.1;
+    color: var(--color-primary);
 }
 
-.org-bar__fill--works {
-    background: linear-gradient(90deg, #2ecc71, #1b7a45);
-}
-
-.org-bar__fill--votes {
-    background: linear-gradient(90deg, #f1c40f, #e67e22);
+.org-number span {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--color-text-muted);
 }
 
 .org-legend {
@@ -1340,8 +1328,8 @@ html[data-theme="dark"] .work-moderation-notice {
     color: #1b7a45;
 }
 
-html[data-theme="dark"] .org-bar {
-    background: rgba(255, 255, 255, 0.08);
+html[data-theme="dark"] .org-number {
+    background: rgba(155, 231, 184, 0.1);
 }
 
 html[data-theme="dark"] .org-top-item em {
