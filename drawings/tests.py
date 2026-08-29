@@ -432,6 +432,7 @@ class GalleryTests(TestCase):
             is_approved=True,
             votes=3,
         )
+        self.png = png
 
     def test_gallery_hides_pending_drawings_for_regular_users(self):
         response = self.client.get(reverse("gallery"))
@@ -465,6 +466,48 @@ class GalleryTests(TestCase):
         self.assertNotContains(response, self.young_work.title)
         self.assertNotContains(response, self.middle_pending_work.title)
         self.assertNotContains(response, self.teen_work.title)
+
+    def test_gallery_searches_by_author(self):
+        other = Drawing.objects.create(
+            user=self.user,
+            title="Другой автор",
+            author="Айгерим",
+            age=9,
+            city="Астана",
+            email=self.user.email,
+            category=self.category_6_9,
+            image=SimpleUploadedFile("gallery-author.png", self.png, content_type="image/png"),
+            is_approved=True,
+            votes=0,
+        )
+        response = self.client.get(reverse("gallery"), {"q": "Айгерим"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, other.title)
+        self.assertNotContains(response, self.young_work.title)
+        self.assertContains(response, "По запросу:")
+
+    def test_gallery_searches_by_city(self):
+        other = Drawing.objects.create(
+            user=self.user,
+            title="Из Шымкента",
+            author="Нурлан",
+            age=16,
+            city="Шымкент",
+            email=self.user.email,
+            category=self.category_14_17,
+            image=SimpleUploadedFile("gallery-city.png", self.png, content_type="image/png"),
+            is_approved=True,
+            votes=0,
+        )
+        response = self.client.get(reverse("gallery"), {"q": "Шымкент"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, other.title)
+        self.assertNotContains(response, self.teen_work.title)
+
+        by_city_partial = self.client.get(reverse("gallery"), {"q": "Алматы"})
+        self.assertContains(by_city_partial, self.young_work.title)
+        self.assertContains(by_city_partial, self.teen_work.title)
+        self.assertNotContains(by_city_partial, other.title)
 
     def test_admin_sees_pending_drawings_and_status(self):
         self.client.login(username=self.admin_user.email, password=self.password)

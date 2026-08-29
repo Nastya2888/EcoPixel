@@ -11,12 +11,39 @@
     </div>
     {% csrf_token %}
 
+    <form class="gallery-search animate-on-scroll" method="get" action="{% url 'gallery' %}">
+        {% if selected_age_category %}
+            <input type="hidden" name="category" value="{{ selected_age_category.slug }}">
+        {% endif %}
+        <input type="hidden" name="sort" value="{{ sort_mode }}">
+        <label class="gallery-search__field">
+            <span class="visually-hidden">{% t "Автор или город" %}</span>
+            <input
+                type="search"
+                name="q"
+                value="{{ search_query }}"
+                maxlength="80"
+                placeholder="{% t 'Автор или город' %}"
+                autocomplete="off"
+            >
+        </label>
+        <button type="submit" class="btn">{% t "Найти" %}</button>
+        {% if search_query %}
+            <a
+                class="btn-secondary"
+                href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}"
+            >
+                {% t "Сбросить" %}
+            </a>
+        {% endif %}
+    </form>
+
     <div class="filter-row animate-on-scroll">
-        <a class="filter-btn {% if not selected_age_category %}active{% endif %}" href="?sort={{ sort_mode }}">{% t "Все" %}</a>
+        <a class="filter-btn {% if not selected_age_category %}active{% endif %}" href="?sort={{ sort_mode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">{% t "Все" %}</a>
         {% for category in age_categories %}
             <a
                 class="filter-btn {% if selected_age_category and selected_age_category.slug == category.slug %}active{% endif %}"
-                href="?category={{ category.slug }}&sort={{ sort_mode }}"
+                href="?category={{ category.slug }}&sort={{ sort_mode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
             >
                 {{ category.name|t }}
             </a>
@@ -26,20 +53,28 @@
     <div class="filter-row animate-on-scroll">
         <a
             class="filter-btn {% if sort_mode == 'popular' %}active{% endif %}"
-            href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort=popular"
+            href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort=popular{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
         >
             {% t "По популярности" %}
         </a>
         <a
             class="filter-btn {% if sort_mode == 'new' %}active{% endif %}"
-            href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort=new"
+            href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort=new{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
         >
             {% t "Сначала новые" %}
         </a>
     </div>
 
-    {% if selected_age_category %}
-        <p class="gallery-current-category">{% t "Текущая категория:" %} {{ selected_age_category.name|t }}</p>
+    {% if selected_age_category or search_query %}
+        <p class="gallery-current-category">
+            {% if selected_age_category %}
+                {% t "Текущая категория:" %} {{ selected_age_category.name|t }}
+            {% endif %}
+            {% if selected_age_category and search_query %} · {% endif %}
+            {% if search_query %}
+                {% t "По запросу:" %} «{{ search_query }}»
+            {% endif %}
+        </p>
     {% endif %}
 
     {% if contest.results_published %}
@@ -101,11 +136,11 @@
 
     <div class="pagination">
         {% if page_obj.has_previous %}
-            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.previous_page_number }}">{% t "Назад" %}</a>
+            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}&page={{ page_obj.previous_page_number }}">{% t "Назад" %}</a>
         {% endif %}
         <span class="active-page">{{ page_obj.number }}</span>
         {% if page_obj.has_next %}
-            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}&page={{ page_obj.next_page_number }}">{% t "Вперёд" %}</a>
+            <a href="?{% if selected_age_category %}category={{ selected_age_category.slug }}&{% endif %}sort={{ sort_mode }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}&page={{ page_obj.next_page_number }}">{% t "Вперёд" %}</a>
         {% endif %}
     </div>
 </section>

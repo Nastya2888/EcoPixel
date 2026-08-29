@@ -6,7 +6,7 @@ import json
 
 from django.http import Http404, HttpResponse, JsonResponse
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Q, Sum
 from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -28,6 +28,18 @@ from .utils import send_notification
 
 def _can_view_moderation_content(request) -> bool:
     return bool(request.user.is_authenticated and request.user.is_staff)
+
+
+def _normalize_search_query(raw_value: str, max_length: int = 80) -> str:
+    return (raw_value or "").strip()[:max_length]
+
+
+def _apply_author_city_search(queryset, search_query: str):
+    if not search_query:
+        return queryset
+    return queryset.filter(
+        Q(author__icontains=search_query) | Q(city__icontains=search_query)
+    )
 
 
 def _is_own_drawing(drawing, user) -> bool:
@@ -177,6 +189,7 @@ def gallery(request):
     category_by_slug = {item["slug"]: item for item in age_categories}
     current_slug = request.GET.get("category", "").strip()
     sort_mode = request.GET.get("sort", "popular").strip()
+    search_query = _normalize_search_query(request.GET.get("q", ""))
     drawings = Drawing.objects.select_related("category").all()
     if not _can_view_moderation_content(request):
         drawings = drawings.filter(is_approved=True)
@@ -186,6 +199,7 @@ def gallery(request):
             age__gte=selected_age_category["min_age"],
             age__lte=selected_age_category["max_age"],
         )
+    drawings = _apply_author_city_search(drawings, search_query)
 
     if sort_mode == "new":
         drawings = drawings.order_by("-created_at")
@@ -208,6 +222,7 @@ def gallery(request):
             "age_categories": age_categories,
             "selected_age_category": selected_age_category,
             "sort_mode": sort_mode,
+            "search_query": search_query,
             "page_obj": page_obj,
             "voted_ids": voted_ids,
             "voting_open": is_voting_open(),
