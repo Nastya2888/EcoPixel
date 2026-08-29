@@ -76,6 +76,12 @@
 
 {% if moderation_status == "approved" %}
     <p class="restore-image-notice success">{% t "Работа опубликована в галерее." %}</p>
+{% elif moderation_status == "bulk_approved" %}
+    <p class="restore-image-notice success">
+        {% t "Опубликовано выбранных работ:" %} {{ moderation_bulk_count }}
+    </p>
+{% elif moderation_status == "bulk_none" %}
+    <p class="restore-image-notice">{% t "Выберите хотя бы одну неопубликованную работу." %}</p>
 {% elif moderation_status == "unpublished" %}
     <p class="restore-image-notice">{% t "Работа снята с публикации." %}</p>
 {% elif moderation_status == "rejected" %}
@@ -120,9 +126,46 @@
         </a>
     </div>
 
+    {% if moderation_page %}
+        <form
+            class="bulk-moderation__bar animate-on-scroll"
+            method="post"
+            action="{% url 'moderate_bulk' %}"
+            id="bulk-moderation-form"
+        >
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <label class="bulk-moderation__select-all">
+                <input type="checkbox" id="bulk-select-all">
+                <span>{% t "Выбрать все на странице" %}</span>
+            </label>
+            <button
+                type="submit"
+                name="action"
+                value="approve"
+                class="btn"
+                onclick="return confirm('{% t 'Опубликовать выбранные работы?' %}');"
+            >
+                {% t "Опубликовать выбранные" %}
+            </button>
+        </form>
+    {% endif %}
+
     <div class="gallery-grid profile-grid">
         {% for work in moderation_page %}
             <article class="work-card card animate-on-scroll profile-work-card">
+                {% if not work.is_approved %}
+                    <label class="bulk-moderation__check">
+                        <input
+                            type="checkbox"
+                            name="drawing_ids"
+                            value="{{ work.id }}"
+                            class="bulk-moderation__item"
+                            form="bulk-moderation-form"
+                        >
+                        <span class="visually-hidden">{% t "Выбрать работу" %} «{{ work.title }}»</span>
+                    </label>
+                {% endif %}
                 <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="{% t 'Открыть работу' %} «{{ work.title }}»">
                     <div class="work-image-wrap">
                         <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
@@ -385,6 +428,23 @@
                 button.textContent = original;
             }, 1600);
         });
+    });
+})();
+</script>
+<script>
+(() => {
+    const selectAll = document.getElementById("bulk-select-all");
+    if (!selectAll) return;
+    const items = () => Array.from(document.querySelectorAll(".bulk-moderation__item"));
+    selectAll.addEventListener("change", () => {
+        items().forEach((item) => {
+            item.checked = selectAll.checked;
+        });
+    });
+    document.addEventListener("change", (event) => {
+        if (!event.target.classList.contains("bulk-moderation__item")) return;
+        const list = items();
+        selectAll.checked = list.length > 0 && list.every((item) => item.checked);
     });
 })();
 </script>

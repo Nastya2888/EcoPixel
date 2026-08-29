@@ -690,6 +690,73 @@ class ModeratorPanelTests(TestCase):
         self.assertFalse(self.pending.is_rejected)
         self.assertEqual(self.pending.rejection_reason, "")
 
+    def test_moderator_can_bulk_approve_drawings(self):
+        second = Drawing.objects.create(
+            user=self.user,
+            title="Ещё одна",
+            author="Автор",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("pending-bulk.png", self.png, content_type="image/png"),
+            is_approved=False,
+            votes=0,
+        )
+        self.client.login(username=self.user.email, password=self.password)
+        forbidden = self.client.post(
+            reverse("moderate_bulk"),
+            {
+                "action": "approve",
+                "drawing_ids": [self.pending.id, second.id],
+                "next": reverse("profile") + "?mod=pending",
+            },
+        )
+        self.assertEqual(forbidden.status_code, 404)
+
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.post(
+            reverse("moderate_bulk"),
+            {
+                "action": "approve",
+                "drawing_ids": [self.pending.id, second.id, self.published.id],
+                "next": reverse("profile") + "?mod=pending",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("bulk_approved", response.url)
+        self.assertIn("count=2", response.url)
+        self.pending.refresh_from_db()
+        second.refresh_from_db()
+        self.assertTrue(self.pending.is_approved)
+        self.assertTrue(second.is_approved)
+
+        empty = self.client.post(
+            reverse("moderate_bulk"),
+            {"action": "approve", "next": reverse("profile") + "?mod=pending"},
+        )
+        self.assertIn("bulk_none", empty.url)
+
+        third = Drawing.objects.create(
+            user=self.user,
+            title="Ещё ждёт",
+            author="Автор",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("pending-bulk-3.png", self.png, content_type="image/png"),
+            is_approved=False,
+            votes=0,
+        )
+        profile = self.client.get(
+            reverse("profile"),
+            {"mod": "pending", "moderation": "bulk_approved", "count": "2"},
+        )
+        self.assertContains(profile, "Опубликовано выбранных работ:")
+        self.assertContains(profile, "Опубликовать выбранные")
+        self.assertContains(profile, f'value="{third.id}"')
+
     def test_moderator_reject_requires_reason(self):
         self.client.login(username=self.moderator.email, password=self.password)
         response = self.client.post(

@@ -114,6 +114,14 @@ EN = {
     ),
     "Опубликовать": "Publish",
     "Опубликовать всё же": "Publish anyway",
+    "Опубликовать выбранные": "Publish selected",
+    "Опубликовать выбранные работы?": "Publish the selected works?",
+    "Выбрать все на странице": "Select all on this page",
+    "Выбрать работу": "Select work",
+    "Опубликовано выбранных работ:": "Published selected works:",
+    "Выберите хотя бы одну неопубликованную работу.": (
+        "Select at least one unpublished work."
+    ),
     "Снять с публикации": "Unpublish",
     "Удалить": "Delete",
     "Отклонить": "Reject",

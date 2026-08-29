@@ -67,10 +67,12 @@ def _safe_redirect_url(request, fallback_name="profile"):
     return reverse(fallback_name)
 
 
-def _redirect_with_status(url, moderation_status):
+def _redirect_with_status(url, moderation_status, extra_params=None):
     parts = urlsplit(url)
     query = dict(parse_qsl(parts.query, keep_blank_values=True))
     query["moderation"] = moderation_status
+    if extra_params:
+        query.update({key: str(value) for key, value in extra_params.items()})
     return redirect(
         urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment))
     )
@@ -688,6 +690,7 @@ def profile(request):
             "missing_image_ids": missing_image_ids,
             "restore_status": request.GET.get("restore", ""),
             "moderation_status": request.GET.get("moderation", ""),
+            "moderation_bulk_count": request.GET.get("count", ""),
             "is_moderator": is_moderator,
             "moderation_filter": moderation_filter,
             "moderation_stats": moderation_stats,
@@ -752,6 +755,45 @@ def moderate_drawing(request, pk):
         return _redirect_with_status(next_url, "deleted")
 
     return redirect(next_url)
+
+
+@login_required
+@require_POST
+def moderate_bulk(request):
+    if not _can_view_moderation_content(request):
+        raise Http404("Модерация недоступна.")
+
+    next_url = _safe_redirect_url(request)
+    action = request.POST.get("action", "").strip()
+    if action != "approve":
+        return redirect(next_url)
+
+    raw_ids = request.POST.getlist("drawing_ids")
+    drawing_ids = []
+    for value in raw_ids[:50]:
+        try:
+            drawing_ids.append(int(value))
+        except (TypeError, ValueError):
+            continue
+
+    if not drawing_ids:
+        return _redirect_with_status(next_url, "bulk_none")
+
+    drawings = list(
+        Drawing.objects.filter(pk__in=drawing_ids, is_approved=False).select_related("category")
+    )
+    approved_count = 0
+    for drawing in drawings:
+        drawing.is_approved = True
+        drawing.is_rejected = False
+        drawing.rejection_reason = ""
+        drawing.save(update_fields=["is_approved", "is_rejected", "rejection_reason"])
+        send_notification(drawing, "approved", request=request)
+        approved_count += 1
+
+    if approved_count == 0:
+        return _redirect_with_status(next_url, "bulk_none")
+    return _redirect_with_status(next_url, "bulk_approved", {"count": approved_count})
 
 
 def _get_category_for_age(age):

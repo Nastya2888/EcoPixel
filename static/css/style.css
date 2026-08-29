@@ -1788,6 +1788,59 @@ html[data-theme="dark"] .org-top-item em {
     align-items: stretch;
 }
 
+.bulk-moderation__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.bulk-moderation__select-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.bulk-moderation__check {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+}
+
+.profile-work-card {
+    position: relative;
+}
+
+.bulk-moderation__check input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+}
+
+html[data-theme="dark"] .bulk-moderation__check {
+    background: rgba(26, 39, 35, 0.92);
+    border-color: rgba(126, 168, 148, 0.28);
+}
+
 .moderation-actions {
     display: flex;
     flex-wrap: wrap;
