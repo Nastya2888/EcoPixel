@@ -38,6 +38,8 @@
                 <p class="restore-image-notice">{% t "Работа снята с публикации." %}</p>
             {% elif request.GET.moderation == "rejected" %}
                 <p class="restore-image-notice">{% t "Работа отклонена. Автор получит письмо с причиной." %}</p>
+            {% elif request.GET.moderation == "note_saved" %}
+                <p class="restore-image-notice success">{% t "Заметка модератора сохранена." %}</p>
             {% elif request.GET.moderation == "reject_reason_required" %}
                 <p class="restore-image-notice">{% t "Укажите причину отклонения перед отправкой." %}</p>
             {% endif %}

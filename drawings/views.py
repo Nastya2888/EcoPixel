@@ -716,13 +716,22 @@ def moderate_drawing(request, pk):
     action = request.POST.get("action", "").strip()
     next_url = _safe_redirect_url(request)
     rejection_reason = request.POST.get("rejection_reason", "").strip()
+    moderator_note = request.POST.get("moderator_note", "").strip()[:1000]
+
+    if action == "save_note":
+        drawing.moderator_note = moderator_note
+        drawing.save(update_fields=["moderator_note"])
+        return _redirect_with_status(next_url, "note_saved")
 
     if action == "approve":
         was_approved = drawing.is_approved
         drawing.is_approved = True
         drawing.is_rejected = False
         drawing.rejection_reason = ""
-        drawing.save(update_fields=["is_approved", "is_rejected", "rejection_reason"])
+        drawing.moderator_note = moderator_note
+        drawing.save(
+            update_fields=["is_approved", "is_rejected", "rejection_reason", "moderator_note"]
+        )
         if not was_approved:
             send_notification(drawing, "approved", request=request)
         return _redirect_with_status(next_url, "approved")
@@ -735,7 +744,10 @@ def moderate_drawing(request, pk):
         drawing.is_approved = False
         drawing.is_rejected = True
         drawing.rejection_reason = rejection_reason
-        drawing.save(update_fields=["is_approved", "is_rejected", "rejection_reason"])
+        drawing.moderator_note = moderator_note
+        drawing.save(
+            update_fields=["is_approved", "is_rejected", "rejection_reason", "moderator_note"]
+        )
         send_notification(drawing, "rejected", request=request)
         return _redirect_with_status(next_url, "rejected")
 
@@ -744,7 +756,13 @@ def moderate_drawing(request, pk):
             drawing.is_approved = False
             drawing.is_rejected = False
             drawing.rejection_reason = ""
-            drawing.save(update_fields=["is_approved", "is_rejected", "rejection_reason"])
+            drawing.moderator_note = moderator_note
+            drawing.save(
+                update_fields=["is_approved", "is_rejected", "rejection_reason", "moderator_note"]
+            )
+        else:
+            drawing.moderator_note = moderator_note
+            drawing.save(update_fields=["moderator_note"])
         return _redirect_with_status(next_url, "unpublished")
 
     if action == "delete":

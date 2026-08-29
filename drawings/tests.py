@@ -757,6 +757,34 @@ class ModeratorPanelTests(TestCase):
         self.assertContains(profile, "Опубликовать выбранные")
         self.assertContains(profile, f'value="{third.id}"')
 
+    def test_moderator_can_save_staff_note(self):
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.post(
+            reverse("moderate_drawing", args=[self.pending.id]),
+            {
+                "action": "save_note",
+                "moderator_note": "Проверить возраст с родителем.",
+                "next": reverse("profile") + "?mod=pending",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("note_saved", response.url)
+        self.pending.refresh_from_db()
+        self.assertEqual(self.pending.moderator_note, "Проверить возраст с родителем.")
+        self.assertFalse(self.pending.is_approved)
+
+        profile = self.client.get(reverse("profile"), {"mod": "pending"})
+        self.assertContains(profile, "Заметка штаба:")
+        self.assertContains(profile, "Проверить возраст с родителем.")
+
+        self.client.login(username=self.user.email, password=self.password)
+        author_profile = self.client.get(reverse("profile"))
+        self.assertNotContains(author_profile, "Заметка штаба:")
+        self.assertNotContains(author_profile, "Проверить возраст с родителем.")
+        detail = self.client.get(reverse("work_detail", args=[self.pending.id]))
+        self.assertNotContains(detail, "Заметка для штаба")
+        self.assertNotContains(detail, "Проверить возраст с родителем.")
+
     def test_moderator_reject_requires_reason(self):
         self.client.login(username=self.moderator.email, password=self.password)
         response = self.client.post(

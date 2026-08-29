@@ -128,6 +128,12 @@ EN = {
     "Отклонено": "Rejected",
     "Отклонённые": "Rejected",
     "Причина отклонения": "Rejection reason",
+    "Заметка для штаба": "Staff note",
+    "не видна автору": "hidden from author",
+    "Например: перепроверить возраст": "For example: double-check the age",
+    "Сохранить заметку": "Save note",
+    "Заметка модератора сохранена.": "Moderator note saved.",
+    "Заметка штаба:": "Staff note:",
     "Например: рисунок не по теме категории": "For example: the drawing does not match the category theme",
     "Причина:": "Reason:",
     "Работа отклонена. Автор получит письмо с причиной.": (

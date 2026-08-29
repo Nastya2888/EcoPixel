@@ -1886,6 +1886,46 @@ html[data-theme="dark"] .bulk-moderation__check {
     width: 100%;
 }
 
+.moderation-staff-note span em {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    opacity: 0.9;
+}
+
+.moderation-staff-note textarea {
+    border-color: rgba(52, 120, 180, 0.4);
+    background: rgba(52, 120, 180, 0.04);
+}
+
+.moderation-staff-note textarea:focus {
+    border-color: rgba(52, 120, 180, 0.7);
+    box-shadow: 0 0 0 3px rgba(52, 120, 180, 0.15);
+}
+
+.profile-staff-note {
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(52, 120, 180, 0.08);
+    border: 1px solid rgba(52, 120, 180, 0.2);
+    color: #2c5f86;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+html[data-theme="dark"] .moderation-staff-note textarea {
+    background: rgba(80, 140, 190, 0.12);
+    border-color: rgba(126, 168, 200, 0.45);
+    color: #e6f4ec;
+}
+
+html[data-theme="dark"] .profile-staff-note {
+    color: #b8d4ea;
+    background: rgba(80, 140, 190, 0.14);
+    border-color: rgba(126, 168, 200, 0.3);
+}
+
 .moderation-reject-field {
     display: grid;
     gap: 6px;

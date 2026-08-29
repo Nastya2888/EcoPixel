@@ -25,7 +25,25 @@ class DrawingAdmin(admin.ModelAdmin):
         "created_at",
     )
     list_filter = ("category", "is_approved", "is_rejected", "created_at")
-    search_fields = ("title", "author", "city", "email", "description", "rejection_reason")
+    search_fields = ("title", "author", "city", "email", "description", "rejection_reason", "moderator_note")
+    fields = (
+        "title",
+        "description",
+        "author",
+        "age",
+        "city",
+        "email",
+        "user",
+        "category",
+        "image",
+        "is_approved",
+        "is_rejected",
+        "rejection_reason",
+        "moderator_note",
+        "votes",
+        "created_at",
+    )
+    readonly_fields = ("created_at",)
 
     def save_model(self, request, obj, form, change):
         was_approved = False

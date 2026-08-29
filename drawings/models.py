@@ -47,6 +47,13 @@ class Drawing(models.Model):
     is_approved = models.BooleanField("Одобрено", default=False)
     is_rejected = models.BooleanField("Отклонено", default=False)
     rejection_reason = models.TextField("Причина отклонения", max_length=500, blank=True, default="")
+    moderator_note = models.TextField(
+        "Заметка модератора",
+        max_length=1000,
+        blank=True,
+        default="",
+        help_text="Видна только модераторам",
+    )
     votes = models.PositiveIntegerField("Голоса", default=0)
     created_at = models.DateTimeField("Создано", auto_now_add=True)
 

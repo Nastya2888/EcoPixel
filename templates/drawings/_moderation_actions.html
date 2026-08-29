@@ -1,11 +1,25 @@
 {% load ui_i18n %}
 {% if work.is_approved %}
-    <form class="moderation-actions" method="post" action="{% url 'moderate_drawing' work.id %}">
+    <form class="moderation-actions moderation-actions--reject" method="post" action="{% url 'moderate_drawing' work.id %}">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ moderation_next }}">
-        <button type="submit" name="action" value="unpublish" class="btn-secondary moderation-btn moderation-btn--unpublish">
-            {% t "Снять с публикации" %}
-        </button>
+        <label class="moderation-reject-field moderation-staff-note">
+            <span>{% t "Заметка для штаба" %} <em>({% t "не видна автору" %})</em></span>
+            <textarea
+                name="moderator_note"
+                rows="2"
+                maxlength="1000"
+                placeholder="{% t 'Например: перепроверить возраст' %}"
+            >{{ work.moderator_note }}</textarea>
+        </label>
+        <div class="moderation-actions__secondary">
+            <button type="submit" name="action" value="save_note" class="btn-secondary moderation-btn">
+                {% t "Сохранить заметку" %}
+            </button>
+            <button type="submit" name="action" value="unpublish" class="btn-secondary moderation-btn moderation-btn--unpublish">
+                {% t "Снять с публикации" %}
+            </button>
+        </div>
         <button
             type="submit"
             name="action"
@@ -38,19 +52,31 @@
                 placeholder="{% t 'Например: рисунок не по теме категории' %}"
             >{% if work.is_rejected %}{{ work.rejection_reason }}{% endif %}</textarea>
         </label>
+        <label class="moderation-reject-field moderation-staff-note">
+            <span>{% t "Заметка для штаба" %} <em>({% t "не видна автору" %})</em></span>
+            <textarea
+                name="moderator_note"
+                rows="2"
+                maxlength="1000"
+                placeholder="{% t 'Например: перепроверить возраст' %}"
+            >{{ work.moderator_note }}</textarea>
+        </label>
         <div class="moderation-actions__secondary">
+            <button type="submit" name="action" value="save_note" class="btn-secondary moderation-btn">
+                {% t "Сохранить заметку" %}
+            </button>
             <button type="submit" name="action" value="reject" class="btn-secondary moderation-btn moderation-btn--reject">
                 {% t "Отклонить" %}
             </button>
-            <button
-                type="submit"
-                name="action"
-                value="delete"
-                class="btn-secondary moderation-btn moderation-btn--delete"
-                onclick="return confirm('{% t 'Удалить' %} «{{ work.title|escapejs }}»?');"
-            >
-                {% t "Удалить" %}
-            </button>
         </div>
+        <button
+            type="submit"
+            name="action"
+            value="delete"
+            class="btn-secondary moderation-btn moderation-btn--delete"
+            onclick="return confirm('{% t 'Удалить' %} «{{ work.title|escapejs }}»?');"
+        >
+            {% t "Удалить" %}
+        </button>
     </form>
 {% endif %}

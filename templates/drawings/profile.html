@@ -82,6 +82,8 @@
     </p>
 {% elif moderation_status == "bulk_none" %}
     <p class="restore-image-notice">{% t "Выберите хотя бы одну неопубликованную работу." %}</p>
+{% elif moderation_status == "note_saved" %}
+    <p class="restore-image-notice success">{% t "Заметка модератора сохранена." %}</p>
 {% elif moderation_status == "unpublished" %}
     <p class="restore-image-notice">{% t "Работа снята с публикации." %}</p>
 {% elif moderation_status == "rejected" %}
@@ -185,6 +187,9 @@
                         {% endif %}
                         {% if work.is_rejected and work.rejection_reason %}
                             <p class="profile-reject-reason"><strong>{% t "Причина:" %}</strong> {{ work.rejection_reason|truncatechars:140 }}</p>
+                        {% endif %}
+                        {% if work.moderator_note %}
+                            <p class="profile-staff-note"><strong>{% t "Заметка штаба:" %}</strong> {{ work.moderator_note|truncatechars:140 }}</p>
                         {% endif %}
                         <p class="work-card__meta">{{ work.author }}, {{ work.age }} {% t "лет" %} · {{ work.city }}</p>
                         <p class="work-card__meta">{{ work.email }}</p>
