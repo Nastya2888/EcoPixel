@@ -510,6 +510,12 @@ def vote(request, pk):
             status=401,
         )
 
+    if not is_voting_open():
+        return JsonResponse(
+            {"success": False, "error": translate("Голосование завершено. Галерея в режиме архива.")},
+            status=403,
+        )
+
     drawing = get_object_or_404(Drawing, pk=pk, is_approved=True)
 
     if _is_own_drawing(drawing, request.user):

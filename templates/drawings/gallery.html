@@ -77,13 +77,16 @@
         </p>
     {% endif %}
 
-    {% if contest.results_published %}
-        <p class="contest-phase-notice animate-on-scroll">{% t "Конкурс завершён." %} <a href="{% url 'results' %}">{% t "Смотреть итоги" %}</a></p>
+    {% if contest.is_archive %}
+        <p class="contest-phase-notice animate-on-scroll">
+            {% t "Архив конкурса — можно смотреть работы, голосование завершено." %}
+            <a href="{% url 'results' %}">{% t "Смотреть итоги" %}</a>
+        </p>
     {% endif %}
 
     <div class="gallery-grid gallery-grid-main">
         {% for work in page_obj %}
-            <article class="work-card card animate-on-scroll">
+            <article class="work-card card animate-on-scroll {% if contest.is_archive %}work-card--archive{% endif %}">
                 <a class="work-card__open" href="{% url 'work_detail' work.id %}" aria-label="{% t 'Открыть работу' %} «{{ work.title }}»">
                     <div class="work-image-wrap">
                         <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy">
@@ -107,6 +110,7 @@
                         </div>
                     </div>
                 </a>
+                {% if contest.voting_open %}
                 <div class="work-card__actions">
                     <button
                         type="button"
@@ -128,6 +132,11 @@
                         {% endif %}
                     </button>
                 </div>
+                {% else %}
+                <div class="work-card__actions">
+                    <a class="btn-secondary" href="{% url 'work_detail' work.id %}">{% t "Смотреть" %}</a>
+                </div>
+                {% endif %}
             </article>
         {% empty %}
             <p>{% t "Работы не найдены." %}</p>

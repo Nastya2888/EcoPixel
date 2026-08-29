@@ -403,6 +403,16 @@ EN = {
     "Сейчас идёт приём работ. Голосование откроется после": "Submissions are open. Voting opens after",
     "Голосование открыто! Итоги будут объявлены": "Voting is open! Results will be announced on",
     "Конкурс завершён.": "The contest is over.",
+    "Архив конкурса — можно смотреть работы, голосование завершено.": (
+        "Contest archive — you can browse works; voting is closed."
+    ),
+    "Голосование завершено. Галерея в режиме архива.": (
+        "Voting is closed. The gallery is in archive mode."
+    ),
+    "Голосование завершено. Работа в архиве конкурса.": (
+        "Voting is closed. This work is in the contest archive."
+    ),
+    "Смотреть": "View",
     "Голосование скоро": "Voting soon",
     "Голосование завершено": "Voting closed",
     "Голосование откроется после окончания приёма работ.": "Voting opens after submissions close.",

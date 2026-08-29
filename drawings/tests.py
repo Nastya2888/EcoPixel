@@ -896,6 +896,44 @@ class ContestPhaseTests(TestCase):
         self.assertTrue(response.context["results_published"])
         self.assertContains(response, winner.title)
 
+    @override_settings(**CONTEST_RESULTS_PUBLISHED)
+    def test_archive_gallery_is_view_only(self):
+        drawing = Drawing.objects.create(
+            user=self.user,
+            title="Архивная работа",
+            author="Аня",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("archive.png", self.png, content_type="image/png"),
+            is_approved=True,
+            votes=3,
+        )
+        voter = User.objects.create_user(
+            username="archive-voter@example.com",
+            email="archive-voter@example.com",
+            password=self.password,
+        )
+        self.client.login(username=voter.email, password=self.password)
+
+        gallery = self.client.get(reverse("gallery"))
+        self.assertEqual(gallery.status_code, 200)
+        self.assertTrue(gallery.context["contest"]["is_archive"])
+        self.assertFalse(gallery.context["contest"]["voting_open"])
+        self.assertContains(gallery, "Архив конкурса")
+        self.assertContains(gallery, "Смотреть")
+        self.assertNotContains(gallery, f'data-id="{drawing.id}"')
+
+        detail = self.client.get(reverse("work_detail", args=[drawing.id]))
+        self.assertContains(detail, "Голосование завершено. Работа в архиве конкурса.")
+        self.assertNotContains(detail, 'id="vote-btn"')
+
+        vote_response = self.client.post(reverse("vote", args=[drawing.id]))
+        self.assertEqual(vote_response.status_code, 403)
+        drawing.refresh_from_db()
+        self.assertEqual(drawing.votes, 3)
+
     @override_settings(**CONTEST_SUBMISSION_OPEN)
     def test_submit_blocked_after_submission_phase(self):
         with override_settings(**CONTEST_VOTING_OPEN):

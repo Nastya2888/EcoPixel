@@ -46,8 +46,8 @@ def is_submission_open(now: datetime | None = None) -> bool:
 
 
 def is_voting_open(now: datetime | None = None) -> bool:
-    # Likes are always available so participants can support works any time.
-    return True
+    # Voting stays open for the whole contest, then archive is view-only.
+    return not are_results_published(now)
 
 
 def are_results_published(now: datetime | None = None) -> bool:
@@ -61,6 +61,7 @@ def get_contest_status(now: datetime | None = None) -> dict:
     submission_end = submission_end_at()
     results_start = results_start_at()
     phase = get_contest_phase(current)
+    voting_open = is_voting_open(current)
 
     countdown_target = None if results_published else results_start
     countdown_label_key = "" if results_published else "До объявления победителей"
@@ -68,8 +69,9 @@ def get_contest_status(now: datetime | None = None) -> dict:
     return {
         "phase": phase,
         "submission_open": is_submission_open(current),
-        "voting_open": True,
+        "voting_open": voting_open,
         "results_published": results_published,
+        "is_archive": results_published,
         "submission_end": submission_end,
         "voting_start": submission_end,
         "results_start": results_start,
