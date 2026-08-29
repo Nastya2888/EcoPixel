@@ -123,24 +123,37 @@
     </div>
 </section>
 
-{% if organizer.top_works %}
 <section class="org-section animate-on-scroll">
     <div class="org-section__head">
         <h2 class="section-title">{% t "Топ работ по голосам" %}</h2>
-        <p class="section-subtitle">{% t "Пять лидеров среди опубликованных рисунков." %}</p>
+        <p class="section-subtitle">{% t "1, 2 и 3 место в каждой возрастной категории." %}</p>
     </div>
-    <div class="org-top-list">
-        {% for work in organizer.top_works %}
-            <a class="org-top-item card" href="{% url 'work_detail' work.id %}">
-                <img src="{% url 'drawing_image' work.id %}" alt="{{ work.title }}" loading="lazy" width="64" height="64">
-                <div>
-                    <strong>{{ work.title }}</strong>
-                    <span>{{ work.author }} · {{ work.category.name|t }}</span>
-                </div>
-                <em>{{ work.votes }}</em>
-            </a>
+    <div class="org-podium-grid">
+        {% for category in organizer.top_by_category %}
+            <article class="org-podium-card card">
+                <h3>{{ category.name|t }}</h3>
+                <p class="org-category-theme">{{ category.theme|t }}</p>
+                {% if category.places %}
+                    <ol class="org-podium-list">
+                        {% for item in category.places %}
+                            <li class="org-podium-item org-podium-item--{{ item.place }}">
+                                <a href="{% url 'work_detail' item.work.id %}">
+                                    <span class="org-podium-place" aria-label="{% t 'Место' %} {{ item.place }}">{{ item.place_label }}</span>
+                                    <img src="{% url 'drawing_image' item.work.id %}" alt="{{ item.work.title }}" loading="lazy" width="56" height="56">
+                                    <div class="org-podium-meta">
+                                        <strong>{{ item.work.title }}</strong>
+                                        <span>{{ item.work.author }}, {{ item.work.age }} {% t "лет" %}</span>
+                                    </div>
+                                    <em>{{ item.work.votes }}</em>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% else %}
+                    <p class="org-podium-empty">{% t "Пока нет опубликованных работ" %}</p>
+                {% endif %}
+            </article>
         {% endfor %}
     </div>
 </section>
-{% endif %}
 {% endblock %}

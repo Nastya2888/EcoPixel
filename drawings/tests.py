@@ -689,6 +689,10 @@ class ModeratorPanelTests(TestCase):
         young = next(row for row in organizer["by_category"] if row["slug"] == "age-6-9")
         self.assertEqual(young["total"], 2)
         self.assertEqual(young["votes"], 2)
+        top_young = next(row for row in organizer["top_by_category"] if row["slug"] == "age-6-9")
+        self.assertEqual(len(top_young["places"]), 1)
+        self.assertEqual(top_young["places"][0]["place"], 1)
+        self.assertEqual(top_young["places"][0]["work"].id, self.published.id)
 
 
 @override_settings(**CONTEST_SUBMISSION_OPEN)

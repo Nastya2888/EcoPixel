@@ -390,7 +390,11 @@ EN = {
     "График активности по дням": "Daily activity chart",
     "работ": "works",
     "Топ работ по голосам": "Top works by votes",
-    "Пять лидеров среди опубликованных рисунков.": "Top five published drawings.",
+    "1, 2 и 3 место в каждой возрастной категории.": (
+        "1st, 2nd, and 3rd place in each age category."
+    ),
+    "Место": "Place",
+    "Пока нет опубликованных работ": "No published works yet",
 }
 
 
