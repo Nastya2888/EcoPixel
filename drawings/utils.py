@@ -24,6 +24,15 @@ def send_notification(drawing, event_type, request=None):
             "Ваша работа опубликована в галерее! "
             f"Голосуйте за неё: {work_url}"
         )
+    elif event_type == "rejected":
+        reason = (drawing.rejection_reason or "").strip() or "Не указана"
+        subject = "ЭкоПиксель: работа отклонена"
+        message = (
+            f"Ваша работа «{drawing.title}» (#{drawing.pk}) не прошла модерацию.\n"
+            f"Причина: {reason}\n\n"
+            f"Вы можете посмотреть работу здесь: {work_url}\n"
+            "Если хотите, создайте новый рисунок и отправьте его снова."
+        )
     else:
         return
 

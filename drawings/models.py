@@ -45,6 +45,8 @@ class Drawing(models.Model):
     image_blob = models.BinaryField("PNG данные", null=True, blank=True, editable=False)
     image_blob_content_type = models.CharField("MIME", max_length=100, blank=True, default="image/png")
     is_approved = models.BooleanField("Одобрено", default=False)
+    is_rejected = models.BooleanField("Отклонено", default=False)
+    rejection_reason = models.TextField("Причина отклонения", max_length=500, blank=True, default="")
     votes = models.PositiveIntegerField("Голоса", default=0)
     created_at = models.DateTimeField("Создано", auto_now_add=True)
 

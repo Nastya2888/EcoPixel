@@ -17,11 +17,29 @@
         </button>
     </form>
 {% else %}
-    <form class="moderation-actions" method="post" action="{% url 'moderate_drawing' work.id %}">
+    <form class="moderation-actions moderation-actions--reject" method="post" action="{% url 'moderate_drawing' work.id %}">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ moderation_next }}">
-        <button type="submit" name="action" value="approve" class="btn moderation-btn moderation-btn--approve">
-            {% t "Опубликовать" %}
+        {% if not work.is_rejected %}
+            <button type="submit" name="action" value="approve" class="btn moderation-btn moderation-btn--approve">
+                {% t "Опубликовать" %}
+            </button>
+        {% else %}
+            <button type="submit" name="action" value="approve" class="btn moderation-btn moderation-btn--approve">
+                {% t "Опубликовать всё же" %}
+            </button>
+        {% endif %}
+        <label class="moderation-reject-field">
+            <span>{% t "Причина отклонения" %}</span>
+            <textarea
+                name="rejection_reason"
+                rows="2"
+                maxlength="500"
+                placeholder="{% t 'Например: рисунок не по теме категории' %}"
+            >{% if work.is_rejected %}{{ work.rejection_reason }}{% endif %}</textarea>
+        </label>
+        <button type="submit" name="action" value="reject" class="btn-secondary moderation-btn moderation-btn--reject">
+            {% t "Отклонить" %}
         </button>
         <button
             type="submit"

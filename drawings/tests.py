@@ -637,6 +637,45 @@ class ModeratorPanelTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.pending.refresh_from_db()
         self.assertTrue(self.pending.is_approved)
+        self.assertFalse(self.pending.is_rejected)
+        self.assertEqual(self.pending.rejection_reason, "")
+
+    def test_moderator_reject_requires_reason(self):
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.post(
+            reverse("moderate_drawing", args=[self.pending.id]),
+            {"action": "reject", "rejection_reason": "", "next": reverse("profile") + "?mod=pending"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("reject_reason_required", response.url)
+        self.pending.refresh_from_db()
+        self.assertFalse(self.pending.is_rejected)
+
+    def test_moderator_can_reject_drawing_with_reason(self):
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.post(
+            reverse("moderate_drawing", args=[self.pending.id]),
+            {
+                "action": "reject",
+                "rejection_reason": "Рисунок не соответствует теме категории.",
+                "next": reverse("profile") + "?mod=pending",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("rejected", response.url)
+        self.pending.refresh_from_db()
+        self.assertFalse(self.pending.is_approved)
+        self.assertTrue(self.pending.is_rejected)
+        self.assertEqual(self.pending.rejection_reason, "Рисунок не соответствует теме категории.")
+
+        owner_view = self.client.login(username=self.user.email, password=self.password)
+        self.assertTrue(owner_view)
+        profile = self.client.get(reverse("profile"))
+        self.assertContains(profile, "Отклонено")
+        self.assertContains(profile, "Рисунок не соответствует теме категории.")
+        detail = self.client.get(reverse("work_detail", args=[self.pending.id]))
+        self.assertContains(detail, "Работа отклонена модератором.")
+        self.assertContains(detail, "Рисунок не соответствует теме категории.")
 
     def test_moderator_can_unpublish_drawing(self):
         self.client.login(username=self.moderator.email, password=self.password)

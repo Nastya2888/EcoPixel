@@ -616,12 +616,13 @@ def profile(request):
             missing_image_ids.add(drawing.id)
 
     published_count = sum(1 for drawing in drawings if drawing.is_approved)
-    pending_count = len(drawings) - published_count
+    rejected_count = sum(1 for drawing in drawings if drawing.is_rejected and not drawing.is_approved)
+    pending_count = len(drawings) - published_count - rejected_count
     votes_total = sum(drawing.votes for drawing in drawings)
 
     is_moderator = _can_view_moderation_content(request)
     moderation_filter = request.GET.get("mod", "pending").strip()
-    if moderation_filter not in {"pending", "published", "all"}:
+    if moderation_filter not in {"pending", "rejected", "published", "all"}:
         moderation_filter = "pending"
 
     moderation_stats = None
@@ -629,12 +630,15 @@ def profile(request):
     if is_moderator:
         moderation_qs = Drawing.objects.select_related("category", "user").order_by("-created_at")
         moderation_stats = {
-            "pending": Drawing.objects.filter(is_approved=False).count(),
+            "pending": Drawing.objects.filter(is_approved=False, is_rejected=False).count(),
+            "rejected": Drawing.objects.filter(is_rejected=True, is_approved=False).count(),
             "published": Drawing.objects.filter(is_approved=True).count(),
             "total": Drawing.objects.count(),
         }
         if moderation_filter == "pending":
-            moderation_qs = moderation_qs.filter(is_approved=False)
+            moderation_qs = moderation_qs.filter(is_approved=False, is_rejected=False)
+        elif moderation_filter == "rejected":
+            moderation_qs = moderation_qs.filter(is_rejected=True, is_approved=False)
         elif moderation_filter == "published":
             moderation_qs = moderation_qs.filter(is_approved=True)
         moderation_page = Paginator(moderation_qs, 12).get_page(request.GET.get("page"))
@@ -655,6 +659,7 @@ def profile(request):
                 "total": len(drawings),
                 "published": published_count,
                 "pending": pending_count,
+                "rejected": rejected_count,
                 "votes": votes_total,
             },
         },
@@ -670,19 +675,36 @@ def moderate_drawing(request, pk):
     drawing = get_object_or_404(Drawing.objects.select_related("category"), pk=pk)
     action = request.POST.get("action", "").strip()
     next_url = _safe_redirect_url(request)
+    rejection_reason = request.POST.get("rejection_reason", "").strip()
 
     if action == "approve":
         was_approved = drawing.is_approved
+        drawing.is_approved = True
+        drawing.is_rejected = False
+        drawing.rejection_reason = ""
+        drawing.save(update_fields=["is_approved", "is_rejected", "rejection_reason"])
         if not was_approved:
-            drawing.is_approved = True
-            drawing.save(update_fields=["is_approved"])
             send_notification(drawing, "approved", request=request)
         return _redirect_with_status(next_url, "approved")
+
+    if action == "reject":
+        if not rejection_reason:
+            return _redirect_with_status(next_url, "reject_reason_required")
+        if len(rejection_reason) > 500:
+            return _redirect_with_status(next_url, "reject_reason_too_long")
+        drawing.is_approved = False
+        drawing.is_rejected = True
+        drawing.rejection_reason = rejection_reason
+        drawing.save(update_fields=["is_approved", "is_rejected", "rejection_reason"])
+        send_notification(drawing, "rejected", request=request)
+        return _redirect_with_status(next_url, "rejected")
 
     if action == "unpublish":
         if drawing.is_approved:
             drawing.is_approved = False
-            drawing.save(update_fields=["is_approved"])
+            drawing.is_rejected = False
+            drawing.rejection_reason = ""
+            drawing.save(update_fields=["is_approved", "is_rejected", "rejection_reason"])
         return _redirect_with_status(next_url, "unpublished")
 
     if action == "delete":

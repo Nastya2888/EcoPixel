@@ -20,12 +20,25 @@
     <div class="work-info animate-on-scroll">
         <span class="work-badge">{{ work.category.name|t }}</span>
         {% if not work.is_approved %}
-            <p class="work-moderation-notice">{% t "Работа на модерации — пока видна только вам и не участвует в голосовании." %}</p>
+            {% if work.is_rejected %}
+                <p class="work-moderation-notice work-moderation-notice--rejected">
+                    {% t "Работа отклонена модератором." %}
+                    {% if work.rejection_reason %}
+                        <br><strong>{% t "Причина:" %}</strong> {{ work.rejection_reason }}
+                    {% endif %}
+                </p>
+            {% else %}
+                <p class="work-moderation-notice">{% t "Работа на модерации — пока видна только вам и не участвует в голосовании." %}</p>
+            {% endif %}
         {% endif %}
         {% if request.GET.moderation == "approved" %}
             <p class="restore-image-notice success">{% t "Работа опубликована в галерее." %}</p>
         {% elif request.GET.moderation == "unpublished" %}
             <p class="restore-image-notice">{% t "Работа снята с публикации." %}</p>
+        {% elif request.GET.moderation == "rejected" %}
+            <p class="restore-image-notice">{% t "Работа отклонена. Автор получит письмо с причиной." %}</p>
+        {% elif request.GET.moderation == "reject_reason_required" %}
+            <p class="restore-image-notice">{% t "Укажите причину отклонения перед отправкой." %}</p>
         {% endif %}
         <h1>{{ work.title }}</h1>
         {% if work.description %}

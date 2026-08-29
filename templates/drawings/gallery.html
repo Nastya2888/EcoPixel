@@ -58,7 +58,7 @@
                         <h3 class="work-card__title">{{ work.title }}</h3>
                         <p class="work-card__meta">{{ work.author }}, {{ work.age }} {% t "лет" %}, {{ work.city }}</p>
                         {% if user.is_staff %}
-                            <p class="work-card__meta">{% t "Статус:" %} {% if work.is_approved %}{% t "Опубликована" %}{% else %}{% t "На модерации" %}{% endif %}</p>
+                            <p class="work-card__meta">{% t "Статус:" %} {% if work.is_approved %}{% t "Опубликована" %}{% elif work.is_rejected %}{% t "Отклонено" %}{% else %}{% t "На модерации" %}{% endif %}</p>
                         {% endif %}
                         <div class="likes">
                             <span class="likes-heart" data-heart>

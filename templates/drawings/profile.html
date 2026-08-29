@@ -37,16 +37,16 @@
             <span>{% t "Ждут проверки" %}</span>
         </div>
         <div class="profile-stat card">
+            <strong>{{ moderation_stats.rejected }}</strong>
+            <span>{% t "Отклонено" %}</span>
+        </div>
+        <div class="profile-stat card">
             <strong>{{ moderation_stats.published }}</strong>
             <span>{% t "Опубликовано" %}</span>
         </div>
         <div class="profile-stat card">
             <strong>{{ moderation_stats.total }}</strong>
             <span>{% t "Всего на сайте" %}</span>
-        </div>
-        <div class="profile-stat card">
-            <strong>{{ stats.total }}</strong>
-            <span>{% t "Мои работы" %}</span>
         </div>
     </section>
 {% else %}
@@ -64,6 +64,10 @@
             <span>{% t "На модерации" %}</span>
         </div>
         <div class="profile-stat card">
+            <strong>{{ stats.rejected }}</strong>
+            <span>{% t "Отклонено" %}</span>
+        </div>
+        <div class="profile-stat card">
             <strong>{{ stats.votes }}</strong>
             <span>{% t "Голосов" %}</span>
         </div>
@@ -74,6 +78,12 @@
     <p class="restore-image-notice success">{% t "Работа опубликована в галерее." %}</p>
 {% elif moderation_status == "unpublished" %}
     <p class="restore-image-notice">{% t "Работа снята с публикации." %}</p>
+{% elif moderation_status == "rejected" %}
+    <p class="restore-image-notice">{% t "Работа отклонена. Автор получит письмо с причиной." %}</p>
+{% elif moderation_status == "reject_reason_required" %}
+    <p class="restore-image-notice">{% t "Укажите причину отклонения перед отправкой." %}</p>
+{% elif moderation_status == "reject_reason_too_long" %}
+    <p class="restore-image-notice">{% t "Причина отклонения слишком длинная (максимум 500 символов)." %}</p>
 {% elif moderation_status == "deleted" %}
     <p class="restore-image-notice">{% t "Работа удалена." %}</p>
 {% endif %}
@@ -92,12 +102,15 @@
 <section class="profile-works moderation-panel">
     <div class="profile-works__head animate-on-scroll">
         <h2 class="section-title">{% t "Модерация работ" %}</h2>
-        <p class="section-subtitle">{% t "Публикуйте подходящие работы или удаляйте нарушения." %}</p>
+        <p class="section-subtitle">{% t "Публикуйте подходящие работы, отклоняйте с причиной или удаляйте нарушения." %}</p>
     </div>
 
     <div class="filter-row animate-on-scroll">
         <a class="filter-btn {% if moderation_filter == 'pending' %}active{% endif %}" href="{% url 'profile' %}?mod=pending">
             {% t "На модерации" %} ({{ moderation_stats.pending }})
+        </a>
+        <a class="filter-btn {% if moderation_filter == 'rejected' %}active{% endif %}" href="{% url 'profile' %}?mod=rejected">
+            {% t "Отклонённые" %} ({{ moderation_stats.rejected }})
         </a>
         <a class="filter-btn {% if moderation_filter == 'published' %}active{% endif %}" href="{% url 'profile' %}?mod=published">
             {% t "В галерее" %} ({{ moderation_stats.published }})
@@ -116,6 +129,8 @@
                         <span class="category-chip">{{ work.category.name|t }}</span>
                         {% if work.is_approved %}
                             <span class="profile-status profile-status--published">{% t "В галерее" %}</span>
+                        {% elif work.is_rejected %}
+                            <span class="profile-status profile-status--rejected">{% t "Отклонено" %}</span>
                         {% else %}
                             <span class="profile-status profile-status--pending">{% t "На модерации" %}</span>
                         {% endif %}
@@ -124,6 +139,9 @@
                         <h3 class="work-card__title">{{ work.title }}</h3>
                         {% if work.description %}
                             <p class="profile-work-desc">{{ work.description|truncatechars:90 }}</p>
+                        {% endif %}
+                        {% if work.is_rejected and work.rejection_reason %}
+                            <p class="profile-reject-reason"><strong>{% t "Причина:" %}</strong> {{ work.rejection_reason|truncatechars:140 }}</p>
                         {% endif %}
                         <p class="work-card__meta">{{ work.author }}, {{ work.age }} {% t "лет" %} · {{ work.city }}</p>
                         <p class="work-card__meta">{{ work.email }}</p>
@@ -211,6 +229,8 @@
                         <span class="category-chip">{{ work.category.name|t }}</span>
                         {% if work.is_approved %}
                             <span class="profile-status profile-status--published">{% t "В галерее" %}</span>
+                        {% elif work.is_rejected %}
+                            <span class="profile-status profile-status--rejected">{% t "Отклонено" %}</span>
                         {% else %}
                             <span class="profile-status profile-status--pending">{% t "На модерации" %}</span>
                         {% endif %}
@@ -219,6 +239,9 @@
                         <h3 class="work-card__title">{{ work.title }}</h3>
                         {% if work.description %}
                             <p class="profile-work-desc">{{ work.description|truncatechars:90 }}</p>
+                        {% endif %}
+                        {% if work.is_rejected and work.rejection_reason %}
+                            <p class="profile-reject-reason"><strong>{% t "Причина:" %}</strong> {{ work.rejection_reason }}</p>
                         {% endif %}
                         <p class="work-card__meta">{{ work.author }}, {{ work.age }} {% t "лет" %} · {{ work.city }}</p>
                         <div class="profile-work-meta">
@@ -240,6 +263,8 @@
                         >
                             {% t "Скопировать ссылку" %}
                         </button>
+                    {% elif work.is_rejected %}
+                        <span class="profile-pending-hint">{% t "Работа отклонена модератором" %}</span>
                     {% else %}
                         <span class="profile-pending-hint">{% t "Ждёт проверки модератора" %}</span>
                     {% endif %}

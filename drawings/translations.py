@@ -104,9 +104,28 @@ EN = {
     "Публикуйте подходящие работы или удаляйте нарушения.": (
         "Publish suitable works or remove violations."
     ),
+    "Публикуйте подходящие работы, отклоняйте с причиной или удаляйте нарушения.": (
+        "Publish suitable works, reject with a reason, or remove violations."
+    ),
     "Опубликовать": "Publish",
+    "Опубликовать всё же": "Publish anyway",
     "Снять с публикации": "Unpublish",
     "Удалить": "Delete",
+    "Отклонить": "Reject",
+    "Отклонено": "Rejected",
+    "Отклонённые": "Rejected",
+    "Причина отклонения": "Rejection reason",
+    "Например: рисунок не по теме категории": "For example: the drawing does not match the category theme",
+    "Причина:": "Reason:",
+    "Работа отклонена. Автор получит письмо с причиной.": (
+        "The work was rejected. The author will receive an email with the reason."
+    ),
+    "Укажите причину отклонения перед отправкой.": "Enter a rejection reason before submitting.",
+    "Причина отклонения слишком длинная (максимум 500 символов).": (
+        "The rejection reason is too long (maximum 500 characters)."
+    ),
+    "Работа отклонена модератором.": "The work was rejected by a moderator.",
+    "Работа отклонена модератором": "Rejected by a moderator",
     "Открыть": "Open",
     "Скопировать ссылку": "Copy link",
     "Скопировано": "Copied",
