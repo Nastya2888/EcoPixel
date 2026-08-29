@@ -248,6 +248,17 @@ EN = {
     ),
     "Предпросмотр": "Preview",
     "Автор": "Author",
+    "Черновики": "Drafts",
+    "Неотправленные рисунки с этого устройства. Можно продолжить или удалить.": (
+        "Unsent drawings from this device. You can continue or delete them."
+    ),
+    "Пока нет черновиков": "No drafts yet",
+    "Начните рисовать — черновик сохранится автоматически.": (
+        "Start drawing — a draft will be saved automatically."
+    ),
+    "Черновик": "Draft",
+    "Обновлён": "Updated",
+    "Удалить этот черновик?": "Delete this draft?",
     "Название работы": "Work title",
     "Например: Лес у реки": "For example: Forest by the river",
     "Описание": "Description",

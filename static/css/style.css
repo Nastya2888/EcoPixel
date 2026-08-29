@@ -1279,6 +1279,20 @@ html[data-theme="dark"] .guide-tool__icon {
     color: #8a6d00;
 }
 
+.profile-status--draft {
+    background: rgba(81, 163, 212, 0.2);
+    color: #1f6f96;
+}
+
+.profile-draft-card .work-image-wrap img {
+    image-rendering: pixelated;
+}
+
+.profile-empty.hidden,
+#profile-drafts-grid.hidden {
+    display: none;
+}
+
 .profile-work-desc {
     margin: 0 0 8px;
     font-size: 13px;
@@ -1355,6 +1369,11 @@ html[data-theme="dark"] .profile-status--pending,
 html[data-theme="dark"] .profile-pending-hint,
 html[data-theme="dark"] .work-moderation-notice {
     color: #f0d36a;
+}
+
+html[data-theme="dark"] .profile-status--draft {
+    background: rgba(129, 195, 215, 0.2);
+    color: #9ad6ea;
 }
 
 html[data-theme="dark"] .work-moderation-notice {

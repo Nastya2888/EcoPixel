@@ -117,7 +117,6 @@
     };
 
     const HISTORY_LIMIT = 20;
-    const DRAFT_KEY = "ecopixel_draft";
     const CUSTOM_COLORS_KEY = "ecopixel_custom_colors";
     const MAX_CUSTOM_COLORS = 3;
     const EXPORT_TARGET_SIZE = 1024;
@@ -134,6 +133,9 @@
     const MIN_TEMPLATE_OPACITY = 15;
     const MAX_TEMPLATE_OPACITY = 80;
     const DEFAULT_TEMPLATE_OPACITY = 45;
+    const draftApi = window.EcoPixelDrafts || null;
+    const draftQueryId = new URLSearchParams(window.location.search).get("draft");
+    let activeDraftId = draftQueryId || null;
 
     function createScaledTemplateDraw(baseDraw, baseSize, targetSize) {
         return function drawScaledTemplate(targetCtx) {
@@ -1482,7 +1484,7 @@
         renderComposite();
         clearCursorHighlight();
         resetDragState();
-        localStorage.removeItem(DRAFT_KEY);
+        clearActiveDraftStorage();
         isDrawingChanged = false;
     }
 
@@ -1591,8 +1593,74 @@
         }
     }
 
+    function saveDraftSnapshot() {
+        if (!draftApi) return;
+        try {
+            const saved = draftApi.upsertDraft({
+                id: activeDraftId,
+                image: canvas.toDataURL("image/png"),
+                width: gridWidth,
+                height: gridHeight,
+            });
+            if (saved?.id) activeDraftId = saved.id;
+        } catch (error) {
+            // Ignore storage write errors.
+        }
+    }
+
+    function clearActiveDraftStorage() {
+        if (!draftApi) return;
+        if (activeDraftId) draftApi.clearActiveDraft(activeDraftId);
+        activeDraftId = null;
+    }
+
+    function applyDraftImage(draft) {
+        return new Promise((resolve) => {
+            if (!draft?.image) {
+                resolve(false);
+                return;
+            }
+            const image = new Image();
+            image.onload = () => {
+                const nextWidth = clampGridValue(draft.width || image.width || gridWidth, gridWidth);
+                const nextHeight = clampGridValue(draft.height || image.height || gridHeight, gridHeight);
+                if (nextWidth !== gridWidth || nextHeight !== gridHeight) {
+                    initCanvas(nextWidth, nextHeight);
+                    setPresetSelection(nextWidth, nextHeight);
+                }
+                const layerCtx = getActiveLayerCtx();
+                if (!layerCtx) {
+                    resolve(false);
+                    return;
+                }
+                layers.forEach((layer) => {
+                    layer.ctx.clearRect(0, 0, canvas.width, canvas.height);
+                });
+                layerCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                saveState();
+                renderComposite();
+                markChanged();
+                resolve(true);
+            };
+            image.onerror = () => resolve(false);
+            image.src = draft.image;
+        });
+    }
+
     async function restoreDraftIfExists() {
-        const draft = localStorage.getItem(DRAFT_KEY);
+        if (!draftApi) return;
+
+        if (draftQueryId) {
+            const requested = draftApi.getDraft(draftQueryId);
+            if (requested) {
+                activeDraftId = requested.id;
+                draftApi.setActiveDraft(requested.id);
+                await applyDraftImage(requested);
+                return;
+            }
+        }
+
+        const draft = draftApi.getLatestDraft();
         if (!draft) return;
         const confirmed = await showConfirm({
             title: t("Несохранённый рисунок"),
@@ -1601,19 +1669,9 @@
             cancelLabel: t("Отменить"),
         });
         if (!confirmed) return;
-        const image = new Image();
-        image.onload = () => {
-            const layerCtx = getActiveLayerCtx();
-            if (!layerCtx) return;
-            layers.forEach((layer) => {
-                layer.ctx.clearRect(0, 0, canvas.width, canvas.height);
-            });
-            layerCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
-            saveState();
-            renderComposite();
-            markChanged();
-        };
-        image.src = draft;
+        activeDraftId = draft.id;
+        draftApi.setActiveDraft(draft.id);
+        await applyDraftImage(draft);
     }
 
     function handleKeyboard(event) {
@@ -1805,7 +1863,7 @@
             }
 
             finishUploadProgress(true);
-            localStorage.removeItem(DRAFT_KEY);
+            clearActiveDraftStorage();
             isDrawingChanged = false;
             lastSubmittedUrl = `${window.location.origin}/work/${data.id}/`;
             submitProgress.classList.add("hidden");
@@ -1876,15 +1934,12 @@
 
     setInterval(() => {
         if (!isDrawingChanged) return;
-        try {
-            localStorage.setItem(DRAFT_KEY, canvas.toDataURL("image/png"));
-        } catch (error) {
-            // Ignore storage write errors.
-        }
+        saveDraftSnapshot();
     }, 10000);
 
     window.addEventListener("beforeunload", (event) => {
         if (!isDrawingChanged) return;
+        saveDraftSnapshot();
         event.preventDefault();
         event.returnValue = "";
     });
