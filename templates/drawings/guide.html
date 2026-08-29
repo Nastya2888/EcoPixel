@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load ui_i18n %}
+
+{% block title %}{% t "Как рисовать" %} | ЭкоПиксель{% endblock %}
+
+{% block content %}
+<section class="guide-hero card animate-on-scroll">
+    <div>
+        <h1 class="section-title">{% t "Как рисовать пиксель-арт" %}</h1>
+        <p class="section-subtitle">{% t "Короткий гайд для детей: простые шаги, чтобы получился красивый пиксельный рисунок про природу." %}</p>
+        <div class="guide-hero__actions">
+            <a class="btn" href="{% url 'draw' %}">{% t "Открыть редактор" %}</a>
+            <a class="btn-secondary" href="{% url 'gallery' %}">{% t "Смотреть примеры" %}</a>
+        </div>
+    </div>
+</section>
+
+<section class="guide-section animate-on-scroll">
+    <h2 class="section-title">{% t "Что такое пиксель-арт?" %}</h2>
+    <div class="guide-intro card">
+        <p>{% t "Пиксель — это маленький цветной квадратик. Пиксель-арт собирается из таких квадратиков, как мозаика. Чем меньше цветов и чем понятнее силуэт — тем рисунок выглядит сильнее." %}</p>
+    </div>
+</section>
+
+<section class="guide-section animate-on-scroll">
+    <h2 class="section-title">{% t "5 простых советов" %}</h2>
+    <div class="guide-tips">
+        <article class="guide-tip card">
+            <span class="guide-tip__num">1</span>
+            <h3>{% t "Начни с большого" %}</h3>
+            <p>{% t "Сначала нарисуй общий силуэт: дерево, дом, реку. Потом добавляй мелкие детали." %}</p>
+        </article>
+        <article class="guide-tip card">
+            <span class="guide-tip__num">2</span>
+            <h3>{% t "Бери мало цветов" %}</h3>
+            <p>{% t "Начни с 4–8 цветов. Слишком много красок делают картинку пёстрой и шумной." %}</p>
+        </article>
+        <article class="guide-tip card">
+            <span class="guide-tip__num">3</span>
+            <h3>{% t "Сделай контур" %}</h3>
+            <p>{% t "Тёмный контур вокруг объекта помогает его увидеть даже на маленьком холсте." %}</p>
+        </article>
+        <article class="guide-tip card">
+            <span class="guide-tip__num">4</span>
+            <h3>{% t "Оставь воздух" %}</h3>
+            <p>{% t "Не закрашивай всё подряд. Пустое место вокруг рисунка делает его чище." %}</p>
+        </article>
+        <article class="guide-tip card">
+            <span class="guide-tip__num">5</span>
+            <h3>{% t "Не бойся стирать" %}</h3>
+            <p>{% t "Ошибки — нормально. В редакторе есть ластик и отмена действия (Undo)." %}</p>
+        </article>
+    </div>
+</section>
+
+<section class="guide-section animate-on-scroll">
+    <h2 class="section-title">{% t "Инструменты редактора" %}</h2>
+    <p class="section-subtitle">{% t "Вот что поможет быстрее рисовать на ЭкоПиксель." %}</p>
+    <div class="guide-tools">
+        <article class="guide-tool card">
+            <h3>{% t "Карандаш" %}</h3>
+            <p>{% t "Ставит пиксели по одному. Лучше всего для контуров и точных деталей." %}</p>
+        </article>
+        <article class="guide-tool card">
+            <h3>{% t "Ластик" %}</h3>
+            <p>{% t "Стирает пиксели. Удобно поправлять края и лишние точки." %}</p>
+        </article>
+        <article class="guide-tool card">
+            <h3>{% t "Заливка" %}</h3>
+            <p>{% t "Закрашивает большую область одним цветом — небо, землю, воду." %}</p>
+        </article>
+        <article class="guide-tool card">
+            <h3>{% t "Линия и фигуры" %}</h3>
+            <p>{% t "Помогают рисовать прямые линии, прямоугольники и круги ровно." %}</p>
+        </article>
+        <article class="guide-tool card">
+            <h3>{% t "Пипетка" %}</h3>
+            <p>{% t "Берёт цвет с уже нарисованного пикселя, чтобы цвета совпадали." %}</p>
+        </article>
+        <article class="guide-tool card">
+            <h3>{% t "Шаблоны" %}</h3>
+            <p>{% t "Можно включить подсказку-шаблон (лес, дом, горы) и обвести поверх." %}</p>
+        </article>
+    </div>
+</section>
+
+<section class="guide-section animate-on-scroll">
+    <h2 class="section-title">{% t "Идеи для эко-рисунка" %}</h2>
+    <div class="guide-ideas card">
+        <ul>
+            <li>{% t "Дерево и птица у чистой реки" %}</li>
+            <li>{% t "Дом с сортировкой мусора и цветником" %}</li>
+            <li>{% t "Город с велосипедами и зелёными крышами" %}</li>
+            <li>{% t "Друзья на субботнике в парке" %}</li>
+            <li>{% t "Солнечные панели и чистый транспорт" %}</li>
+        </ul>
+        <p class="guide-ideas__note">{% t "Выбери тему своей возрастной категории — и расскажи историю одним кадром." %}</p>
+    </div>
+</section>
+
+<section class="guide-section animate-on-scroll">
+    <h2 class="section-title">{% t "Мини-план на 10 минут" %}</h2>
+    <ol class="guide-plan">
+        <li class="card">
+            <strong>{% t "Минута 1–2" %}</strong>
+            <span>{% t "Выбери размер холста и 5–6 цветов." %}</span>
+        </li>
+        <li class="card">
+            <strong>{% t "Минута 3–5" %}</strong>
+            <span>{% t "Нарисуй главный объект крупным силуэтом." %}</span>
+        </li>
+        <li class="card">
+            <strong>{% t "Минута 6–8" %}</strong>
+            <span>{% t "Добавь фон: небо, траву, воду." %}</span>
+        </li>
+        <li class="card">
+            <strong>{% t "Минута 9–10" %}</strong>
+            <span>{% t "Сделай контур, поправь детали и сохрани работу." %}</span>
+        </li>
+    </ol>
+</section>
+
+<section class="guide-cta card animate-on-scroll">
+    <h2>{% t "Готов рисовать?" %}</h2>
+    <p>{% t "Открой редактор и создай свой пиксельный эко-рисунок прямо сейчас." %}</p>
+    <a class="btn" href="{% url 'draw' %}">{% t "Начать рисовать" %}</a>
+</section>
+{% endblock %}

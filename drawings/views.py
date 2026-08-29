@@ -273,6 +273,11 @@ def rules(request):
 
 
 @require_GET
+def guide(request):
+    return render(request, "drawings/guide.html")
+
+
+@require_GET
 def results(request):
     results_published = are_results_published()
     winners = _get_category_winners() if results_published else []

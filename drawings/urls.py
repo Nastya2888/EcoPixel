@@ -16,6 +16,7 @@ urlpatterns = [
     path("drawing-image/<int:pk>/", views.drawing_image, name="drawing_image"),
     path("work/<int:pk>/", views.work_detail, name="work_detail"),
     path("rules/", views.rules, name="rules"),
+    path("guide/", views.guide, name="guide"),
     path("results/", views.results, name="results"),
     path("draw/", views.draw, name="draw"),
     path("draw/submit/", views.submit_drawing, name="submit_drawing"),

@@ -279,6 +279,13 @@ class HomePageTests(TestCase):
         self.assertNotContains(response, "?category=age-14-17")
         self.assertNotContains(response, "?category=age-18-25")
 
+    def test_guide_page_is_available(self):
+        response = self.client.get(reverse("guide"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Как рисовать пиксель-арт")
+        self.assertContains(response, "5 простых советов")
+        self.assertContains(response, reverse("draw"))
+
 
 @override_settings(**CONTEST_VOTING_OPEN)
 class VotingTests(TestCase):

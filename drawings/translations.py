@@ -5,6 +5,7 @@ EN = {
     # Nav / footer
     "Галерея": "Gallery",
     "Правила": "Rules",
+    "Как рисовать": "How to draw",
     "Личный кабинет": "My account",
     "Войти": "Log in",
     "Регистрация": "Sign up",
@@ -395,6 +396,86 @@ EN = {
     ),
     "Место": "Place",
     "Пока нет опубликованных работ": "No published works yet",
+    # Guide page
+    "Как рисовать пиксель-арт": "How to draw pixel art",
+    "Короткий гайд для детей: простые шаги, чтобы получился красивый пиксельный рисунок про природу.": (
+        "A short kids’ guide: simple steps for a beautiful pixel drawing about nature."
+    ),
+    "Открыть редактор": "Open the editor",
+    "Смотреть примеры": "See examples",
+    "Что такое пиксель-арт?": "What is pixel art?",
+    "Пиксель — это маленький цветной квадратик. Пиксель-арт собирается из таких квадратиков, как мозаика. Чем меньше цветов и чем понятнее силуэт — тем рисунок выглядит сильнее.": (
+        "A pixel is a tiny colored square. Pixel art is built from these squares like a mosaic. Fewer colors and a clear silhouette make the drawing stronger."
+    ),
+    "5 простых советов": "5 simple tips",
+    "Начни с большого": "Start big",
+    "Сначала нарисуй общий силуэт: дерево, дом, реку. Потом добавляй мелкие детали.": (
+        "First draw the big silhouette: a tree, a house, a river. Add small details later."
+    ),
+    "Бери мало цветов": "Use few colors",
+    "Начни с 4–8 цветов. Слишком много красок делают картинку пёстрой и шумной.": (
+        "Start with 4–8 colors. Too many colors make the picture noisy."
+    ),
+    "Сделай контур": "Add an outline",
+    "Тёмный контур вокруг объекта помогает его увидеть даже на маленьком холсте.": (
+        "A dark outline helps the object stand out even on a small canvas."
+    ),
+    "Оставь воздух": "Leave some space",
+    "Не закрашивай всё подряд. Пустое место вокруг рисунка делает его чище.": (
+        "Don’t fill every pixel. Empty space around the drawing makes it cleaner."
+    ),
+    "Не бойся стирать": "Don’t fear erasing",
+    "Ошибки — нормально. В редакторе есть ластик и отмена действия (Undo).": (
+        "Mistakes are okay. The editor has an eraser and Undo."
+    ),
+    "Инструменты редактора": "Editor tools",
+    "Вот что поможет быстрее рисовать на ЭкоПиксель.": (
+        "These tools help you draw faster in EcoPixel."
+    ),
+    "Ставит пиксели по одному. Лучше всего для контуров и точных деталей.": (
+        "Places pixels one by one. Best for outlines and precise details."
+    ),
+    "Стирает пиксели. Удобно поправлять края и лишние точки.": (
+        "Erases pixels. Handy for fixing edges and extra dots."
+    ),
+    "Закрашивает большую область одним цветом — небо, землю, воду.": (
+        "Fills a large area with one color — sky, ground, water."
+    ),
+    "Линия и фигуры": "Line and shapes",
+    "Помогают рисовать прямые линии, прямоугольники и круги ровно.": (
+        "Help you draw straight lines, rectangles, and circles evenly."
+    ),
+    "Берёт цвет с уже нарисованного пикселя, чтобы цвета совпадали.": (
+        "Picks a color from an existing pixel so colors match."
+    ),
+    "Шаблоны": "Templates",
+    "Можно включить подсказку-шаблон (лес, дом, горы) и обвести поверх.": (
+        "You can turn on a template hint (forest, house, mountains) and draw over it."
+    ),
+    "Идеи для эко-рисунка": "Ideas for an eco drawing",
+    "Дерево и птица у чистой реки": "A tree and a bird by a clean river",
+    "Дом с сортировкой мусора и цветником": "A house with recycling bins and flowers",
+    "Город с велосипедами и зелёными крышами": "A city with bikes and green roofs",
+    "Друзья на субботнике в парке": "Friends cleaning up a park",
+    "Солнечные панели и чистый транспорт": "Solar panels and clean transport",
+    "Выбери тему своей возрастной категории — и расскажи историю одним кадром.": (
+        "Pick your age-category theme and tell a story in one scene."
+    ),
+    "Мини-план на 10 минут": "A 10-minute mini plan",
+    "Минута 1–2": "Minutes 1–2",
+    "Выбери размер холста и 5–6 цветов.": "Choose the canvas size and 5–6 colors.",
+    "Минута 3–5": "Minutes 3–5",
+    "Нарисуй главный объект крупным силуэтом.": "Draw the main object as a big silhouette.",
+    "Минута 6–8": "Minutes 6–8",
+    "Добавь фон: небо, траву, воду.": "Add a background: sky, grass, water.",
+    "Минута 9–10": "Minutes 9–10",
+    "Сделай контур, поправь детали и сохрани работу.": (
+        "Add an outline, fix details, and save your work."
+    ),
+    "Готов рисовать?": "Ready to draw?",
+    "Открой редактор и создай свой пиксельный эко-рисунок прямо сейчас.": (
+        "Open the editor and create your pixel eco drawing right now."
+    ),
 }
 
 

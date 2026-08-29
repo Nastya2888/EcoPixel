@@ -778,6 +778,17 @@ html[data-theme="dark"] .floating-card {
     padding: 24px;
 }
 
+.step-card__link {
+    margin: 12px 0 0;
+}
+
+.step-card__link a {
+    font-weight: 700;
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .step-number {
     position: absolute;
     right: 12px;
@@ -786,6 +797,172 @@ html[data-theme="dark"] .floating-card {
     font-size: 64px;
     color: var(--color-primary-15);
     font-weight: 700;
+}
+
+/* Pixel-art guide for kids */
+.guide-hero {
+    padding: 32px 28px;
+    margin-bottom: 28px;
+}
+
+.guide-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.guide-section {
+    margin-bottom: 36px;
+}
+
+.guide-intro {
+    padding: 22px 24px;
+    font-size: 17px;
+    line-height: 1.55;
+}
+
+.guide-intro p {
+    margin: 0;
+}
+
+.guide-tips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.guide-tip {
+    padding: 20px;
+    position: relative;
+}
+
+.guide-tip__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    background: rgba(46, 204, 113, 0.16);
+    color: #1b7a45;
+    font-family: var(--font-display);
+    font-weight: 700;
+}
+
+.guide-tip h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.guide-tip p {
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+.guide-tools {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.guide-tool {
+    padding: 18px;
+}
+
+.guide-tool h3 {
+    margin: 0 0 8px;
+    font-size: 17px;
+}
+
+.guide-tool p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.guide-ideas {
+    padding: 22px 24px;
+}
+
+.guide-ideas ul {
+    margin: 0 0 14px;
+    padding-left: 1.2em;
+}
+
+.guide-ideas li {
+    margin-bottom: 8px;
+    line-height: 1.45;
+}
+
+.guide-ideas__note {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+.guide-plan {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.guide-plan li {
+    display: grid;
+    gap: 4px;
+    padding: 16px 18px;
+}
+
+.guide-plan strong {
+    font-family: var(--font-display);
+    color: var(--color-primary);
+}
+
+.guide-plan span {
+    color: var(--color-text-muted);
+}
+
+.guide-cta {
+    text-align: center;
+    padding: 32px 24px;
+    margin-bottom: 24px;
+}
+
+.guide-cta h2 {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+}
+
+.guide-cta p {
+    margin: 0 0 16px;
+    color: var(--color-text-muted);
+}
+
+html[data-theme="dark"] .guide-tip__num {
+    background: rgba(155, 231, 184, 0.14);
+    color: #9be7b8;
+}
+
+@media (max-width: 900px) {
+    .guide-tools {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .guide-tips,
+    .guide-tools {
+        grid-template-columns: 1fr;
+    }
+
+    .guide-hero {
+        padding: 24px 18px;
+    }
 }
 
 .stats-grid {
