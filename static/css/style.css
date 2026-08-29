@@ -1813,7 +1813,7 @@ html[data-theme="dark"] .org-top-item em {
     position: absolute;
     top: 12px;
     left: 12px;
-    z-index: 2;
+    z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1827,6 +1827,10 @@ html[data-theme="dark"] .org-top-item em {
 
 .profile-work-card {
     position: relative;
+}
+
+.profile-work-card:has(.bulk-moderation__check) .category-chip {
+    left: 48px;
 }
 
 .bulk-moderation__check input {
