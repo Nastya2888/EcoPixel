@@ -777,6 +777,7 @@ class ModeratorPanelTests(TestCase):
         self.assertContains(response, "Статистика конкурса")
         self.assertContains(response, "Работы по категориям")
         self.assertContains(response, "Активность по дням")
+        self.assertContains(response, "Скачать CSV")
         organizer = response.context["organizer"]
         self.assertEqual(organizer["overview"]["total"], 2)
         self.assertEqual(organizer["overview"]["published"], 1)
@@ -791,6 +792,26 @@ class ModeratorPanelTests(TestCase):
         self.assertEqual(len(top_young["places"]), 1)
         self.assertEqual(top_young["places"][0]["place"], 1)
         self.assertEqual(top_young["places"][0]["work"].id, self.published.id)
+
+    def test_organizer_stats_csv_export(self):
+        self.pending.is_rejected = True
+        self.pending.rejection_reason = "Не по теме"
+        self.pending.save(update_fields=["is_rejected", "rejection_reason"])
+
+        self.client.login(username=self.user.email, password=self.password)
+        forbidden = self.client.get(reverse("organizer_stats_export"))
+        self.assertEqual(forbidden.status_code, 404)
+
+        self.client.login(username=self.moderator.email, password=self.password)
+        response = self.client.get(reverse("organizer_stats_export"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
+        self.assertIn("attachment", response["Content-Disposition"])
+        content = response.content.decode("utf-8-sig")
+        self.assertIn("Автор,Город,Возраст,Категория,Голоса,Статус", content)
+        self.assertIn(self.published.author, content)
+        self.assertIn("Опубликована", content)
+        self.assertIn("Отклонено", content)
 
 
 @override_settings(**CONTEST_SUBMISSION_OPEN)

@@ -413,6 +413,7 @@ EN = {
         "Overview of works, votes, and activity for organizers."
     ),
     "К модерации": "Back to moderation",
+    "Скачать CSV": "Download CSV",
     "Общие показатели": "Overview",
     "Участников": "Participants",
     "Авторов": "Authors",

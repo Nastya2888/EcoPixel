@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import csv
+import io
 from datetime import timedelta
 
 from django.db.models import Count, Sum
@@ -7,6 +9,50 @@ from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from .models import Category, Drawing, Vote
+
+
+def drawing_moderation_status(drawing: Drawing) -> str:
+    if drawing.is_approved:
+        return "Опубликована"
+    if drawing.is_rejected:
+        return "Отклонено"
+    return "На модерации"
+
+
+def build_drawings_export_csv() -> bytes:
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(
+        [
+            "ID",
+            "Название",
+            "Автор",
+            "Город",
+            "Возраст",
+            "Категория",
+            "Голоса",
+            "Статус",
+        ]
+    )
+    drawings = (
+        Drawing.objects.select_related("category")
+        .order_by("category__name", "-votes", "id")
+    )
+    for drawing in drawings:
+        writer.writerow(
+            [
+                drawing.id,
+                drawing.title,
+                drawing.author,
+                drawing.city,
+                drawing.age,
+                drawing.category.name if drawing.category_id else "",
+                drawing.votes,
+                drawing_moderation_status(drawing),
+            ]
+        )
+    # UTF-8 BOM so Excel opens Cyrillic correctly.
+    return ("\ufeff" + buffer.getvalue()).encode("utf-8")
 
 
 def _day_list(days: int):

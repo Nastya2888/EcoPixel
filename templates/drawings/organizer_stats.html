@@ -11,6 +11,7 @@
         <p class="section-subtitle">{% t "Обзор работ, голосов и активности для организатора." %}</p>
     </div>
     <div class="org-stats-hero__actions">
+        <a class="btn" href="{% url 'organizer_stats_export' %}">{% t "Скачать CSV" %}</a>
         <a class="btn-secondary" href="{% url 'profile' %}?mod=pending">{% t "К модерации" %}</a>
         <a class="btn-secondary" href="{% url 'gallery' %}">{% t "Галерея" %}</a>
     </div>

@@ -617,6 +617,20 @@ def organizer_stats(request):
 
 
 @login_required
+@require_GET
+def organizer_stats_export(request):
+    if not _can_view_moderation_content(request):
+        raise Http404("Экспорт доступен только организаторам.")
+
+    from .organizer_stats import build_drawings_export_csv
+
+    payload = build_drawings_export_csv()
+    response = HttpResponse(payload, content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="ecopixel-drawings.csv"'
+    return response
+
+
+@login_required
 def profile(request):
     drawings = list(
         Drawing.objects.filter(user=request.user)
