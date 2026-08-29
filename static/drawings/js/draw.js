@@ -77,6 +77,12 @@
     const tgShareLink = document.getElementById("tg-share-link");
     const submitPreviewCanvas = document.getElementById("submit-preview-canvas");
     const submitPreviewCtx = submitPreviewCanvas?.getContext("2d");
+    const previewCategoryChip = document.getElementById("preview-category-chip");
+    const previewCardTitle = document.getElementById("preview-card-title");
+    const previewCardMeta = document.getElementById("preview-card-meta");
+    const submitTitleInput = document.getElementById("submit-title");
+    const submitAuthorInput = document.getElementById("submit-author");
+    const submitCityInput = document.getElementById("submit-city");
 
     if (!previewCanvas || !previewCtx || !paletteEl || !form || !templateCtx) return;
 
@@ -1159,7 +1165,26 @@
         if (!submitPreviewCanvas || !submitPreviewCtx) return;
         submitPreviewCtx.clearRect(0, 0, submitPreviewCanvas.width, submitPreviewCanvas.height);
         submitPreviewCtx.imageSmoothingEnabled = false;
+        submitPreviewCtx.fillStyle = "#FFFFFF";
+        submitPreviewCtx.fillRect(0, 0, submitPreviewCanvas.width, submitPreviewCanvas.height);
         submitPreviewCtx.drawImage(canvas, 0, 0, submitPreviewCanvas.width, submitPreviewCanvas.height);
+    }
+
+    function updateGalleryCardPreview() {
+        updateSubmitPreview();
+
+        const title = (submitTitleInput?.value || "").trim() || t("Название работы");
+        const author = (submitAuthorInput?.value || "").trim() || t("Автор");
+        const ageRaw = (ageInput?.value || "").trim();
+        const city = (submitCityInput?.value || "").trim() || "—";
+        const ageLabel = ageRaw || "—";
+        const categoryName = (categoryAuto?.value || "").trim() || t("Категория");
+
+        if (previewCardTitle) previewCardTitle.textContent = title;
+        if (previewCardMeta) {
+            previewCardMeta.textContent = `${author}, ${ageLabel} ${t("лет")}, ${city}`;
+        }
+        if (previewCategoryChip) previewCategoryChip.textContent = categoryName;
     }
 
     function getPointer(event) {
@@ -1475,6 +1500,7 @@
         categoryAuto.value = category.name;
         categorySlugInput.value = category.slug;
         categoryAuto.classList.toggle("has-value", Boolean(category.name));
+        updateGalleryCardPreview();
     }
 
     function createUploadBlob() {
@@ -1525,7 +1551,7 @@
         form.classList.remove("hidden");
         submitProgress.classList.add("hidden");
         submitSuccess.classList.add("hidden");
-        updateSubmitPreview();
+        updateGalleryCardPreview();
         modal.classList.remove("hidden");
         modal.classList.add("active");
         modal.setAttribute("aria-hidden", "false");
@@ -1737,6 +1763,9 @@
     });
 
     ageInput?.addEventListener("input", updateCategoryPreview);
+    submitTitleInput?.addEventListener("input", updateGalleryCardPreview);
+    submitAuthorInput?.addEventListener("input", updateGalleryCardPreview);
+    submitCityInput?.addEventListener("input", updateGalleryCardPreview);
 
     form.addEventListener("submit", async (event) => {
         event.preventDefault();

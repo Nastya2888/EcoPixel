@@ -5148,6 +5148,59 @@ html[data-theme="dark"] .draw-v4 .size-field input {
     background: linear-gradient(135deg, rgba(46, 204, 113, 0.12), rgba(0, 184, 148, 0.08));
 }
 
+.draw-gallery-preview-wrap {
+    padding: 16px 24px 4px;
+}
+
+.draw-gallery-preview-label {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #6f8479;
+}
+
+.draw-gallery-preview-card {
+    max-width: 280px;
+    margin: 0 auto;
+    pointer-events: none;
+    box-shadow: 0 12px 28px rgba(27, 67, 50, 0.12);
+}
+
+.draw-gallery-preview-card .work-card__open {
+    cursor: default;
+}
+
+.draw-gallery-preview-card .work-image-wrap {
+    background:
+        linear-gradient(45deg, #edf1ee 25%, transparent 25%),
+        linear-gradient(-45deg, #edf1ee 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #edf1ee 75%),
+        linear-gradient(-45deg, transparent 75%, #edf1ee 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+}
+
+.draw-gallery-preview-card canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    image-rendering: pixelated;
+    background: #fff;
+}
+
+.draw-gallery-preview-card:hover img,
+.draw-gallery-preview-card:hover canvas {
+    transform: none;
+}
+
+.preview-card-status {
+    margin: 4px 0 8px;
+    color: #b7791f;
+}
+
 .draw-submit-preview {
     flex-shrink: 0;
     padding: 10px;
@@ -5641,6 +5694,14 @@ html[data-theme="dark"] .draw-submit-header {
     border-bottom-color: rgba(126, 168, 148, 0.16);
 }
 
+html[data-theme="dark"] .draw-gallery-preview-label {
+    color: #9abcaf;
+}
+
+html[data-theme="dark"] .preview-card-status {
+    color: #f0c36a;
+}
+
 html[data-theme="dark"] .draw-submit-heading h2,
 html[data-theme="dark"] .draw-submit-success p {
     color: #e6f4ec;
@@ -5690,8 +5751,13 @@ html[data-theme="dark"] .draw-submit-consent-mark {
 
     #submission-form,
     .draw-submit-progress,
-    .draw-submit-success {
+    .draw-submit-success,
+    .draw-gallery-preview-wrap {
         padding-left: 18px;
         padding-right: 18px;
+    }
+
+    .draw-gallery-preview-card {
+        max-width: 100%;
     }
 }

@@ -268,13 +268,33 @@
 <div id="submit-modal" class="modal modal-overlay draw-submit-modal hidden" aria-hidden="true">
     <div class="modal-content draw-submit-content">
         <div class="draw-submit-header">
-            <div class="draw-submit-preview" aria-hidden="true">
-                <canvas id="submit-preview-canvas" width="96" height="96"></canvas>
-            </div>
             <div class="draw-submit-heading">
                 <h2>{% t "Отправить работу" %}</h2>
                 <p class="draw-submit-subtitle">{% t "Заполните данные — рисунок появится в галерее конкурса" %}</p>
             </div>
+        </div>
+
+        <div class="draw-gallery-preview-wrap">
+            <p class="draw-gallery-preview-label">{% t "Так будет выглядеть карточка в галерее" %}</p>
+            <article class="work-card draw-gallery-preview-card" aria-live="polite">
+                <div class="work-card__open">
+                    <div class="work-image-wrap">
+                        <canvas id="submit-preview-canvas" width="160" height="160"></canvas>
+                        <span id="preview-category-chip" class="category-chip">{% t "Категория" %}</span>
+                    </div>
+                    <div class="work-card__body">
+                        <h3 id="preview-card-title" class="work-card__title">{% t "Название работы" %}</h3>
+                        <p id="preview-card-meta" class="work-card__meta">{% t "Автор" %}, — {% t "лет" %}, —</p>
+                        <p class="work-card__meta preview-card-status">{% t "Статус:" %} {% t "На модерации" %}</p>
+                        <div class="likes">
+                            <span class="likes-heart" aria-hidden="true">
+                                <svg class="icon-heart" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            </span>
+                            <span class="votes-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
         </div>
 
         <form id="submission-form" data-submit-url="{% url 'submit_drawing' %}">
@@ -411,5 +431,5 @@ window.ECOPIXEL_CONTEST = {
     resultsPublished: {{ contest.results_published|yesno:"true,false" }}
 };
 </script>
-<script src="{% static 'drawings/js/draw.js' %}?v=20260829-01"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260829-02"></script>
 {% endblock %}

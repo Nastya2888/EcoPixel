@@ -246,6 +246,8 @@ EN = {
     "Заполните данные — рисунок появится в галерее конкурса": (
         "Fill in the details — your drawing will appear in the contest gallery"
     ),
+    "Так будет выглядеть карточка в галерее": "This is how the gallery card will look",
+    "Автор": "Author",
     "Название работы": "Work title",
     "Например: Лес у реки": "For example: Forest by the river",
     "Описание": "Description",
