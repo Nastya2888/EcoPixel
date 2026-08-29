@@ -1,23 +1,74 @@
 {% extends "base.html" %}
+{% load static %}
 {% load ui_i18n %}
 
 {% block title %}{% t "Как рисовать" %} | ЭкоПиксель{% endblock %}
 
 {% block content %}
 <section class="guide-hero card animate-on-scroll">
-    <div>
+    <div class="guide-hero__text">
         <h1 class="section-title">{% t "Как рисовать пиксель-арт" %}</h1>
         <p class="section-subtitle">{% t "Короткий гайд для детей: простые шаги, чтобы получился красивый пиксельный рисунок про природу." %}</p>
         <div class="guide-hero__actions">
             <a class="btn" href="{% url 'draw' %}">{% t "Открыть редактор" %}</a>
-            <a class="btn-secondary" href="{% url 'gallery' %}">{% t "Смотреть примеры" %}</a>
+            <a class="btn-secondary" href="#guide-video">{% t "Смотреть видео" %}</a>
         </div>
+    </div>
+    <div class="guide-hero__art" aria-hidden="true">
+        <svg class="guide-pixel-art" viewBox="0 0 16 16" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+            <rect width="16" height="16" fill="#B8E0F0"/>
+            <rect x="0" y="11" width="16" height="5" fill="#7BC67E"/>
+            <rect x="0" y="11" width="16" height="1" fill="#5AAF5E"/>
+            <rect x="6" y="8" width="2" height="4" fill="#A67C52"/>
+            <rect x="4" y="4" width="6" height="5" fill="#2ECC71"/>
+            <rect x="3" y="5" width="2" height="3" fill="#27AE60"/>
+            <rect x="9" y="5" width="2" height="3" fill="#27AE60"/>
+            <rect x="5" y="3" width="4" height="2" fill="#52B788"/>
+            <rect x="11" y="2" width="3" height="2" fill="#F4D35E"/>
+            <rect x="12" y="1" width="1" height="1" fill="#F4D35E"/>
+            <rect x="2" y="9" width="2" height="1" fill="#E07A5F"/>
+            <rect x="1" y="10" width="4" height="1" fill="#81C3D7"/>
+        </svg>
+    </div>
+</section>
+
+<section id="guide-video" class="guide-section animate-on-scroll">
+    <h2 class="section-title">{% t "Видео-объяснение" %}</h2>
+    <p class="section-subtitle">{% t "Посмотри короткое видео — и сразу попробуй в редакторе." %}</p>
+    <div class="guide-video card">
+        <div class="guide-video__frame">
+            <video
+                controls
+                playsinline
+                preload="metadata"
+                poster="{% static 'img/guide-video-poster.jpg' %}"
+                aria-label="{% t 'Видео: как рисовать пиксель-арт' %}"
+            >
+                <source src="{% static 'video/guide.mp4' %}" type="video/mp4">
+                {% t "Ваш браузер не поддерживает воспроизведение видео." %}
+            </video>
+        </div>
+        <p class="guide-video__hint">{% t "Длина ролика около 1 минуты. Можно поставить на паузу и повторять шаги." %}</p>
     </div>
 </section>
 
 <section class="guide-section animate-on-scroll">
     <h2 class="section-title">{% t "Что такое пиксель-арт?" %}</h2>
     <div class="guide-intro card">
+        <div class="guide-intro__art" aria-hidden="true">
+            <svg viewBox="0 0 8 8" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+                <rect width="8" height="8" fill="#EAF6EE"/>
+                <rect x="1" y="1" width="2" height="2" fill="#2ECC71"/>
+                <rect x="3" y="1" width="2" height="2" fill="#27AE60"/>
+                <rect x="5" y="1" width="2" height="2" fill="#1B7A45"/>
+                <rect x="1" y="3" width="2" height="2" fill="#81C3D7"/>
+                <rect x="3" y="3" width="2" height="2" fill="#E07A5F"/>
+                <rect x="5" y="3" width="2" height="2" fill="#F4D35E"/>
+                <rect x="1" y="5" width="2" height="2" fill="#A67C52"/>
+                <rect x="3" y="5" width="2" height="2" fill="#D4A373"/>
+                <rect x="5" y="5" width="2" height="2" fill="#7BC67E"/>
+            </svg>
+        </div>
         <p>{% t "Пиксель — это маленький цветной квадратик. Пиксель-арт собирается из таких квадратиков, как мозаика. Чем меньше цветов и чем понятнее силуэт — тем рисунок выглядит сильнее." %}</p>
     </div>
 </section>
@@ -26,27 +77,37 @@
     <h2 class="section-title">{% t "5 простых советов" %}</h2>
     <div class="guide-tips">
         <article class="guide-tip card">
-            <span class="guide-tip__num">1</span>
+            <span class="guide-tip__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16"/><path d="M8 20V10l4-6 4 6v10"/><path d="M10 14h4"/></svg>
+            </span>
             <h3>{% t "Начни с большого" %}</h3>
             <p>{% t "Сначала нарисуй общий силуэт: дерево, дом, реку. Потом добавляй мелкие детали." %}</p>
         </article>
         <article class="guide-tip card">
-            <span class="guide-tip__num">2</span>
+            <span class="guide-tip__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="10" r="3" fill="#2ECC71" stroke="none"/><circle cx="14" cy="8" r="3" fill="#81C3D7" stroke="none"/><circle cx="12" cy="14" r="3" fill="#F4D35E" stroke="none"/><circle cx="8" cy="10" r="3"/><circle cx="14" cy="8" r="3"/><circle cx="12" cy="14" r="3"/></svg>
+            </span>
             <h3>{% t "Бери мало цветов" %}</h3>
             <p>{% t "Начни с 4–8 цветов. Слишком много красок делают картинку пёстрой и шумной." %}</p>
         </article>
         <article class="guide-tip card">
-            <span class="guide-tip__num">3</span>
+            <span class="guide-tip__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1"/><rect x="9" y="9" width="6" height="6" fill="#2ECC71" stroke="none"/></svg>
+            </span>
             <h3>{% t "Сделай контур" %}</h3>
             <p>{% t "Тёмный контур вокруг объекта помогает его увидеть даже на маленьком холсте." %}</p>
         </article>
         <article class="guide-tip card">
-            <span class="guide-tip__num">4</span>
+            <span class="guide-tip__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="8" y="8" width="5" height="5" fill="#2ECC71" stroke="none"/></svg>
+            </span>
             <h3>{% t "Оставь воздух" %}</h3>
             <p>{% t "Не закрашивай всё подряд. Пустое место вокруг рисунка делает его чище." %}</p>
         </article>
         <article class="guide-tip card">
-            <span class="guide-tip__num">5</span>
+            <span class="guide-tip__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16C2 15 2 13 3 12L13 2L22 11L20 20Z"/><path d="M17 17L7 7"/></svg>
+            </span>
             <h3>{% t "Не бойся стирать" %}</h3>
             <p>{% t "Ошибки — нормально. В редакторе есть ластик и отмена действия (Undo)." %}</p>
         </article>
@@ -58,26 +119,44 @@
     <p class="section-subtitle">{% t "Вот что поможет быстрее рисовать на ЭкоПиксель." %}</p>
     <div class="guide-tools">
         <article class="guide-tool card">
+            <span class="guide-tool__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+            </span>
             <h3>{% t "Карандаш" %}</h3>
             <p>{% t "Ставит пиксели по одному. Лучше всего для контуров и точных деталей." %}</p>
         </article>
         <article class="guide-tool card">
+            <span class="guide-tool__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16C2 15 2 13 3 12L13 2L22 11L20 20Z"></path><path d="M17 17L7 7"></path></svg>
+            </span>
             <h3>{% t "Ластик" %}</h3>
             <p>{% t "Стирает пиксели. Удобно поправлять края и лишние точки." %}</p>
         </article>
         <article class="guide-tool card">
+            <span class="guide-tool__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11l-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11z"></path><path d="M5 21h14"></path></svg>
+            </span>
             <h3>{% t "Заливка" %}</h3>
             <p>{% t "Закрашивает большую область одним цветом — небо, землю, воду." %}</p>
         </article>
         <article class="guide-tool card">
+            <span class="guide-tool__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20L20 4"></path><rect x="5" y="14" width="6" height="5" rx="1"/><circle cx="17" cy="7" r="3"/></svg>
+            </span>
             <h3>{% t "Линия и фигуры" %}</h3>
             <p>{% t "Помогают рисовать прямые линии, прямоугольники и круги ровно." %}</p>
         </article>
         <article class="guide-tool card">
+            <span class="guide-tool__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21a3 3 0 0 1 0-4.2l6.6-6.6a2 2 0 0 0 0-2.8l-1-1 2.8-2.8 1 1a2 2 0 0 0 2.8 0l1.8 1.8-2.8 2.8-1-1a2 2 0 0 0-2.8 0L8.8 18A3 3 0 0 1 7 21z"></path></svg>
+            </span>
             <h3>{% t "Пипетка" %}</h3>
             <p>{% t "Берёт цвет с уже нарисованного пикселя, чтобы цвета совпадали." %}</p>
         </article>
         <article class="guide-tool card">
+            <span class="guide-tool__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 14l2.5-3 2 2 3.5-4.5L18 14"/><circle cx="9" cy="9" r="1.5" fill="currentColor" stroke="none"/></svg>
+            </span>
             <h3>{% t "Шаблоны" %}</h3>
             <p>{% t "Можно включить подсказку-шаблон (лес, дом, горы) и обвести поверх." %}</p>
         </article>
@@ -87,6 +166,11 @@
 <section class="guide-section animate-on-scroll">
     <h2 class="section-title">{% t "Идеи для эко-рисунка" %}</h2>
     <div class="guide-ideas card">
+        <div class="guide-ideas__visuals" aria-hidden="true">
+            <svg viewBox="0 0 12 12" shape-rendering="crispEdges"><rect width="12" height="12" fill="#B8E0F0"/><rect y="8" width="12" height="4" fill="#7BC67E"/><rect x="5" y="5" width="2" height="4" fill="#A67C52"/><rect x="3" y="2" width="6" height="4" fill="#2ECC71"/></svg>
+            <svg viewBox="0 0 12 12" shape-rendering="crispEdges"><rect width="12" height="12" fill="#DCEFE4"/><rect x="2" y="5" width="8" height="5" fill="#F5F5DC"/><rect x="2" y="3" width="8" height="2" fill="#E07A5F"/><rect x="5" y="7" width="2" height="3" fill="#D4A373"/></svg>
+            <svg viewBox="0 0 12 12" shape-rendering="crispEdges"><rect width="12" height="12" fill="#CDE8F5"/><rect x="1" y="4" width="4" height="6" fill="#E9C46A"/><rect x="6" y="2" width="5" height="8" fill="#F4A261"/><rect y="10" width="12" height="2" fill="#27AE60"/></svg>
+        </div>
         <ul>
             <li>{% t "Дерево и птица у чистой реки" %}</li>
             <li>{% t "Дом с сортировкой мусора и цветником" %}</li>

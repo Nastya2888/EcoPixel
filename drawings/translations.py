@@ -402,7 +402,19 @@ EN = {
         "A short kids’ guide: simple steps for a beautiful pixel drawing about nature."
     ),
     "Открыть редактор": "Open the editor",
+    "Смотреть видео": "Watch the video",
     "Смотреть примеры": "See examples",
+    "Видео-объяснение": "Video explanation",
+    "Посмотри короткое видео — и сразу попробуй в редакторе.": (
+        "Watch a short video — then try it in the editor."
+    ),
+    "Видео: как рисовать пиксель-арт": "Video: how to draw pixel art",
+    "Ваш браузер не поддерживает воспроизведение видео.": (
+        "Your browser does not support video playback."
+    ),
+    "Длина ролика около 1 минуты. Можно поставить на паузу и повторять шаги.": (
+        "The clip is about one minute long. You can pause and repeat the steps."
+    ),
     "Что такое пиксель-арт?": "What is pixel art?",
     "Пиксель — это маленький цветной квадратик. Пиксель-арт собирается из таких квадратиков, как мозаика. Чем меньше цветов и чем понятнее силуэт — тем рисунок выглядит сильнее.": (
         "A pixel is a tiny colored square. Pixel art is built from these squares like a mosaic. Fewer colors and a clear silhouette make the drawing stronger."

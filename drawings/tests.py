@@ -284,6 +284,8 @@ class HomePageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Как рисовать пиксель-арт")
         self.assertContains(response, "5 простых советов")
+        self.assertContains(response, "Видео-объяснение")
+        self.assertContains(response, "video/guide.mp4")
         self.assertContains(response, reverse("draw"))
 
 

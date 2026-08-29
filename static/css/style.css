@@ -801,6 +801,10 @@ html[data-theme="dark"] .floating-card {
 
 /* Pixel-art guide for kids */
 .guide-hero {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: 24px;
+    align-items: center;
     padding: 32px 28px;
     margin-bottom: 28px;
 }
@@ -812,11 +816,55 @@ html[data-theme="dark"] .floating-card {
     margin-top: 18px;
 }
 
+.guide-hero__art {
+    display: flex;
+    justify-content: center;
+}
+
+.guide-pixel-art {
+    width: min(100%, 220px);
+    height: auto;
+    image-rendering: pixelated;
+    border-radius: 18px;
+    box-shadow: 0 16px 40px rgba(27, 67, 50, 0.18);
+    border: 3px solid rgba(255, 255, 255, 0.8);
+}
+
 .guide-section {
     margin-bottom: 36px;
 }
 
+.guide-video {
+    padding: 18px;
+}
+
+.guide-video__frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #0f1c17;
+    aspect-ratio: 16 / 9;
+}
+
+.guide-video__frame video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #0f1c17;
+}
+
+.guide-video__hint {
+    margin: 12px 0 0;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
 .guide-intro {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 18px;
+    align-items: center;
     padding: 22px 24px;
     font-size: 17px;
     line-height: 1.55;
@@ -824,6 +872,14 @@ html[data-theme="dark"] .floating-card {
 
 .guide-intro p {
     margin: 0;
+}
+
+.guide-intro__art svg {
+    width: 96px;
+    height: 96px;
+    image-rendering: pixelated;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(27, 67, 50, 0.12);
 }
 
 .guide-tips {
@@ -834,21 +890,23 @@ html[data-theme="dark"] .floating-card {
 
 .guide-tip {
     padding: 20px;
-    position: relative;
 }
 
-.guide-tip__num {
+.guide-tip__icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    background: rgba(46, 204, 113, 0.16);
+    width: 44px;
+    height: 44px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: rgba(46, 204, 113, 0.14);
     color: #1b7a45;
-    font-family: var(--font-display);
-    font-weight: 700;
+}
+
+.guide-tip__icon svg {
+    width: 22px;
+    height: 22px;
 }
 
 .guide-tip h3 {
@@ -872,6 +930,24 @@ html[data-theme="dark"] .floating-card {
     padding: 18px;
 }
 
+.guide-tool__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(0, 184, 148, 0.1));
+    color: #1b7a45;
+    border: 1px solid rgba(46, 204, 113, 0.22);
+}
+
+.guide-tool__icon svg {
+    width: 24px;
+    height: 24px;
+}
+
 .guide-tool h3 {
     margin: 0 0 8px;
     font-size: 17px;
@@ -886,6 +962,21 @@ html[data-theme="dark"] .floating-card {
 
 .guide-ideas {
     padding: 22px 24px;
+}
+
+.guide-ideas__visuals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.guide-ideas__visuals svg {
+    width: 72px;
+    height: 72px;
+    image-rendering: pixelated;
+    border-radius: 12px;
+    border: 1px solid rgba(46, 204, 113, 0.18);
 }
 
 .guide-ideas ul {
@@ -943,12 +1034,18 @@ html[data-theme="dark"] .floating-card {
     color: var(--color-text-muted);
 }
 
-html[data-theme="dark"] .guide-tip__num {
+html[data-theme="dark"] .guide-tip__icon,
+html[data-theme="dark"] .guide-tool__icon {
     background: rgba(155, 231, 184, 0.14);
     color: #9be7b8;
+    border-color: rgba(155, 231, 184, 0.22);
 }
 
 @media (max-width: 900px) {
+    .guide-hero {
+        grid-template-columns: 1fr;
+    }
+
     .guide-tools {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -962,6 +1059,10 @@ html[data-theme="dark"] .guide-tip__num {
 
     .guide-hero {
         padding: 24px 18px;
+    }
+
+    .guide-intro {
+        grid-template-columns: 1fr;
     }
 }
 
