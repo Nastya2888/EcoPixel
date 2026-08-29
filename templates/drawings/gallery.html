@@ -42,11 +42,7 @@
         <p class="gallery-current-category">{% t "Текущая категория:" %} {{ selected_age_category.name|t }}</p>
     {% endif %}
 
-    {% if contest.phase == 'submission' %}
-        <p class="contest-phase-notice animate-on-scroll">{% t "Сейчас идёт приём работ. Голосование откроется после" %} {{ contest.submission_end|date:"d.m.Y" }}.</p>
-    {% elif contest.phase == 'voting' %}
-        <p class="contest-phase-notice animate-on-scroll contest-phase-notice--active">{% t "Голосование открыто! Итоги будут объявлены" %} {{ contest.results_start|date:"d.m.Y" }}.</p>
-    {% elif contest.results_published %}
+    {% if contest.results_published %}
         <p class="contest-phase-notice animate-on-scroll">{% t "Конкурс завершён." %} <a href="{% url 'results' %}">{% t "Смотреть итоги" %}</a></p>
     {% endif %}
 
@@ -82,14 +78,10 @@
                         class="vote-btn btn-ripple {% if work.id in voted_ids %}voted{% endif %}"
                         data-id="{{ work.id }}"
                         data-voted="{% if work.id in voted_ids %}true{% else %}false{% endif %}"
-                        {% if not work.is_approved or not user.is_authenticated or work.user_id == user.id or not voting_open %}disabled{% endif %}
+                        {% if not work.is_approved or not user.is_authenticated or work.user_id == user.id %}disabled{% endif %}
                     >
                         {% if not work.is_approved %}
                             {% t "На модерации" %}
-                        {% elif not voting_open and not results_published %}
-                            {% t "Голосование скоро" %}
-                        {% elif not voting_open and results_published %}
-                            {% t "Голосование завершено" %}
                         {% elif not user.is_authenticated %}
                             <span class="vote-btn-label"><svg class="icon-heart-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>{% t "Войти, чтобы голосовать" %}</span></span>
                         {% elif work.user_id == user.id %}

@@ -14,9 +14,6 @@
             <a class="btn-secondary" href="{% url 'gallery' %}">{% t "Смотреть работы" %}</a>
         </div>
         <div class="countdown">
-            {% if contest.countdown_target_iso %}
-                <p class="countdown-label">{{ contest.countdown_label }}</p>
-            {% endif %}
             <div class="countdown-timer" {% if not contest.countdown_target_iso %}hidden{% endif %}>
                 <div class="timer-card"><strong id="cd-days">00</strong><span>{% t "дней" %}</span></div>
                 <div class="timer-card"><strong id="cd-hours">00</strong><span>{% t "часов" %}</span></div>

@@ -33,46 +33,43 @@ def results_start_at() -> datetime:
 
 def get_contest_phase(now: datetime | None = None) -> str:
     current = now or timezone.now()
-    if current <= submission_end_at():
-        return PHASE_SUBMISSION
     if current < results_start_at():
+        if current <= submission_end_at():
+            return PHASE_SUBMISSION
         return PHASE_VOTING
     return PHASE_RESULTS
 
 
 def is_submission_open(now: datetime | None = None) -> bool:
-    return get_contest_phase(now) == PHASE_SUBMISSION
+    current = now or timezone.now()
+    return current <= submission_end_at()
 
 
 def is_voting_open(now: datetime | None = None) -> bool:
-    return get_contest_phase(now) == PHASE_VOTING
+    # Likes are always available so participants can support works any time.
+    return True
 
 
 def are_results_published(now: datetime | None = None) -> bool:
-    return get_contest_phase(now) == PHASE_RESULTS
+    current = now or timezone.now()
+    return current >= results_start_at()
 
 
 def get_contest_status(now: datetime | None = None) -> dict:
     current = now or timezone.now()
-    phase = get_contest_phase(current)
+    results_published = are_results_published(current)
     submission_end = submission_end_at()
     results_start = results_start_at()
+    phase = get_contest_phase(current)
 
-    if phase == PHASE_SUBMISSION:
-        countdown_target = submission_end
-        countdown_label_key = "До окончания приёма работ"
-    elif phase == PHASE_VOTING:
-        countdown_target = results_start
-        countdown_label_key = "До объявления победителей"
-    else:
-        countdown_target = None
-        countdown_label_key = ""
+    countdown_target = None if results_published else results_start
+    countdown_label_key = "" if results_published else "До объявления победителей"
 
     return {
         "phase": phase,
-        "submission_open": phase == PHASE_SUBMISSION,
-        "voting_open": phase == PHASE_VOTING,
-        "results_published": phase == PHASE_RESULTS,
+        "submission_open": is_submission_open(current),
+        "voting_open": True,
+        "results_published": results_published,
         "submission_end": submission_end,
         "voting_start": submission_end,
         "results_start": results_start,

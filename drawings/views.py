@@ -488,13 +488,6 @@ def vote(request, pk):
             status=401,
         )
 
-    if not is_voting_open():
-        if are_results_published():
-            message = translate("Голосование завершено. Итоги уже объявлены.")
-        else:
-            message = translate("Голосование ещё не началось. Сначала завершится приём работ.")
-        return JsonResponse({"success": False, "error": message}, status=403)
-
     drawing = get_object_or_404(Drawing, pk=pk, is_approved=True)
 
     if _is_own_drawing(drawing, request.user):

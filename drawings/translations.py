@@ -355,9 +355,9 @@ EN = {
     ),
     "Голосование завершено. Итоги уже объявлены.": "Voting is over. Results have been published.",
     "Итоги будут объявлены 15 сентября": "Results will be announced on September 15",
-    "Сейчас идёт этап конкурса:": "Current contest stage:",
-    "приём работ": "submissions",
-    "голосование": "voting",
+    "Пока можно смотреть работы и голосовать в галерее.": (
+        "You can browse works and vote in the gallery for now."
+    ),
     "Смотреть работы в галерее": "Browse works in the gallery",
     "Поздравляем победителей в каждой возрастной категории!": (
         "Congratulations to the winners in each age category!"

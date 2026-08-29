@@ -44,13 +44,6 @@
             <span>{% t "Дата:" %} {{ work.created_at|date:"d.m.Y" }}</span>
         </div>
         <div class="votes-big"><span id="votes-count">{{ work.votes }}</span> {% t "голосов" %}</div>
-        {% if not voting_open and not results_published %}
-            <p class="work-vote-notice">{% t "Голосование откроется после окончания приёма работ." %}</p>
-        {% elif not voting_open and results_published %}
-            <p class="work-vote-notice">{% t "Голосование завершено." %} <a href="{% url 'results' %}">{% t "Смотреть итоги" %}</a></p>
-        {% elif voting_open %}
-            <p class="work-vote-notice work-vote-notice--active">{% t "Голосование открыто до" %} {{ contest.results_start|date:"d.m.Y" }}.</p>
-        {% endif %}
         {% if is_moderator %}
             <div class="work-moderation-panel">
                 <p class="work-moderation-panel__title">{% t "Модерация" %}</p>
@@ -66,16 +59,12 @@
                 class="btn-ripple {% if has_voted %}voted{% endif %}"
                 data-id="{{ work.id }}"
                 data-voted="{% if has_voted %}true{% else %}false{% endif %}"
-                {% if not user.is_authenticated or is_own_work or not voting_open %}disabled{% endif %}
+                {% if not user.is_authenticated or is_own_work %}disabled{% endif %}
             >
                 {% if not user.is_authenticated %}
                     <span class="vote-btn-label"><svg class="icon-heart-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>{% t "Войти, чтобы голосовать" %}</span></span>
                 {% elif is_own_work %}
                     {% t "Это ваша работа" %}
-                {% elif not voting_open and not results_published %}
-                    {% t "Голосование скоро" %}
-                {% elif not voting_open and results_published %}
-                    {% t "Голосование завершено" %}
                 {% elif has_voted %}
                     {% t "Убрать голос" %}
                 {% else %}

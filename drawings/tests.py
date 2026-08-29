@@ -688,7 +688,7 @@ class ContestPhaseTests(TestCase):
             september_results = datetime(2026, 9, 15, 12, 0, 0, tzinfo=ZoneInfo("Europe/Moscow"))
             self.assertEqual(get_contest_phase(september_results), PHASE_RESULTS)
 
-    def test_vote_blocked_before_voting_phase(self):
+    def test_vote_allowed_during_submission_phase(self):
         drawing = Drawing.objects.create(
             user=self.user,
             title="Тест",
@@ -709,8 +709,8 @@ class ContestPhaseTests(TestCase):
         with override_settings(**CONTEST_SUBMISSION_OPEN):
             self.client.login(username=voter.email, password=self.password)
             response = self.client.post(reverse("vote", args=[drawing.id]))
-            self.assertEqual(response.status_code, 403)
-            self.assertIn("ещё не началось", response.json()["error"])
+            self.assertEqual(response.status_code, 200)
+            self.assertJSONEqual(response.content, {"success": True, "votes": 1, "voted": True})
 
     @override_settings(**CONTEST_VOTING_OPEN)
     def test_results_hidden_before_publication_date(self):

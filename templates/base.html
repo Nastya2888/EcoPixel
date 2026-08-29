@@ -28,7 +28,7 @@
     </script>
     <link rel="icon" type="image/png" href="{% static 'img/logoeco.png' %}">
     <link rel="apple-touch-icon" href="{% static 'img/logoeco.png' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260829-01">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260829-02">
 </head>
 <body{% block body_attrs %}{% endblock %}>
 <div class="bg-pixels" aria-hidden="true">
@@ -100,28 +100,6 @@
         </div>
     </div>
 </header>
-{% if contest.phase == 'submission' %}
-    <div class="contest-banner contest-banner--submission">
-        <div class="container contest-banner__inner">
-            <span class="contest-banner__badge">{% t "Приём работ" %}</span>
-            <span>{% t "Отправляйте рисунки до" %} {{ contest.submission_end|date:"d.m.Y" }}</span>
-        </div>
-    </div>
-{% elif contest.phase == 'voting' %}
-    <div class="contest-banner contest-banner--voting">
-        <div class="container contest-banner__inner">
-            <span class="contest-banner__badge">{% t "Голосование" %}</span>
-            <span>{% t "Итоги и победители —" %} {{ contest.results_start|date:"d.m.Y" }}</span>
-        </div>
-    </div>
-{% elif contest.results_published %}
-    <div class="contest-banner contest-banner--results">
-        <div class="container contest-banner__inner">
-            <span class="contest-banner__badge">{% t "Итоги" %}</span>
-            <a href="{% url 'results' %}">{% t "Победители объявлены — смотреть результаты" %}</a>
-        </div>
-    </div>
-{% endif %}
 <main class="container">
     {% block content %}{% endblock %}
 </main>
