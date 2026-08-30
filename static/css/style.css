@@ -2549,11 +2549,6 @@ html[data-theme="dark"] .moderation-reject-field textarea:focus {
     gap: 6px;
 }
 
-.share-icon-max {
-    flex-shrink: 0;
-    border-radius: 5px;
-}
-
 .draw-page {
     padding: 32px;
     background: var(--color-white-85);
