@@ -1148,7 +1148,6 @@ class ResubmitTests(TestCase):
         self.client.login(username=self.user.email, password=self.password)
         response = self.client.get(reverse("draw_resubmit", args=[self.rejected.id]))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Исправление отклонённой работы")
         self.assertContains(response, "ECOPIXEL_RESUBMIT")
         self.assertContains(response, reverse("resubmit_drawing", args=[self.rejected.id]))
         self.assertContains(response, "Отправить исправленную работу")

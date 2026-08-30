@@ -8,14 +8,6 @@
 
 {% block content %}
 <section class="draw-page draw-v4 card animate-on-scroll" data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
-    {% if resubmit_drawing %}
-        <p class="draw-resubmit-notice">
-            {% t "Исправление отклонённой работы" %} «{{ resubmit_drawing.title }}»
-            {% if resubmit_drawing.rejection_reason %}
-                <br><strong>{% t "Причина:" %}</strong> {{ resubmit_drawing.rejection_reason }}
-            {% endif %}
-        </p>
-    {% endif %}
     <div class="editor-workspace">
         <aside class="editor-sidebar left">
             <div class="panel tools-panel" id="tools">
