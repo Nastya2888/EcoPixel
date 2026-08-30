@@ -99,3 +99,35 @@ class Vote(models.Model):
 
     def __str__(self) -> str:
         return f"{self.drawing_id} - {self.user_id}"
+
+
+class DrawingReport(models.Model):
+    drawing = models.ForeignKey(
+        Drawing,
+        on_delete=models.CASCADE,
+        related_name="reports",
+        verbose_name="Работа",
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="drawing_reports",
+        verbose_name="Пользователь",
+    )
+    comment = models.TextField("Комментарий", max_length=500)
+    is_resolved = models.BooleanField("Обработана", default=False)
+    created_at = models.DateTimeField("Создано", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Жалоба"
+        verbose_name_plural = "Жалобы"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["drawing", "user"],
+                name="unique_report_per_drawing_user",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"Жалоба #{self.pk} на работу {self.drawing_id}"

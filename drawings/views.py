@@ -6,7 +6,7 @@ import json
 
 from django.http import Http404, HttpResponse, JsonResponse
 from django.db import transaction
-from django.db.models import Q, Sum
+from django.db.models import Prefetch, Q, Sum
 from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -20,7 +20,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 
-from .models import Category, Drawing, Vote
+from .models import Category, Drawing, DrawingReport, Vote
 from .contest import are_results_published, is_submission_open, is_voting_open
 from .translations import EN, current_language_code, translate
 from .utils import build_max_share_url, send_notification
@@ -406,9 +406,21 @@ def work_detail(request, pk):
         raise Http404("Работа недоступна.")
     has_voted = False
     is_own_work = False
+    has_reported = False
+    can_report = False
+    open_reports = []
     if request.user.is_authenticated:
         has_voted = Vote.objects.filter(drawing=work, user=request.user).exists()
         is_own_work = _is_own_drawing(work, request.user)
+        if work.is_approved and not is_own_work and not _can_view_moderation_content(request):
+            has_reported = DrawingReport.objects.filter(drawing=work, user=request.user).exists()
+            can_report = not has_reported
+    if _can_view_moderation_content(request):
+        open_reports = list(
+            DrawingReport.objects.filter(drawing=work, is_resolved=False)
+            .select_related("user")
+            .order_by("-created_at")
+        )
     og_image_url = request.build_absolute_uri(reverse("drawing_image", args=[work.pk]))
     work_url = request.build_absolute_uri()
     max_share_url = build_max_share_url(f"{work.title} — {work_url}")
@@ -419,11 +431,15 @@ def work_detail(request, pk):
             "work": work,
             "has_voted": has_voted,
             "is_own_work": is_own_work,
+            "has_reported": has_reported,
+            "can_report": can_report,
+            "open_reports": open_reports,
             "is_moderator": _can_view_moderation_content(request),
             "og_image_url": og_image_url,
             "max_share_url": max_share_url,
             "voting_open": is_voting_open(),
             "results_published": are_results_published(),
+            "report_status": request.GET.get("report", ""),
         },
     )
 
@@ -693,6 +709,50 @@ def vote(request, pk):
     return JsonResponse({"success": True, "votes": drawing.votes, "voted": True})
 
 
+@require_POST
+def report_drawing(request, pk):
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"success": False, "error": translate("Войдите, чтобы отправить жалобу.")},
+            status=401,
+        )
+
+    drawing = get_object_or_404(Drawing, pk=pk, is_approved=True)
+
+    if _is_own_drawing(drawing, request.user):
+        return JsonResponse(
+            {"success": False, "error": translate("Нельзя пожаловаться на свою работу.")},
+            status=403,
+        )
+
+    if _can_view_moderation_content(request):
+        return JsonResponse(
+            {"success": False, "error": translate("Модераторам не нужно отправлять жалобы.")},
+            status=403,
+        )
+
+    comment = request.POST.get("comment", "").strip()
+    if not comment:
+        return JsonResponse(
+            {"success": False, "error": translate("Напишите комментарий к жалобе.")},
+            status=400,
+        )
+    if len(comment) > 500:
+        return JsonResponse(
+            {"success": False, "error": translate("Комментарий слишком длинный (максимум 500 символов).")},
+            status=400,
+        )
+
+    if DrawingReport.objects.filter(drawing=drawing, user=request.user).exists():
+        return JsonResponse(
+            {"success": False, "error": translate("Вы уже отправляли жалобу на эту работу.")},
+            status=409,
+        )
+
+    DrawingReport.objects.create(drawing=drawing, user=request.user, comment=comment)
+    return JsonResponse({"success": True})
+
+
 def register(request):
     if request.user.is_authenticated:
         return redirect("profile")
@@ -814,17 +874,21 @@ def profile(request):
 
     is_moderator = _can_view_moderation_content(request)
     moderation_filter = request.GET.get("mod", "pending").strip()
-    if moderation_filter not in {"pending", "rejected", "published", "all"}:
+    if moderation_filter not in {"pending", "rejected", "published", "reported", "all"}:
         moderation_filter = "pending"
 
     moderation_stats = None
     moderation_page = None
     if is_moderator:
+        open_reports_qs = DrawingReport.objects.filter(is_resolved=False).select_related("user").order_by(
+            "-created_at"
+        )
         moderation_qs = Drawing.objects.select_related("category", "user").order_by("-created_at")
         moderation_stats = {
             "pending": Drawing.objects.filter(is_approved=False, is_rejected=False).count(),
             "rejected": Drawing.objects.filter(is_rejected=True, is_approved=False).count(),
             "published": Drawing.objects.filter(is_approved=True).count(),
+            "reported": Drawing.objects.filter(reports__is_resolved=False).distinct().count(),
             "total": Drawing.objects.count(),
         }
         if moderation_filter == "pending":
@@ -833,6 +897,11 @@ def profile(request):
             moderation_qs = moderation_qs.filter(is_rejected=True, is_approved=False)
         elif moderation_filter == "published":
             moderation_qs = moderation_qs.filter(is_approved=True)
+        elif moderation_filter == "reported":
+            moderation_qs = moderation_qs.filter(reports__is_resolved=False).distinct()
+        moderation_qs = moderation_qs.prefetch_related(
+            Prefetch("reports", queryset=open_reports_qs, to_attr="open_reports_list")
+        )
         moderation_page = Paginator(moderation_qs, 12).get_page(request.GET.get("page"))
 
     return render(
@@ -875,6 +944,10 @@ def moderate_drawing(request, pk):
         drawing.moderator_note = moderator_note
         drawing.save(update_fields=["moderator_note"])
         return _redirect_with_status(next_url, "note_saved")
+
+    if action == "resolve_reports":
+        DrawingReport.objects.filter(drawing=drawing, is_resolved=False).update(is_resolved=True)
+        return _redirect_with_status(next_url, "reports_resolved")
 
     if action == "approve":
         was_approved = drawing.is_approved

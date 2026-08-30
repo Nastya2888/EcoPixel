@@ -154,6 +154,26 @@ EN = {
     "Приём работ завершён — исправить и отправить снова уже нельзя.": (
         "Submission is closed — you can no longer edit and resubmit this work."
     ),
+    "Пожаловаться": "Report",
+    "Пожаловаться на работу": "Report this work",
+    "Комментарий к жалобе": "Report comment",
+    "Опишите, что не так с этой работой": "Describe what is wrong with this work",
+    "Отправить жалобу": "Submit report",
+    "Жалоба отправлена. Спасибо!": "Report submitted. Thank you!",
+    "Напишите комментарий к жалобе.": "Write a comment for your report.",
+    "Комментарий слишком длинный (максимум 500 символов).": (
+        "The comment is too long (maximum 500 characters)."
+    ),
+    "Вы уже отправляли жалобу на эту работу.": "You have already reported this work.",
+    "Войдите, чтобы отправить жалобу.": "Log in to submit a report.",
+    "Нельзя пожаловаться на свою работу.": "You cannot report your own work.",
+    "Модераторам не нужно отправлять жалобы.": "Moderators do not need to submit reports.",
+    "Жалобы": "Reports",
+    "Жалоба:": "Report:",
+    "Жалоб пока нет": "No reports yet",
+    "Нет необработанных жалоб на работы.": "There are no unresolved work reports.",
+    "Отметить жалобы обработанными": "Mark reports as resolved",
+    "Жалобы отмечены как обработанные.": "Reports marked as resolved.",
     "Работа отклонена модератором": "Rejected by a moderator",
     "Открыть": "Open",
     "Скопировать ссылку": "Copy link",

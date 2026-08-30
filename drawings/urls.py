@@ -25,5 +25,6 @@ urlpatterns = [
     path("draw/resubmit/<int:pk>/submit/", views.resubmit_drawing, name="resubmit_drawing"),
     path("draw/submit/", views.submit_drawing, name="submit_drawing"),
     path("vote/<int:pk>/", views.vote, name="vote"),
+    path("report/<int:pk>/", views.report_drawing, name="report_drawing"),
     path("certificate/<int:pk>/", views.certificate, name="certificate"),
 ]

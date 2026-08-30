@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Drawing, Vote
+from .models import Category, Drawing, DrawingReport, Vote
 from .utils import send_notification
 
 
@@ -70,3 +70,11 @@ class VoteAdmin(admin.ModelAdmin):
     list_display = ("drawing", "user", "created_at")
     list_filter = ("created_at",)
     search_fields = ("user__username", "drawing__title")
+
+
+@admin.register(DrawingReport)
+class DrawingReportAdmin(admin.ModelAdmin):
+    list_display = ("drawing", "user", "is_resolved", "created_at")
+    list_filter = ("is_resolved", "created_at")
+    search_fields = ("comment", "user__username", "drawing__title")
+    readonly_fields = ("created_at",)

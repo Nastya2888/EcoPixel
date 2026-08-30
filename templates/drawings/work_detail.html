@@ -45,8 +45,14 @@
                 <p class="restore-image-notice success">{% t "Заметка модератора сохранена." %}</p>
             {% elif request.GET.moderation == "reject_reason_required" %}
                 <p class="restore-image-notice">{% t "Укажите причину отклонения перед отправкой." %}</p>
+            {% elif request.GET.moderation == "reports_resolved" %}
+                <p class="restore-image-notice success">{% t "Жалобы отмечены как обработанные." %}</p>
             {% elif request.GET.resubmit == "closed" %}
                 <p class="restore-image-notice">{% t "Приём работ завершён — исправить и отправить снова уже нельзя." %}</p>
+            {% elif report_status == "sent" %}
+                <p class="restore-image-notice success">{% t "Жалоба отправлена. Спасибо!" %}</p>
+            {% elif report_status == "comment_required" %}
+                <p class="restore-image-notice">{% t "Напишите комментарий к жалобе." %}</p>
             {% endif %}
             <h1>{{ work.title }}</h1>
             {% if work.description %}
@@ -73,6 +79,24 @@
                     {% endwith %}
                 </div>
             {% endif %}
+            {% if is_moderator and open_reports %}
+                <div class="work-reports-panel">
+                    <p class="work-reports-panel__title">{% t "Жалобы" %} ({{ open_reports|length }})</p>
+                    {% for report in open_reports %}
+                        <div class="work-report-item">
+                            <p>{{ report.comment }}</p>
+                            <p class="work-report-meta">{{ report.user.email }} · {{ report.created_at|date:"d.m.Y H:i" }}</p>
+                        </div>
+                    {% endfor %}
+                    <form method="post" action="{% url 'moderate_drawing' work.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button type="submit" name="action" value="resolve_reports" class="btn-secondary moderation-btn">
+                            {% t "Отметить жалобы обработанными" %}
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
             {% if voting_open %}
             <div class="vote-btn-wrap">
                 <button
@@ -96,6 +120,17 @@
             </div>
             {% else %}
                 <p class="work-moderation-notice">{% t "Голосование завершено. Работа в архиве конкурса." %}</p>
+            {% endif %}
+            {% if can_report %}
+                <button type="button" id="report-work-btn" class="btn-secondary report-work-btn" data-id="{{ work.id }}">
+                    {% t "Пожаловаться" %}
+                </button>
+            {% elif has_reported %}
+                <p class="report-sent-notice">{% t "Жалоба отправлена. Спасибо!" %}</p>
+            {% elif work.is_approved and not is_own_work and not is_moderator %}
+                <button type="button" id="report-login-btn" class="btn-secondary report-work-btn">
+                    {% t "Пожаловаться" %}
+                </button>
             {% endif %}
             <div class="share-row">
                 <a target="_blank" rel="noopener" href="https://vk.com/share.php?url={{ request.build_absolute_uri|urlencode }}">
@@ -121,6 +156,31 @@
         </div>
     </div>
 </section>
+
+<dialog class="report-dialog" id="report-dialog" onclick="if (event.target === this) this.close()">
+    <div class="report-dialog__panel">
+        <h3 class="report-dialog__title">{% t "Пожаловаться на работу" %}</h3>
+        <p class="report-dialog__hint">«{{ work.title }}»</p>
+        <form id="report-form">
+            <label class="moderation-reject-field">
+                <span>{% t "Комментарий к жалобе" %}</span>
+                <textarea
+                    id="report-comment"
+                    name="comment"
+                    rows="4"
+                    maxlength="500"
+                    required
+                    placeholder="{% t 'Опишите, что не так с этой работой' %}"
+                ></textarea>
+            </label>
+            <div class="report-dialog__actions">
+                <button type="button" class="btn-secondary" id="report-cancel-btn">{% t "Отменить" %}</button>
+                <button type="submit" class="btn moderation-btn--reject-confirm" id="report-submit-btn">{% t "Отправить жалобу" %}</button>
+            </div>
+        </form>
+        <p id="report-message" class="report-message"></p>
+    </div>
+</dialog>
 
 <script>
 (() => {
@@ -148,4 +208,5 @@
 })();
 </script>
 <script src="{% static 'js/votes.js' %}?v=20260825-03"></script>
+<script src="{% static 'js/report.js' %}?v=20260830-01"></script>
 {% endblock %}

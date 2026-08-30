@@ -4,7 +4,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .contest import PHASE_RESULTS, PHASE_SUBMISSION, PHASE_VOTING, get_contest_phase
-from .models import Category, Drawing, Vote
+from .models import Category, Drawing, DrawingReport, Vote
 from .utils import build_max_share_url
 
 
@@ -1213,3 +1213,138 @@ class ResubmitTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.rejected.refresh_from_db()
         self.assertTrue(self.rejected.is_rejected)
+
+
+class ReportDrawingTests(TestCase):
+    png = (
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+        b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00"
+        b"\x0cIDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\x18\xd8N"
+        b"\x00\x00\x00\x00IEND\xaeB`\x82"
+    )
+
+    def setUp(self):
+        self.category = Category.objects.create(name="Природа", slug="nature")
+        self.author = User.objects.create_user(
+            username="author", password="pass", email="a@example.com"
+        )
+        self.reporter = User.objects.create_user(
+            username="reporter", password="pass", email="r@example.com"
+        )
+        self.moderator = User.objects.create_user(
+            username="mod", password="pass", email="m@example.com"
+        )
+        self.moderator.is_staff = True
+        self.moderator.save()
+        self.drawing = Drawing.objects.create(
+            user=self.author,
+            category=self.category,
+            title="Work",
+            author="Author",
+            age=10,
+            city="City",
+            email=self.author.email,
+            image=SimpleUploadedFile("test.png", self.png, content_type="image/png"),
+            is_approved=True,
+        )
+
+    def test_report_requires_auth(self):
+        response = self.client.post(
+            reverse("report_drawing", args=[self.drawing.pk]),
+            {"comment": "Spam"},
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_report_requires_comment(self):
+        self.client.login(username="reporter", password="pass")
+        response = self.client.post(
+            reverse("report_drawing", args=[self.drawing.pk]),
+            {"comment": "   "},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(
+            DrawingReport.objects.filter(drawing=self.drawing, user=self.reporter).exists()
+        )
+
+    def test_report_success(self):
+        self.client.login(username="reporter", password="pass")
+        response = self.client.post(
+            reverse("report_drawing", args=[self.drawing.pk]),
+            {"comment": "Нарушает правила"},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["success"])
+        report = DrawingReport.objects.get(drawing=self.drawing, user=self.reporter)
+        self.assertEqual(report.comment, "Нарушает правила")
+        self.assertFalse(report.is_resolved)
+
+    def test_report_duplicate(self):
+        DrawingReport.objects.create(
+            drawing=self.drawing,
+            user=self.reporter,
+            comment="First",
+        )
+        self.client.login(username="reporter", password="pass")
+        response = self.client.post(
+            reverse("report_drawing", args=[self.drawing.pk]),
+            {"comment": "Second"},
+        )
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(
+            DrawingReport.objects.filter(drawing=self.drawing, user=self.reporter).count(),
+            1,
+        )
+
+    def test_cannot_report_own_work(self):
+        self.client.login(username="author", password="pass")
+        response = self.client.post(
+            reverse("report_drawing", args=[self.drawing.pk]),
+            {"comment": "Self report"},
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_moderator_cannot_report(self):
+        self.client.login(username="mod", password="pass")
+        response = self.client.post(
+            reverse("report_drawing", args=[self.drawing.pk]),
+            {"comment": "Mod report"},
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_work_detail_shows_report_button(self):
+        self.client.login(username="reporter", password="pass")
+        response = self.client.get(
+            reverse("work_detail", args=[self.drawing.pk])
+        )
+        self.assertContains(response, "Пожаловаться")
+        self.assertContains(response, "report-dialog")
+
+    def test_profile_reported_filter(self):
+        DrawingReport.objects.create(
+            drawing=self.drawing,
+            user=self.reporter,
+            comment="Bad",
+        )
+        self.client.login(username="mod", password="pass")
+        response = self.client.get(
+            reverse("profile") + "?mod=reported"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Work")
+        self.assertContains(response, "Bad")
+
+    def test_resolve_reports(self):
+        DrawingReport.objects.create(
+            drawing=self.drawing,
+            user=self.reporter,
+            comment="Bad",
+        )
+        self.client.login(username="mod", password="pass")
+        response = self.client.post(
+            reverse("moderate_drawing", args=[self.drawing.pk]),
+            {"action": "resolve_reports"},
+        )
+        self.assertEqual(response.status_code, 302)
+        report = DrawingReport.objects.get(drawing=self.drawing)
+        self.assertTrue(report.is_resolved)
