@@ -23,7 +23,7 @@ from django.views.decorators.http import require_GET, require_POST
 from .models import Category, Drawing, Vote
 from .contest import are_results_published, is_submission_open, is_voting_open
 from .translations import EN, current_language_code, translate
-from .utils import send_notification
+from .utils import build_max_share_url, send_notification
 
 
 def _can_view_moderation_content(request) -> bool:
@@ -252,6 +252,8 @@ def work_detail(request, pk):
         has_voted = Vote.objects.filter(drawing=work, user=request.user).exists()
         is_own_work = _is_own_drawing(work, request.user)
     og_image_url = request.build_absolute_uri(reverse("drawing_image", args=[work.pk]))
+    work_url = request.build_absolute_uri()
+    max_share_url = build_max_share_url(f"{work.title} — {work_url}")
     return render(
         request,
         "drawings/work_detail.html",
@@ -261,6 +263,7 @@ def work_detail(request, pk):
             "is_own_work": is_own_work,
             "is_moderator": _can_view_moderation_content(request),
             "og_image_url": og_image_url,
+            "max_share_url": max_share_url,
             "voting_open": is_voting_open(),
             "results_published": are_results_published(),
         },

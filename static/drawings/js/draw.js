@@ -75,6 +75,7 @@
     const copyLinkBtn = document.getElementById("copy-link-btn");
     const vkShareLink = document.getElementById("vk-share-link");
     const tgShareLink = document.getElementById("tg-share-link");
+    const maxShareLink = document.getElementById("max-share-link");
     const submitPreviewCanvas = document.getElementById("submit-preview-canvas");
     const submitPreviewCtx = submitPreviewCanvas?.getContext("2d");
     const previewCategoryChip = document.getElementById("preview-category-chip");
@@ -1871,6 +1872,10 @@
             submitSuccessText.textContent = `${t("Готово! Номер работы:")} #${data.id}`;
             vkShareLink.href = `https://vk.com/share.php?url=${encodeURIComponent(lastSubmittedUrl)}`;
             tgShareLink.href = `https://t.me/share/url?url=${encodeURIComponent(lastSubmittedUrl)}&text=${encodeURIComponent(t("Мой рисунок на конкурсе ЭкоПиксель!"))}`;
+            if (maxShareLink) {
+                const maxText = `${t("Мой рисунок на конкурсе ЭкоПиксель!")} ${lastSubmittedUrl}`;
+                maxShareLink.href = `https://max.ru/:share?text=${encodeURIComponent(maxText)}`;
+            }
             submitResultEl.innerHTML = `${t("Рисунок принят! Номер работы:")} #${data.id}. <a href="/work/${data.id}/">${t("Открыть работу")}</a>`;
             form.reset();
             updateCategoryPreview();

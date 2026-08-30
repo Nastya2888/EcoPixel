@@ -1,6 +1,12 @@
+from urllib.parse import quote
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.urls import reverse
+
+
+def build_max_share_url(text: str) -> str:
+    return f"https://max.ru/:share?text={quote(text, safe='')}"
 
 
 def send_notification(drawing, event_type, request=None):

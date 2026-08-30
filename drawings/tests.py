@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from .contest import PHASE_RESULTS, PHASE_SUBMISSION, PHASE_VOTING, get_contest_phase
 from .models import Category, Drawing, Vote
+from .utils import build_max_share_url
 
 
 CONTEST_SUBMISSION_OPEN = {
@@ -551,6 +552,12 @@ class GalleryTests(TestCase):
         response = self.client.get(reverse("gallery"), {"voted": "1"})
         self.assertContains(response, "Вы пока ни за что не голосовали.")
 
+    def test_work_detail_includes_max_share_link(self):
+        response = self.client.get(reverse("work_detail", args=[self.teen_work.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "max.ru/:share?text=")
+        self.assertContains(response, ">MAX</span>")
+
     def test_admin_sees_pending_drawings_and_status(self):
         self.client.login(username=self.admin_user.email, password=self.password)
         response = self.client.get(reverse("gallery"))
@@ -1083,3 +1090,11 @@ class ContestPhaseTests(TestCase):
             self.assertEqual(response.status_code, 403)
             self.assertIn("завершён", response.json()["error"])
             self.assertEqual(Drawing.objects.filter(user=self.user).count(), 0)
+
+
+class MaxShareTests(TestCase):
+    def test_build_max_share_url_encodes_text(self):
+        url = build_max_share_url("Тест — https://example.com/work/1/")
+        self.assertTrue(url.startswith("https://max.ru/:share?text="))
+        self.assertNotIn(" ", url)
+        self.assertIn("example.com", url)

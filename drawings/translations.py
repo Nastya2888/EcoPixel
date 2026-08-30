@@ -319,6 +319,7 @@ EN = {
     "Вернуться к редактированию": "Back to editing",
     "Отправка...": "Sending...",
     "Поделиться в ВК": "Share on VK",
+    "Поделиться в MAX": "Share on MAX",
     "Графит": "Graphite",
     "Белый": "White",
     "Серый": "Gray",
