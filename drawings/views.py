@@ -84,6 +84,164 @@ def _build_stored_image_name(original_name: str) -> str:
     return f"drawing-{uuid4().hex}{ext}"
 
 
+def _parse_submission_payload(request):
+    image = request.FILES.get("image")
+    title = request.POST.get("title", "").strip()
+    description = request.POST.get("description", "").strip()
+    author_name = request.POST.get("author_name", "").strip()
+    age_raw = request.POST.get("age", "").strip()
+    city = request.POST.get("city", "").strip()
+    email = request.POST.get("email", "").strip()
+    consent = request.POST.get("consent")
+    category_slug_from_form = request.POST.get("category_slug", "").strip()
+
+    if image is None:
+        return JsonResponse(
+            {"success": False, "error": translate("Файл изображения не передан.")},
+            status=400,
+        ), None
+
+    if image.content_type != "image/png":
+        return JsonResponse(
+            {"success": False, "error": translate("Допускаются только PNG изображения.")},
+            status=400,
+        ), None
+
+    image_bytes = image.read()
+    if not image_bytes:
+        return JsonResponse(
+            {"success": False, "error": translate("Пустой файл изображения.")},
+            status=400,
+        ), None
+
+    if len(description) > 500:
+        return JsonResponse(
+            {"success": False, "error": translate("Описание не должно быть длиннее 500 символов.")},
+            status=400,
+        ), None
+
+    if not all([title, author_name, age_raw, city]):
+        return JsonResponse(
+            {"success": False, "error": translate("Заполните все поля формы.")},
+            status=400,
+        ), None
+
+    if consent not in {"on", "true", "1"}:
+        return JsonResponse(
+            {
+                "success": False,
+                "error": translate("Требуется согласие на обработку персональных данных."),
+            },
+            status=400,
+        ), None
+
+    try:
+        age = int(age_raw)
+    except (TypeError, ValueError):
+        return JsonResponse(
+            {"success": False, "error": translate("Возраст указан неверно.")},
+            status=400,
+        ), None
+
+    if age < 6 or age > 25:
+        return JsonResponse(
+            {"success": False, "error": translate("Возраст должен быть от 6 до 25 лет.")},
+            status=400,
+        ), None
+
+    if request.user.is_authenticated:
+        email = request.user.email or email
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse(
+            {"success": False, "error": translate("Укажите корректный email.")},
+            status=400,
+        ), None
+
+    category_name, category_slug = _get_category_for_age(age)
+    if category_slug_from_form and category_slug_from_form != category_slug:
+        return JsonResponse(
+            {"success": False, "error": translate("Возраст не соответствует выбранной категории.")},
+            status=400,
+        ), None
+
+    return None, {
+        "image_bytes": image_bytes,
+        "image_content_type": image.content_type or "image/png",
+        "image_name": image.name,
+        "title": title,
+        "description": description,
+        "author_name": author_name,
+        "age": age,
+        "city": city,
+        "email": email,
+        "category_name": category_name,
+        "category_slug": category_slug,
+    }
+
+
+def _get_or_create_category(category_name: str, category_slug: str) -> Category:
+    category, _ = Category.objects.get_or_create(
+        slug=category_slug,
+        defaults={"name": category_name, "theme": category_name},
+    )
+    if category.name != category_name:
+        category.name = category_name
+        category.save(update_fields=["name"])
+    return category
+
+
+def _replace_drawing_image(drawing: Drawing, image_bytes: bytes, image_content_type: str, image_name: str) -> None:
+    previous_name = drawing.image.name if drawing.image else ""
+    stored_name = _build_stored_image_name(image_name)
+    drawing.image.save(stored_name, ContentFile(image_bytes), save=False)
+    drawing.image_blob = image_bytes
+    drawing.image_blob_content_type = image_content_type
+    if (
+        previous_name
+        and previous_name != drawing.image.name
+        and default_storage.exists(previous_name)
+    ):
+        default_storage.delete(previous_name)
+
+
+def _render_draw_page(request, resubmit_drawing=None):
+    categories = AGE_CATEGORY_FILTERS
+    draw_i18n = EN if current_language_code() == "en" else {}
+    submit_url = reverse("submit_drawing")
+    resubmit_drawing_json = "null"
+    if resubmit_drawing is not None:
+        submit_url = reverse("resubmit_drawing", args=[resubmit_drawing.pk])
+        resubmit_drawing_json = json.dumps(
+            {
+                "id": resubmit_drawing.pk,
+                "title": resubmit_drawing.title,
+                "description": resubmit_drawing.description,
+                "author_name": resubmit_drawing.author,
+                "age": resubmit_drawing.age,
+                "city": resubmit_drawing.city,
+                "category_slug": resubmit_drawing.category.slug,
+                "image_url": request.build_absolute_uri(
+                    reverse("drawing_image", args=[resubmit_drawing.pk])
+                ),
+            },
+            ensure_ascii=False,
+        )
+    return render(
+        request,
+        "drawings/draw.html",
+        {
+            "categories": categories,
+            "draw_i18n_json": json.dumps(draw_i18n, ensure_ascii=False),
+            "contest_submission_open": is_submission_open(),
+            "resubmit_drawing": resubmit_drawing,
+            "resubmit_drawing_json": resubmit_drawing_json,
+            "submit_url": submit_url,
+        },
+    )
+
+
 def _missing_image_svg(title: str) -> str:
     safe_title = escape(title or "Работа")
     return f"""
@@ -338,17 +496,22 @@ def certificate(request, pk):
 
 @require_GET
 def draw(request):
-    categories = AGE_CATEGORY_FILTERS
-    draw_i18n = EN if current_language_code() == "en" else {}
-    return render(
-        request,
-        "drawings/draw.html",
-        {
-            "categories": categories,
-            "draw_i18n_json": json.dumps(draw_i18n, ensure_ascii=False),
-            "contest_submission_open": is_submission_open(),
-        },
+    return _render_draw_page(request)
+
+
+@login_required
+@require_GET
+def draw_resubmit(request, pk):
+    drawing = get_object_or_404(
+        Drawing,
+        pk=pk,
+        user=request.user,
+        is_rejected=True,
+        is_approved=False,
     )
+    if not is_submission_open():
+        return redirect(f"{reverse('work_detail', args=[pk])}?resubmit=closed")
+    return _render_draw_page(request, resubmit_drawing=drawing)
 
 
 @require_POST
@@ -371,115 +534,96 @@ def submit_drawing(request):
             status=403,
         )
 
-    image = request.FILES.get("image")
-    title = request.POST.get("title", "").strip()
-    description = request.POST.get("description", "").strip()
-    author_name = request.POST.get("author_name", "").strip()
-    age_raw = request.POST.get("age", "").strip()
-    city = request.POST.get("city", "").strip()
-    email = request.POST.get("email", "").strip()
-    consent = request.POST.get("consent")
-    category_slug_from_form = request.POST.get("category_slug", "").strip()
+    error_response, payload = _parse_submission_payload(request)
+    if error_response:
+        return error_response
 
-    if image is None:
-        return JsonResponse(
-            {"success": False, "error": translate("Файл изображения не передан.")},
-            status=400,
-        )
-
-    if image.content_type != "image/png":
-        return JsonResponse(
-            {"success": False, "error": translate("Допускаются только PNG изображения.")},
-            status=400,
-        )
-
-    image_bytes = image.read()
-    if not image_bytes:
-        return JsonResponse(
-            {"success": False, "error": translate("Пустой файл изображения.")},
-            status=400,
-        )
-
-    if len(description) > 500:
-        return JsonResponse(
-            {"success": False, "error": translate("Описание не должно быть длиннее 500 символов.")},
-            status=400,
-        )
-
-    if not all([title, author_name, age_raw, city]):
-        return JsonResponse(
-            {"success": False, "error": translate("Заполните все поля формы.")},
-            status=400,
-        )
-
-    if consent not in {"on", "true", "1"}:
-        return JsonResponse(
-            {
-                "success": False,
-                "error": translate("Требуется согласие на обработку персональных данных."),
-            },
-            status=400,
-        )
-
-    try:
-        age = int(age_raw)
-    except (TypeError, ValueError):
-        return JsonResponse(
-            {"success": False, "error": translate("Возраст указан неверно.")},
-            status=400,
-        )
-
-    if age < 6 or age > 25:
-        return JsonResponse(
-            {"success": False, "error": translate("Возраст должен быть от 6 до 25 лет.")},
-            status=400,
-        )
-
-    if request.user.is_authenticated:
-        email = request.user.email or email
-    try:
-        validate_email(email)
-    except ValidationError:
-        return JsonResponse(
-            {"success": False, "error": translate("Укажите корректный email.")},
-            status=400,
-        )
-
-    category_name, category_slug = _get_category_for_age(age)
-    if category_slug_from_form and category_slug_from_form != category_slug:
-        return JsonResponse(
-            {"success": False, "error": translate("Возраст не соответствует выбранной категории.")},
-            status=400,
-        )
-
-    category, _ = Category.objects.get_or_create(
-        slug=category_slug,
-        defaults={"name": category_name, "theme": category_name},
-    )
-    if category.name != category_name:
-        category.name = category_name
-        category.save(update_fields=["name"])
-
-    stored_name = _build_stored_image_name(image.name)
+    category = _get_or_create_category(payload["category_name"], payload["category_slug"])
+    stored_name = _build_stored_image_name(payload["image_name"])
 
     drawing = Drawing.objects.create(
         user=request.user,
-        title=title,
-        description=description,
-        author=author_name,
-        age=age,
-        city=city,
-        email=email,
+        title=payload["title"],
+        description=payload["description"],
+        author=payload["author_name"],
+        age=payload["age"],
+        city=payload["city"],
+        email=payload["email"],
         category=category,
-        image=ContentFile(image_bytes, name=stored_name),
-        image_blob=image_bytes,
-        image_blob_content_type=image.content_type or "image/png",
+        image=ContentFile(payload["image_bytes"], name=stored_name),
+        image_blob=payload["image_bytes"],
+        image_blob_content_type=payload["image_content_type"],
         is_approved=False,
         votes=0,
     )
     send_notification(drawing, "submitted", request=request)
 
     return JsonResponse({"success": True, "id": drawing.id})
+
+
+@login_required
+@require_POST
+def resubmit_drawing(request, pk):
+    drawing = get_object_or_404(
+        Drawing,
+        pk=pk,
+        user=request.user,
+        is_rejected=True,
+        is_approved=False,
+    )
+
+    if not is_submission_open():
+        return JsonResponse(
+            {
+                "success": False,
+                "error": translate("Приём работ завершён — исправить и отправить снова уже нельзя."),
+            },
+            status=403,
+        )
+
+    error_response, payload = _parse_submission_payload(request)
+    if error_response:
+        return error_response
+
+    category = _get_or_create_category(payload["category_name"], payload["category_slug"])
+    drawing.title = payload["title"]
+    drawing.description = payload["description"]
+    drawing.author = payload["author_name"]
+    drawing.age = payload["age"]
+    drawing.city = payload["city"]
+    drawing.email = payload["email"]
+    drawing.category = category
+    _replace_drawing_image(
+        drawing,
+        payload["image_bytes"],
+        payload["image_content_type"],
+        payload["image_name"],
+    )
+    drawing.is_rejected = False
+    drawing.rejection_reason = ""
+    drawing.moderator_note = ""
+    drawing.is_approved = False
+    drawing.save(
+        update_fields=[
+            "title",
+            "description",
+            "author",
+            "age",
+            "city",
+            "email",
+            "category",
+            "image",
+            "image_blob",
+            "image_blob_content_type",
+            "is_rejected",
+            "rejection_reason",
+            "moderator_note",
+            "is_approved",
+        ]
+    )
+    send_notification(drawing, "submitted", request=request)
+
+    return JsonResponse({"success": True, "id": drawing.id, "resubmitted": True})
 
 
 @login_required

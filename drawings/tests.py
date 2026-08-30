@@ -1098,3 +1098,119 @@ class MaxShareTests(TestCase):
         self.assertTrue(url.startswith("https://max.ru/:share?text="))
         self.assertNotIn(" ", url)
         self.assertIn("example.com", url)
+
+
+@override_settings(**CONTEST_SUBMISSION_OPEN)
+class ResubmitTests(TestCase):
+    def setUp(self):
+        self.password = "StrongPass123!"
+        self.user = User.objects.create_user(
+            username="author@example.com",
+            email="author@example.com",
+            password=self.password,
+        )
+        self.other_user = User.objects.create_user(
+            username="other@example.com",
+            email="other@example.com",
+            password=self.password,
+        )
+        self.category = Category.objects.create(name="6–9 лет", slug="age-6-9", theme="6–9 лет")
+        self.png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
+            b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00"
+            b"\x00\x00\nIDATx\x9cc`\x00\x00\x00\x02\x00\x01\xe2!"
+            b"\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        self.rejected = Drawing.objects.create(
+            user=self.user,
+            title="Отклонённый рисунок",
+            description="Старое описание",
+            author="Автор",
+            age=8,
+            city="Алматы",
+            email=self.user.email,
+            category=self.category,
+            image=SimpleUploadedFile("rejected.png", self.png, content_type="image/png"),
+            image_blob=self.png,
+            image_blob_content_type="image/png",
+            is_rejected=True,
+            rejection_reason="Не по теме",
+            is_approved=False,
+            votes=0,
+        )
+
+    def test_draw_resubmit_requires_login(self):
+        response = self.client.get(reverse("draw_resubmit", args=[self.rejected.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response.url)
+
+    def test_draw_resubmit_loads_for_owner(self):
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.get(reverse("draw_resubmit", args=[self.rejected.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Исправление отклонённой работы")
+        self.assertContains(response, "ECOPIXEL_RESUBMIT")
+        self.assertContains(response, reverse("resubmit_drawing", args=[self.rejected.id]))
+        self.assertContains(response, "Отправить исправленную работу")
+
+    def test_draw_resubmit_404_for_other_user(self):
+        self.client.login(username=self.other_user.email, password=self.password)
+        response = self.client.get(reverse("draw_resubmit", args=[self.rejected.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_resubmit_updates_same_record(self):
+        self.client.login(username=self.user.email, password=self.password)
+        png = SimpleUploadedFile("fixed.png", self.png, content_type="image/png")
+        original_id = self.rejected.id
+        response = self.client.post(
+            reverse("resubmit_drawing", args=[self.rejected.id]),
+            {
+                "image": png,
+                "title": "Исправленный рисунок",
+                "description": "Новое описание",
+                "author_name": "Автор",
+                "age": "8",
+                "city": "Алматы",
+                "email": self.user.email,
+                "consent": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {"success": True, "id": original_id, "resubmitted": True},
+        )
+        self.rejected.refresh_from_db()
+        self.assertFalse(self.rejected.is_rejected)
+        self.assertEqual(self.rejected.rejection_reason, "")
+        self.assertEqual(self.rejected.moderator_note, "")
+        self.assertEqual(self.rejected.title, "Исправленный рисунок")
+        self.assertEqual(Drawing.objects.filter(user=self.user).count(), 1)
+
+    def test_profile_and_work_detail_show_resubmit_link(self):
+        self.client.login(username=self.user.email, password=self.password)
+        profile = self.client.get(reverse("profile"))
+        self.assertContains(profile, "Исправить и отправить снова")
+        self.assertContains(profile, reverse("draw_resubmit", args=[self.rejected.id]))
+        detail = self.client.get(reverse("work_detail", args=[self.rejected.id]))
+        self.assertContains(detail, "Исправить и отправить снова")
+
+    @override_settings(**CONTEST_VOTING_OPEN)
+    def test_resubmit_blocked_when_submission_closed(self):
+        self.client.login(username=self.user.email, password=self.password)
+        png = SimpleUploadedFile("fixed.png", self.png, content_type="image/png")
+        response = self.client.post(
+            reverse("resubmit_drawing", args=[self.rejected.id]),
+            {
+                "image": png,
+                "title": "Исправленный рисунок",
+                "author_name": "Автор",
+                "age": "8",
+                "city": "Алматы",
+                "email": self.user.email,
+                "consent": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        self.rejected.refresh_from_db()
+        self.assertTrue(self.rejected.is_rejected)

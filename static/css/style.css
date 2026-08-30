@@ -1335,6 +1335,21 @@ html[data-theme="dark"] .guide-tool__icon {
     color: #8a6d00;
 }
 
+.draw-resubmit-notice {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(231, 76, 60, 0.08);
+    border: 1px solid rgba(231, 76, 60, 0.18);
+    color: #8e2c22;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.work-moderation-notice--rejected + .btn {
+    margin-top: 10px;
+}
+
 .profile-empty {
     grid-column: 1 / -1;
     padding: 36px 24px;

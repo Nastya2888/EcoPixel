@@ -8,6 +8,14 @@
 
 {% block content %}
 <section class="draw-page draw-v4 card animate-on-scroll" data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
+    {% if resubmit_drawing %}
+        <p class="draw-resubmit-notice">
+            {% t "Исправление отклонённой работы" %} «{{ resubmit_drawing.title }}»
+            {% if resubmit_drawing.rejection_reason %}
+                <br><strong>{% t "Причина:" %}</strong> {{ resubmit_drawing.rejection_reason }}
+            {% endif %}
+        </p>
+    {% endif %}
     <div class="editor-workspace">
         <aside class="editor-sidebar left">
             <div class="panel tools-panel" id="tools">
@@ -297,7 +305,7 @@
             </article>
         </div>
 
-        <form id="submission-form" data-submit-url="{% url 'submit_drawing' %}">
+        <form id="submission-form" data-submit-url="{{ submit_url }}">
             {% csrf_token %}
             <input type="hidden" name="category_slug" id="category-slug-input" value="">
 
@@ -373,7 +381,13 @@
             <div id="form-errors" class="form-errors"></div>
 
             <div class="draw-submit-actions">
-                <button type="submit" class="btn draw-submit-primary">{% t "Отправить на конкурс" %}</button>
+                <button type="submit" class="btn draw-submit-primary">
+                    {% if resubmit_drawing %}
+                        {% t "Отправить исправленную работу" %}
+                    {% else %}
+                        {% t "Отправить на конкурс" %}
+                    {% endif %}
+                </button>
                 <button type="button" id="cancel-submit" class="btn-secondary draw-submit-back">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
                     <span>{% t "Вернуться к редактированию" %}</span>
@@ -426,6 +440,7 @@
 
 <script>
 window.ECOPIXEL_DRAW_I18N = {{ draw_i18n_json|safe }};
+window.ECOPIXEL_RESUBMIT = {{ resubmit_drawing_json|safe }};
 window.ECOPIXEL_CONTEST = {
     submissionOpen: {{ contest.submission_open|yesno:"true,false" }},
     votingOpen: {{ contest.voting_open|yesno:"true,false" }},
@@ -433,5 +448,5 @@ window.ECOPIXEL_CONTEST = {
 };
 </script>
 <script src="{% static 'js/drafts.js' %}?v=20260829-01"></script>
-<script src="{% static 'drawings/js/draw.js' %}?v=20260830-02"></script>
+<script src="{% static 'drawings/js/draw.js' %}?v=20260830-03"></script>
 {% endblock %}

@@ -28,6 +28,9 @@
                             <br><strong>{% t "Причина:" %}</strong> {{ work.rejection_reason }}
                         {% endif %}
                     </p>
+                    {% if is_own_work and contest.submission_open %}
+                        <a class="btn" href="{% url 'draw_resubmit' work.id %}">{% t "Исправить и отправить снова" %}</a>
+                    {% endif %}
                 {% else %}
                     <p class="work-moderation-notice">{% t "Работа на модерации — пока видна только вам и не участвует в голосовании." %}</p>
                 {% endif %}
@@ -42,6 +45,8 @@
                 <p class="restore-image-notice success">{% t "Заметка модератора сохранена." %}</p>
             {% elif request.GET.moderation == "reject_reason_required" %}
                 <p class="restore-image-notice">{% t "Укажите причину отклонения перед отправкой." %}</p>
+            {% elif request.GET.resubmit == "closed" %}
+                <p class="restore-image-notice">{% t "Приём работ завершён — исправить и отправить снова уже нельзя." %}</p>
             {% endif %}
             <h1>{{ work.title }}</h1>
             {% if work.description %}

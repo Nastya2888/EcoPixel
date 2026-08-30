@@ -312,7 +312,11 @@
                             {% t "Скопировать ссылку" %}
                         </button>
                     {% elif work.is_rejected %}
-                        <span class="profile-pending-hint">{% t "Работа отклонена модератором" %}</span>
+                        {% if contest.submission_open %}
+                            <a class="btn" href="{% url 'draw_resubmit' work.id %}">{% t "Исправить и отправить снова" %}</a>
+                        {% else %}
+                            <span class="profile-pending-hint">{% t "Работа отклонена модератором" %}</span>
+                        {% endif %}
                     {% else %}
                         <span class="profile-pending-hint">{% t "Ждёт проверки модератора" %}</span>
                     {% endif %}

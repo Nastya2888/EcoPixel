@@ -147,6 +147,13 @@ EN = {
         "The rejection reason is too long (maximum 500 characters)."
     ),
     "Работа отклонена модератором.": "The work was rejected by a moderator.",
+    "Исправить и отправить снова": "Edit and resubmit",
+    "Исправление отклонённой работы": "Editing a rejected work",
+    "Отправить исправленную работу": "Submit corrected work",
+    "Работа снова отправлена на модерацию.": "The work was sent back for moderation.",
+    "Приём работ завершён — исправить и отправить снова уже нельзя.": (
+        "Submission is closed — you can no longer edit and resubmit this work."
+    ),
     "Работа отклонена модератором": "Rejected by a moderator",
     "Открыть": "Open",
     "Скопировать ссылку": "Copy link",

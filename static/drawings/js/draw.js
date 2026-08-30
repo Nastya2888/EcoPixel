@@ -1648,6 +1648,29 @@
         });
     }
 
+    async function restoreResubmitIfExists() {
+        const resubmit = window.ECOPIXEL_RESUBMIT;
+        if (!resubmit) return false;
+
+        if (submitTitleInput) submitTitleInput.value = resubmit.title || "";
+        const descriptionInput = document.getElementById("submit-description");
+        if (descriptionInput) descriptionInput.value = resubmit.description || "";
+        if (submitAuthorInput) submitAuthorInput.value = resubmit.author_name || "";
+        if (ageInput) ageInput.value = resubmit.age ?? "";
+        if (submitCityInput) submitCityInput.value = resubmit.city || "";
+        if (categorySlugInput) categorySlugInput.value = resubmit.category_slug || "";
+        updateCategoryPreview();
+
+        if (resubmit.image_url) {
+            await applyDraftImage({
+                image: resubmit.image_url,
+                width: gridWidth,
+                height: gridHeight,
+            });
+        }
+        return true;
+    }
+
     async function restoreDraftIfExists() {
         if (!draftApi) return;
 
@@ -1869,7 +1892,9 @@
             lastSubmittedUrl = `${window.location.origin}/work/${data.id}/`;
             submitProgress.classList.add("hidden");
             submitSuccess.classList.remove("hidden");
-            submitSuccessText.textContent = `${t("Готово! Номер работы:")} #${data.id}`;
+            submitSuccessText.textContent = data.resubmitted
+                ? `${t("Работа снова отправлена на модерацию.")} #${data.id}`
+                : `${t("Готово! Номер работы:")} #${data.id}`;
             vkShareLink.href = `https://vk.com/share.php?url=${encodeURIComponent(lastSubmittedUrl)}`;
             tgShareLink.href = `https://t.me/share/url?url=${encodeURIComponent(lastSubmittedUrl)}&text=${encodeURIComponent(t("Мой рисунок на конкурсе ЭкоПиксель!"))}`;
             if (maxShareLink) {
@@ -1973,6 +1998,11 @@
     }
     setPresetSelection(32, 32);
     updateCategoryPreview();
-    restoreDraftIfExists();
+    (async () => {
+        const restoredResubmit = await restoreResubmitIfExists();
+        if (!restoredResubmit) {
+            await restoreDraftIfExists();
+        }
+    })();
     setTool("pencil");
 })();
