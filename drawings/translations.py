@@ -6,6 +6,7 @@ EN = {
     "Галерея": "Gallery",
     "Правила": "Rules",
     "Как рисовать": "How to draw",
+    "Вопросы и ответы": "FAQ",
     "Личный кабинет": "My account",
     "Войти": "Log in",
     "Регистрация": "Sign up",
@@ -174,6 +175,70 @@ EN = {
     "Нет необработанных жалоб на работы.": "There are no unresolved work reports.",
     "Отметить жалобы обработанными": "Mark reports as resolved",
     "Жалобы отмечены как обработанные.": "Reports marked as resolved.",
+    # FAQ
+    "Короткие ответы на частые вопросы участников: как голосовать, что делать при отклонении и как исправить работу.": (
+        "Short answers to common questions: how to vote, what to do if rejected, and how to fix your work."
+    ),
+    "Как голосовать": "How to vote",
+    "Почему отклонили": "Why a work was rejected",
+    "Как исправить работу": "How to fix your work",
+    "Как проголосовать за работу?": "How do I vote for a work?",
+    "Откройте галерею, выберите понравившуюся работу и нажмите «Проголосовать» на странице работы. Голос учитывается сразу — счётчик обновится без перезагрузки страницы.": (
+        "Open the gallery, pick a work you like, and click “Vote” on its page. Your vote is counted immediately — the counter updates without reloading."
+    ),
+    "Нужно ли регистрироваться, чтобы голосовать?": "Do I need an account to vote?",
+    "Да. Голосовать могут только авторизованные пользователи — так мы защищаем конкурс от накрутки. Если вы ещё не зарегистрировались, нажмите «Войти» или «Регистрация» в шапке сайта.": (
+        "Yes. Only signed-in users can vote — this helps prevent vote manipulation. If you have not registered yet, click “Log in” or “Sign up” in the site header."
+    ),
+    "Можно ли голосовать за свою работу?": "Can I vote for my own work?",
+    "Нет. За собственную работу проголосовать нельзя — кнопка будет неактивна. Попросите друзей и родных поддержать ваш рисунок и поделитесь ссылкой на работу.": (
+        "No. You cannot vote for your own work — the button will be disabled. Ask friends and family to support your drawing and share the link to your work."
+    ),
+    "Сколько раз можно голосовать за одну работу?": "How many times can I vote for one work?",
+    "Один аккаунт — один голос за работу. Если передумали, нажмите «Убрать голос» — голос снимется, и вы сможете поддержать другую работу.": (
+        "One account — one vote per work. If you change your mind, click “Remove vote” — your vote will be removed and you can support another work."
+    ),
+    "Когда открыто голосование?": "When is voting open?",
+    "Голосование доступно после публикации работ в галерее и до объявления итогов. Точные даты этапов указаны на главной странице и в правилах конкурса. Когда голосование завершено, кнопка «Проголосовать» исчезает — работы остаются в архиве галереи.": (
+        "Voting is available after works are published in the gallery and until results are announced. Exact dates are on the home page and in the contest rules. When voting ends, the “Vote” button disappears — works remain in the gallery archive."
+    ),
+    "Почему мою работу не опубликовали?": "Why was my work not published?",
+    "Модератор проверяет каждую работу перед публикацией в галерее. Работу могут отклонить, если она не соответствует правилам конкурса, теме категории или техническим требованиям.": (
+        "A moderator reviews every work before it appears in the gallery. A work may be rejected if it does not match the contest rules, category theme, or technical requirements."
+    ),
+    "Где посмотреть причину отклонения?": "Where can I see the rejection reason?",
+    "Причину можно увидеть в личном кабинете — откройте «Личный кабинет» и найдите работу со статусом «Отклонено». Там же указан комментарий модератора. Письмо с причиной также отправляется на email, указанный при отправке работы.": (
+        "You can see the reason in your account — open “My account” and find the work marked “Rejected”. The moderator’s comment is shown there. An email with the reason is also sent to the address you provided when submitting."
+    ),
+    "За что чаще всего отклоняют работы?": "What are the most common rejection reasons?",
+    "Рисунок не по теме выбранной возрастной категории": "The drawing does not match the selected age category theme",
+    "Слишком пустой или незаконченный рисунок": "The drawing is too empty or unfinished",
+    "Нарушение правил: чужое изображение, неуместный контент": "Rule violation: someone else’s image, inappropriate content",
+    "Ошибки в анкете: неверный возраст, город или категория": "Form errors: wrong age, city, or category",
+    "Можно ли оспорить решение модератора?": "Can I appeal a moderator’s decision?",
+    "Если вы уверены, что отклонение ошибочно, исправьте работу по комментарию модератора и отправьте её снова (см. раздел ниже). Если вопрос остался — напишите организатору по контактам из правил конкурса.": (
+        "If you believe the rejection was a mistake, fix the work according to the moderator’s comment and resubmit (see the section below). If you still have questions, contact the organizer using the details in the contest rules."
+    ),
+    "Можно ли исправить отклонённую работу?": "Can I fix a rejected work?",
+    "Да, если приём работ ещё открыт. Откройте личный кабинет или страницу отклонённой работы и нажмите «Исправить и отправить снова». Редактор откроется с вашим рисунком — внесите правки и отправьте заново.": (
+        "Yes, if submissions are still open. Open your account or the rejected work’s page and click “Edit and resubmit”. The editor will open with your drawing — make changes and submit again."
+    ),
+    "Что происходит после повторной отправки?": "What happens after resubmitting?",
+    "Работа снова попадает на модерацию с тем же номером. Статус «Отклонено» снимается, причина отклонения очищается. Голоса сохраняются только если работа уже была опубликована ранее; для отклонённых до публикации счётчик начинается с нуля после одобрения.": (
+        "The work goes back to moderation with the same ID. The “Rejected” status is cleared and the rejection reason is removed. Votes are kept only if the work was already published; for works rejected before publication, the vote count starts at zero after approval."
+    ),
+    "Можно ли исправить работу, которая уже в галерее?": "Can I edit a work that is already in the gallery?",
+    "Опубликованную работу через редактор изменить нельзя — только отклонённую. Если в опубликованной работе нашли ошибку, напишите организатору или воспользуйтесь кнопкой «Пожаловаться» на странице работы (для других участников).": (
+        "Published works cannot be edited in the editor — only rejected ones. If there is an error in a published work, contact the organizer or use “Report” on the work page (for other participants)."
+    ),
+    "Приём работ закрыт — что делать?": "Submissions are closed — what now?",
+    "Когда срок приёма работ истёк, кнопка «Исправить и отправить снова» исчезает. В этом случае исправить и переотправить работу уже нельзя — следите за таймером на главной странице.": (
+        "When the submission deadline has passed, the “Edit and resubmit” button disappears. You can no longer fix and resubmit — watch the countdown on the home page."
+    ),
+    "Не нашли ответ?": "Did not find your answer?",
+    "Прочитайте полные правила конкурса или откройте гайд по рисованию.": (
+        "Read the full contest rules or open the drawing guide."
+    ),
     "Работа отклонена модератором": "Rejected by a moderator",
     "Открыть": "Open",
     "Скопировать ссылку": "Copy link",

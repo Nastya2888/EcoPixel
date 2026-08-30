@@ -480,6 +480,11 @@ def guide(request):
 
 
 @require_GET
+def faq(request):
+    return render(request, "drawings/faq.html")
+
+
+@require_GET
 def results(request):
     results_published = are_results_published()
     winners = _get_category_winners() if results_published else []

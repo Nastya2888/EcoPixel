@@ -28,7 +28,7 @@
     </script>
     <link rel="icon" type="image/png" href="{% static 'img/logoeco.png' %}">
     <link rel="apple-touch-icon" href="{% static 'img/logoeco.png' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260830-08">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260830-09">
 </head>
 <body{% block body_attrs %}{% endblock %}>
 <div class="bg-pixels" aria-hidden="true">
@@ -48,6 +48,7 @@
         <nav id="main-nav" class="main-nav mobile-menu">
             <a href="{% url 'gallery' %}">{% t "Галерея" %}</a>
             <a href="{% url 'guide' %}">{% t "Как рисовать" %}</a>
+            <a href="{% url 'faq' %}">{% t "Вопросы и ответы" %}</a>
             <a href="{% url 'rules' %}">{% t "Правила" %}</a>
             {% if user.is_authenticated %}
                 <a href="{% url 'profile' %}">{% t "Личный кабинет" %}</a>
@@ -115,6 +116,7 @@
             <p class="footer-tagline">{% t "ЭкоПиксель — конкурс пиксельных рисунков" %}</p>
             <nav class="footer-nav">
                 <a href="{% url 'rules' %}">{% t "Правила" %}</a>
+                <a href="{% url 'faq' %}">{% t "Вопросы и ответы" %}</a>
                 <a href="{% url 'guide' %}">{% t "Как рисовать" %}</a>
                 <a href="{% url 'gallery' %}">{% t "Галерея" %}</a>
                 <a href="{% url 'results' %}">{% t "Результаты" %}</a>

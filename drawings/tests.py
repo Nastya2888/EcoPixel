@@ -289,6 +289,16 @@ class HomePageTests(TestCase):
         self.assertContains(response, "video/guide.mp4")
         self.assertContains(response, reverse("draw"))
 
+    def test_faq_page_is_available(self):
+        response = self.client.get(reverse("faq"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Вопросы и ответы")
+        self.assertContains(response, "Как проголосовать за работу?")
+        self.assertContains(response, "Почему мою работу не опубликовали?")
+        self.assertContains(response, "Можно ли исправить отклонённую работу?")
+        self.assertContains(response, reverse("rules"))
+        self.assertContains(response, reverse("gallery"))
+
 
 @override_settings(**CONTEST_VOTING_OPEN)
 class VotingTests(TestCase):
