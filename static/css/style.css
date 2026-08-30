@@ -2229,6 +2229,12 @@ html[data-theme="dark"] .moderation-reject-field textarea:focus {
     margin-top: 10px;
 }
 
+.filter-btn--votes.active {
+    border-color: rgba(231, 76, 60, 0.45);
+    color: #c0392b;
+    background: rgba(231, 76, 60, 0.08);
+}
+
 .gallery-search {
     display: flex;
     flex-wrap: wrap;

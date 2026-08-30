@@ -194,6 +194,9 @@ def gallery(request):
     current_slug = request.GET.get("category", "").strip()
     sort_mode = request.GET.get("sort", "popular").strip()
     search_query = _normalize_search_query(request.GET.get("q", ""))
+    voted_only = request.GET.get("voted", "").strip() == "1"
+    if voted_only and not request.user.is_authenticated:
+        voted_only = False
     drawings = Drawing.objects.select_related("category").all()
     if not _can_view_moderation_content(request):
         drawings = drawings.filter(is_approved=True)
@@ -204,6 +207,8 @@ def gallery(request):
             age__lte=selected_age_category["max_age"],
         )
     drawings = _apply_author_city_search(drawings, search_query)
+    if voted_only:
+        drawings = drawings.filter(vote_entries__user=request.user).distinct()
 
     if sort_mode == "new":
         drawings = drawings.order_by("-created_at")
@@ -227,6 +232,7 @@ def gallery(request):
             "selected_age_category": selected_age_category,
             "sort_mode": sort_mode,
             "search_query": search_query,
+            "voted_only": voted_only,
             "page_obj": page_obj,
             "voted_ids": voted_ids,
             "voting_open": is_voting_open(),

@@ -516,6 +516,41 @@ class GalleryTests(TestCase):
         self.assertContains(by_city_partial, self.teen_work.title)
         self.assertNotContains(by_city_partial, other.title)
 
+    def test_gallery_hides_my_votes_filter_for_guests(self):
+        response = self.client.get(reverse("gallery"))
+        self.assertNotContains(response, "Мои голоса")
+
+    def test_gallery_shows_my_votes_filter_for_authenticated_users(self):
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.get(reverse("gallery"))
+        self.assertContains(response, "Мои голоса")
+
+    def test_gallery_voted_filter_ignored_for_guests(self):
+        response = self.client.get(reverse("gallery"), {"voted": "1"})
+        self.assertFalse(response.context["voted_only"])
+        self.assertContains(response, self.young_work.title)
+        self.assertContains(response, self.teen_work.title)
+
+    def test_gallery_voted_filter_shows_only_voted_works(self):
+        voter = User.objects.create_user(
+            username="voter@example.com",
+            email="voter@example.com",
+            password=self.password,
+        )
+        Vote.objects.create(drawing=self.teen_work, user=voter)
+        self.client.login(username=voter.email, password=self.password)
+
+        response = self.client.get(reverse("gallery"), {"voted": "1"})
+        self.assertTrue(response.context["voted_only"])
+        self.assertContains(response, self.teen_work.title)
+        self.assertNotContains(response, self.young_work.title)
+        self.assertNotContains(response, self.adult_work.title)
+
+    def test_gallery_voted_filter_empty_state(self):
+        self.client.login(username=self.user.email, password=self.password)
+        response = self.client.get(reverse("gallery"), {"voted": "1"})
+        self.assertContains(response, "Вы пока ни за что не голосовали.")
+
     def test_admin_sees_pending_drawings_and_status(self):
         self.client.login(username=self.admin_user.email, password=self.password)
         response = self.client.get(reverse("gallery"))

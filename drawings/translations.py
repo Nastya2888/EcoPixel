@@ -73,6 +73,8 @@ EN = {
     "Сбросить": "Clear",
     "По запросу:": "Search:",
     "Работы не найдены.": "No works found.",
+    "Мои голоса": "My votes",
+    "Вы пока ни за что не голосовали.": "You haven't voted for any works yet.",
     "Назад": "Back",
     "Вперёд": "Next",
     "На модерации": "Under review",
